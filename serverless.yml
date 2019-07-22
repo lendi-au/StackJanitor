@@ -10,6 +10,7 @@ plugins:
 provider:
   name: aws
   runtime: nodejs10.x
+  region: ap-southeast-2
 
 functions:
   index:

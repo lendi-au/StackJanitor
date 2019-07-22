@@ -10,7 +10,9 @@
     "lint:sources": "tslint --format stylish 'src/**/*.ts' 'src/**/*.tsx' --project './tsconfig.json' --exclude 'src/**/*.test.ts' --exclude 'src/**/*.test.tsx'",
     "lint:tests": "tslint --config tslint.tests.json --format stylish 'src/**/*.test.ts' 'src/**/*.test.tsx' --project './tsconfig.json'",
     "lint": "yarn run lint:types && yarn lint:sources && yarn lint:tests && yarn run lint:format",
-    "test": "mocha -r ts-node/register ./**/*.spec.ts"
+    "test": "mocha -r ts-node/register ./**/*.spec.ts",
+    "package": "serverless package",
+    "deploy": "serverless deploy"
   },
   "dependencies": {
     "source-map-support": "^0.5.10"
@@ -23,6 +25,7 @@
     "chai": "^4.2.0",
     "mocha": "^6.2.0",
     "prettier": "1.18.2",
+    "serverless": "^1.48.2",
     "serverless-webpack": "^5.2.0",
     "ts-loader": "^5.3.3",
     "ts-node": "^8.3.0",
