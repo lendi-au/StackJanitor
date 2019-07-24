@@ -3,6 +3,5 @@ import test from "ava";
 // import { index } from "../src/handler";
 
 test("my passing test", t => {
-  // check if the test is passing
   t.pass();
 });
