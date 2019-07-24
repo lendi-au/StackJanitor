@@ -8,5 +8,5 @@
     "target": "es2017",
     "outDir": "lib"
   },
-  "exclude": ["node_modules"]
+  "include": ["typings/**/*.d.ts", "src/**/*.ts", "src/**/*.tsx"]
 }
