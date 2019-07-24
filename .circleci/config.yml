@@ -24,7 +24,7 @@ jobs:
           key: v1-{{ arch }}-cache-{{ checksum "package.json"}}
       - run:
           name: "Run Jest and Collect Coverage Reports"
-          command: jest --collectCoverage=true
+          command: yarn test --collectCoverage=true
       - store_artifacts:
           path: coverage
 
