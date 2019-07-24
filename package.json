@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "StackJanitor cleans up CloudFormation stacks based on TTL and tags.",
   "main": "src/handler.js",
+  "author": "Lendi",
+  "license": "MIT",
+  "repository": "git@github.com:lendi-au/StackJanitor.git",
   "scripts": {
     "format": "prettier --write '**/*.{md,json,js,jsx,ts,tsx}'",
     "lint:types": "tsc",
@@ -43,12 +46,21 @@
       "git add"
     ]
   },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx"
+    ]
+  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
     }
-  },
-  "author": "Lendi",
-  "license": "MIT",
-  "repository": "git@github.com:lendi-au/StackJanitor.git"
+  }
 }
