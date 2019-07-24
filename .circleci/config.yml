@@ -43,6 +43,16 @@ jobs:
       - store_artifacts:
           path: coverage
 
+  release:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-{{ arch }}-cache-{{ checksum "package.json"}}
+      - run:
+          name: "Releasing to Github"
+          command: yarn release
+
 workflows:
   version: 2
   install_lint_and_test:
