@@ -23,29 +23,11 @@ jobs:
       - restore_cache:
           key: v1-{{ arch }}-cache-{{ checksum "package.json"}}
       - run:
-          name: Setup Code Climate Test Reporter
-          command: |
-            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-            chmod +x ./cc-test-reporter
-      - run:
-          name: Setup Test Output Directory
-          command: mkdir -p test-results/ava
-      - run:
-          name: Run tests
-          command: yarn test | npx tap-xunit > test-results/ava/results.xml
-      - run:
-          name: Run coverage report
-          command: |
-            ./cc-test-reporter before-build
-            yarn run coverage > coverage-report.lcov
+          name: "Run Jest and Collect Coverage Reports"
+          command: jest --collectCoverage=true
       - store_artifacts:
-          path: test-results/ava/results.xml
-          destination: test-results/ava/
-      - store_artifacts:
-          path: coverage-report.lcov
-          destination: reports
-      - store_test_results:
-          path: test-results
+          path: coverage
+
 workflows:
   version: 2
   build_and_test:
