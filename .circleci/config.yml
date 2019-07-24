@@ -10,7 +10,7 @@ defaults: &defaults
 
 version: 2
 jobs:
-  build:
+  install:
     <<: *defaults
     steps:
       - checkout
@@ -45,15 +45,15 @@ jobs:
 
 workflows:
   version: 2
-  build_and_test:
+  install_lint_and_test:
     jobs:
-      - build
+      - install
       - lint:
           requires:
-            - build
+            - install
       - test:
           requires:
-            - build
+            - install
           filters:
             branches:
               ignore:
