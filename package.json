@@ -10,6 +10,7 @@
     "lint:sources": "tslint --format stylish 'src/**/*.ts' 'src/**/*.tsx' --project './tsconfig.json' --exclude 'src/**/*.test.ts' --exclude 'src/**/*.test.tsx'",
     "lint:tests": "tslint --config tslint.tests.json --format stylish 'src/**/*.test.ts' 'src/**/*.test.tsx' --project './tsconfig.json'",
     "lint": "yarn run lint:types && yarn lint:sources && yarn lint:tests && yarn run lint:format",
+    "coverage": "nyc report --reporter=lcov --reporter=text-lcov --reporter=html",
     "test": "BABEL_ENV=test nyc ava",
     "package": "serverless package",
     "deploy": "serverless deploy",
