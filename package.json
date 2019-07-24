@@ -20,9 +20,6 @@
   },
   "devDependencies": {
     "@atlaskit/build-releases": "^3.0.3",
-    "@lendi/prettier-config": "^1.0.1",
-    "@lendi/tslint-config": "^1.1.0",
-    "@lendi/typescript-config": "^2.0.0",
     "@types/aws-lambda": "^8.10.17",
     "@types/node": "^10.12.18",
     "ava": "^2.2.0",
