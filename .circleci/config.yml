@@ -1,3 +1,8 @@
+# SlackJanitor configuration file
+#
+# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+#
+
 defaults: &defaults
   working_directory: ~/repo
   docker:
