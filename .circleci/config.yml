@@ -1,35 +1,61 @@
-# SlackJanitor configuration file
-#
-# Check https://circleci.com/docs/2.0/language-javascript/ for more details
-#
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: circleci/node:10
+
 version: 2
 jobs:
   build:
-    docker:
-      - image: circleci/node:10
-
-    working_directory: ~/repo
-
-    branches:
-      ignore:
-        - /none
-
+    <<: *defaults
     steps:
       - checkout
-
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-
-      - run: yarn install
-
+      - run:
+          name: yarn install
+          command: yarn
       - save_cache:
+          key: v1-{{ arch }}-cache-{{ checksum "package.json"}}
           paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
-
-      # run tests!
-      - run: yarn test
+            - ./node_modules
+  test:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-{{ arch }}-cache-{{ checksum "package.json"}}
+      - run:
+          name: Setup Code Climate Test Reporter
+          command: |
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+            chmod +x ./cc-test-reporter
+      - run:
+          name: Setup Test Output Directory
+          command: mkdir -p test-results/ava
+      - run:
+          name: Run tests
+          command: yarn test | npx tap-xunit > test-results/ava/results.xml
+      - run:
+          name: Run coverage report
+          command: |
+            ./cc-test-reporter before-build
+            yarn run coverage > coverage-report.lcov
+            ./cc-test-reporter after-build -d --coverage-input-type lcov --exit-code $?
+      - store_artifacts:
+          path: test-results/ava/results.xml
+          destination: test-results/ava/
+      - store_artifacts:
+          path: coverage-report.lcov
+          destination: reports
+      - store_test_results:
+          path: test-results
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore:
+                - /none
