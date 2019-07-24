@@ -72,7 +72,7 @@ const versionOptions = {
 
 const publishOptions = {
   // This sets whether unpublished packages are public by default. We err on the side of caution here.
-  public: true
+  public: false
 };
 
 module.exports = {
