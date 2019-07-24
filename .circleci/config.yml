@@ -7,8 +7,6 @@ version: 2
 jobs:
   build:
     <<: *defaults
-    environment:
-      CC_TEST_REPORTER_ID: CC_TEST_REPORTER_ID
     steps:
       - checkout
       - run:
@@ -20,8 +18,6 @@ jobs:
             - ./node_modules
   test:
     <<: *defaults
-    environment:
-      CC_TEST_REPORTER_ID: CC_TEST_REPORTER_ID
     steps:
       - checkout
       - restore_cache:
@@ -42,7 +38,6 @@ jobs:
           command: |
             ./cc-test-reporter before-build
             yarn run coverage > coverage-report.lcov
-            ./cc-test-reporter after-build -d --coverage-input-type lcov --exit-code $?
       - store_artifacts:
           path: test-results/ava/results.xml
           destination: test-results/ava/
