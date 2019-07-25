@@ -10,6 +10,7 @@
     "format": "prettier --write '**/*.{md,json,js,jsx,ts,tsx}'",
     "lint:format": "prettier-check '**/*.{md,json,js,jsx,ts,tsx}'",
     "test": "jest",
+    "get-version": "echo $npm_package_version",
     "package": "serverless package",
     "deploy": "serverless deploy",
     "release": "standard-version"
