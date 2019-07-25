@@ -3,32 +3,36 @@
   "version": "1.0.0",
   "description": "StackJanitor cleans up CloudFormation stacks based on TTL and tags.",
   "main": "src/handler.js",
+  "author": "Lendi",
+  "license": "MIT",
+  "repository": "git@github.com:lendi-au/StackJanitor.git",
   "scripts": {
     "format": "prettier --write '**/*.{md,json,js,jsx,ts,tsx}'",
-    "lint:types": "tsc",
     "lint:format": "prettier-check '**/*.{md,json,js,jsx,ts,tsx}'",
-    "lint:sources": "tslint --format stylish 'src/**/*.ts' 'src/**/*.tsx' --project './tsconfig.json' --exclude 'src/**/*.test.ts' --exclude 'src/**/*.test.tsx'",
-    "lint:tests": "tslint --config tslint.tests.json --format stylish 'src/**/*.test.ts' 'src/**/*.test.tsx' --project './tsconfig.json'",
-    "lint": "yarn run lint:types && yarn lint:sources && yarn lint:tests && yarn run lint:format",
-    "test": "mocha -r ts-node/register ./**/*.spec.ts",
+    "test": "jest",
     "package": "serverless package",
-    "deploy": "serverless deploy"
+    "deploy": "serverless deploy",
+    "release": "standard-version"
   },
   "dependencies": {
     "source-map-support": "^0.5.10"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.17",
-    "@types/chai": "^4.1.7",
-    "@types/mocha": "^5.2.7",
+    "@types/jest": "^24.0.15",
     "@types/node": "^10.12.18",
-    "chai": "^4.2.0",
-    "mocha": "^6.2.0",
+    "husky": "^1.3.1",
+    "jest": "^24.8.0",
+    "lint-staged": "^8.1.4",
     "prettier": "1.18.2",
+    "prettier-check": "^2.0.0",
     "serverless": "^1.48.2",
     "serverless-webpack": "^5.2.0",
+    "standard-version": "^6.0.1",
+    "ts-jest": "^24.0.2",
     "ts-loader": "^5.3.3",
     "ts-node": "^8.3.0",
+    "tslint": "^5.12.1",
     "typescript": "^3.2.4",
     "webpack": "^4.29.0"
   },
@@ -38,11 +42,21 @@
       "git add"
     ]
   },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx"
+    ]
+  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
     }
-  },
-  "author": "Lendi",
-  "license": "MIT"
+  }
 }

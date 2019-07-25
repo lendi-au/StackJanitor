@@ -2,34 +2,59 @@
 #
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
+
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: circleci/node:10
+
 version: 2
 jobs:
-  build:
-    docker:
-      - image: circleci/node:10
-
-    working_directory: ~/repo
-
-    branches:
-      ignore:
-        - /none
-
+  install:
+    <<: *defaults
     steps:
       - checkout
-
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-
-      - run: yarn install
-
+      - run:
+          name: yarn install
+          command: yarn
       - save_cache:
+          key: v1-{{ arch }}-cache-{{ checksum "package.json"}}
           paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+            - ./node_modules
+  lint:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-{{ arch }}-cache-{{ checksum "package.json"}}
+      - run:
+          name: "Linting via prettier"
+          command: yarn lint:format
 
-      # run tests!
-      - run: yarn test
+  test:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-{{ arch }}-cache-{{ checksum "package.json"}}
+      - run:
+          name: "Run Jest and Collect Coverage Reports"
+          command: yarn test --collectCoverage=true
+      - store_artifacts:
+          path: coverage
+
+workflows:
+  version: 2
+  install_lint_and_test:
+    jobs:
+      - install
+      - lint:
+          requires:
+            - install
+      - test:
+          requires:
+            - install
+          filters:
+            branches:
+              ignore:
+                - /none
