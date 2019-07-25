@@ -32,11 +32,11 @@ jobs:
           command: yarn lint:format
       - run:
           name: "Get the version"
-          command: yarn get-version > meta/version.txt
+          command: yarn get-version > version.txt
       - persist_to_workspace:
           root: ~/repo
           paths:
-            - meta/version.txt
+            - version.txt
 
   test:
     <<: *defaults
@@ -55,11 +55,11 @@ jobs:
       - image: cibuilds/github:0.10
     steps:
       - attach_workspace:
-          at: ./repo/meta
+          at: ./repo
       - run:
           name: "Publish Release on GitHub"
           command: |
-            VERSION=$(cat ./repo/meta/version.txt)
+            VERSION=$(cat ./repo/version.txt)
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/
 
 workflows:
