@@ -33,8 +33,10 @@ jobs:
       - run:
           name: "Get the version"
           command: node -p "require('./package.json').version" > version.txt
-      - store_artifacts:
-          path: version.txt
+      - persist_to_workspace:
+          root: ~/repo
+          path:
+            - version.txt
 
   test:
     <<: *defaults
@@ -53,11 +55,11 @@ jobs:
       - image: cibuilds/github:0.10
     steps:
       - attach_workspace:
-          at: ./artifacts
+          at: ~/repo
       - run:
           name: "Publish Release on GitHub"
           command: |
-            VERSION=$(cat ./artifacts/version.txt)
+            VERSION=$(cat ~/repo/version.txt)
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/
 
 workflows:
