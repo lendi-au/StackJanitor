@@ -34,7 +34,7 @@ jobs:
           name: "Get the version"
           command: node -p "require('./package.json').version" > version.txt
       - store_artifacts:
-          paths: version.txt
+          path: version.txt
 
   test:
     <<: *defaults
