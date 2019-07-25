@@ -4,7 +4,7 @@
 #
 
 defaults: &defaults
-  working_directory: /repo
+  working_directory: ~/repo
   docker:
     - image: circleci/node:10
 
@@ -57,12 +57,12 @@ jobs:
       - image: cibuilds/github:0.10
     steps:
       - attach_workspace:
-          at: /repo/workspace
+          at: ./workspace
       - run:
           name: "Publish Release on GitHub"
           command: |
-            VERSION=$(cat /repo/workspace/version.txt)
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /repo/workspace/
+            VERSION=$(cat ./workspace/version.txt)
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./workspace/
 
 workflows:
   version: 2
