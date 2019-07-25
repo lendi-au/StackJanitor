@@ -34,7 +34,7 @@ jobs:
           name: "Get the version"
           command: node -p "require('./package.json').version" > version.txt
       - persist_to_workspace:
-          root: ./tmp
+          root: ~/root
           path:
             - version.txt
 
@@ -57,11 +57,11 @@ jobs:
       - attach_workspace:
           at: ./artifacts
       - attach_workspace:
-          at: ./tmp
+          at: ~/root
       - run:
           name: "Publish Release on GitHub"
           command: |
-            VERSION=$(cat ./tmp/version.txt)
+            VERSION=$(cat ./root/version.txt)
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/
 
 workflows:
