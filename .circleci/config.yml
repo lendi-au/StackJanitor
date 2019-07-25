@@ -4,7 +4,7 @@
 #
 
 defaults: &defaults
-  working_directory: ~/repo
+  working_directory: /repo
   docker:
     - image: circleci/node:10
 
@@ -32,10 +32,12 @@ jobs:
           command: yarn lint:format
       - run:
           name: "Get the version"
-          command: node -p "require('./package.json').version" > version.txt
+          command: |
+            mkdir -p workspace
+            node -p "require('./package.json').version" > workspace/version.txt
       - persist_to_workspace:
-          root: ./root
-          path:
+          root: workspace
+          paths:
             - version.txt
 
   test:
@@ -55,14 +57,12 @@ jobs:
       - image: cibuilds/github:0.10
     steps:
       - attach_workspace:
-          at: ./artifacts
-      - attach_workspace:
-          at: ./root
+          at: /repo/workspace
       - run:
           name: "Publish Release on GitHub"
           command: |
-            VERSION=$(cat ./root/version.txt)
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/
+            VERSION=$(cat /repo/workspace/version.txt)
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /repo/workspace/
 
 workflows:
   version: 2
