@@ -13,7 +13,7 @@ provider:
   region: ap-southeast-2
 
 functions:
-  LogCloudFormationStack:
+  logCloudFormationStack:
     handler: src/logCloudFormationStack.index
     events:
       - cloudwatchEvent:
