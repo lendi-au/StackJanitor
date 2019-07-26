@@ -16,6 +16,13 @@ functions:
   index:
     handler: src/handler.index
     events:
-      - http:
-          method: get
-          path: index
+      - cloudwatchEvent:
+          event:
+            source:
+              - "aws.cloudformation"
+            detail:
+              eventSource:
+                - "cloudformation.amazonaws.com"
+              eventName:
+                - "CreateStack"
+                - "UpdateStack"
