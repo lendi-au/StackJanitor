@@ -9,5 +9,5 @@
     "outDir": "lib",
     "allowSyntheticDefaultImports": true
   },
-  "exclude": ["src/**/*.spec.ts"]
+  "exclude": ["src/**/*.test.ts"]
 }
