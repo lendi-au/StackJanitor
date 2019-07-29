@@ -11,9 +11,29 @@ provider:
   region: ap-southeast-2
 
 functions:
-  index:
-    handler: src/handler.index
+  logCloudFormationStack:
+    handler: src/logCloudFormationStack.index
     events:
-      - http:
-          method: get
-          path: index
+      - cloudwatchEvent:
+          event:
+            source:
+              - "aws.cloudformation"
+            detail:
+              eventSource:
+                - "cloudformation.amazonaws.com"
+              eventName:
+                - "CreateStack"
+                - "UpdateStack"
+
+  deleteCloudFormationStack:
+    handler: src/deleteCloudFormationStack.index
+    events:
+      - cloudwatchEvent:
+          event:
+            source:
+              - "aws.cloudformation"
+            detail:
+              eventSource:
+                - "cloudformation.amazonaws.com"
+              eventName:
+                - "DeleteStack"
