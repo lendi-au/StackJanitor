@@ -1,3 +1,6 @@
+import { AWSError, Request } from "aws-sdk";
+import { DescribeStacksOutput } from "aws-sdk/clients/cloudformation";
+
 export type parameterValue = "Environment";
 export type EventName = "UpdateStack" | "CreateStack" | "DeleteStack";
 
@@ -11,6 +14,13 @@ export enum CONST {
   DISABLED = "disabled"
 }
 
+export interface describeStacks {
+  (
+    params: any,
+    callback?: (err: AWSError, data: DescribeStacksOutput) => void
+  ): Request<DescribeStacksOutput, AWSError>;
+}
+
 export interface CloudFormationEvent {
   id: string;
   detail: {
@@ -22,7 +32,7 @@ export interface CloudFormationEvent {
         };
       };
     };
-    eventName: EventName;
+    eventName: string;
     requestParameters: {
       parameters: parameterKey[];
       stackName: string;
