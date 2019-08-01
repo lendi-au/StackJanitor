@@ -1,28 +1,46 @@
-import AWS from "aws-sdk";
+import { CloudFormation } from "aws-sdk";
 import { Context } from "aws-lambda";
-import { CloudFormationEvent, Environment } from "./types";
-const stepFunctions = new AWS.StepFunctions();
+import { CloudFormationEvent, CONST } from "./types";
+import { Tag } from "aws-sdk/clients/cloudformation";
+const cloudFormation = new CloudFormation();
 
-const stateMachineName: string = "StackJanitor";
+const getStackTags = (event: CloudFormationEvent): Promise<Tag[]> =>
+  new Promise((resolve, reject) => {
+    try {
+      const params = {
+        StackName: event.detail.requestParameters.stackName
+      };
 
-const getEnvironment = (event: CloudFormationEvent): Environment => {
-  const parameters = event.detail.requestParameters.parameters;
-  console.info(parameters);
-  return "development";
-};
+      cloudFormation.describeStacks(params, (err, data) => {
+        if (err) {
+          return reject(err);
+        }
+        let tags: Tag[] = [];
+        data.Stacks.forEach(stack => {
+          stack.Tags.forEach(tag => {
+            tags.push(tag);
+          });
+        });
+        return resolve(tags);
+      });
+    } catch (e) {
+      return reject(e);
+    }
+  });
 
 export const index = async (event: CloudFormationEvent, _context: Context) => {
-  // Need to grab environment parameter value
+  let tagValue: string = CONST.DISABLED;
 
-  // Check if the environment is development
+  const tags = await getStackTags(event);
+  tags.forEach(tag => {
+    if (tag.Key === CONST.TAG) {
+      tagValue = tag.Value;
+    }
+  });
 
-  // if Development
-
-  // if Env is Not Development
-
-  console.info(event);
-  console.info(getEnvironment);
-  console.info(_context);
-  console.info(stateMachineName);
-  console.info(stepFunctions.listStateMachines());
+  return {
+    results: {
+      stackjanitor: tagValue
+    }
+  };
 };

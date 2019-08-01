@@ -11,10 +11,16 @@ provider:
   name: aws
   runtime: nodejs10.x
   region: ap-southeast-2
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "cloudformation:DescribeStack*"
+      Resource: "*"
 
 functions:
   logCloudFormationStack:
     handler: src/logCloudFormationStack.index
+    cfnRole: arn:aws:iam::XXXXXX:role/role
 
   deleteCloudFormationStack:
     handler: src/deleteCloudFormationStack.index
@@ -29,10 +35,26 @@ stepFunctions:
         States:
           logCloudFormationStack:
             Type: Task
-            Next: ShouldItBeMonitored
+            Next: checkStackJanitorTag
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-logCloudFormationStack
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: EndStackMonitoring
 
-          ShouldItBeMonitored:
+          checkStackJanitorTag:
+            Type: Choice
+            Choices:
+              - Variable: $.results.stackjanitor
+                StringEquals: enabled
+                Next: MonitorStack
+            Default: EndStackMonitoring
+
+          EndStackMonitoring:
+            Type: Pass
+            End: true
+
+          MonitorStack:
             Type: Pass
             End: true
 
