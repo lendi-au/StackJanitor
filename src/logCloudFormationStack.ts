@@ -2,11 +2,8 @@ import { CloudFormation } from "aws-sdk";
 import { Context } from "aws-lambda";
 import { CloudFormationEvent, CONST, describeStacks } from "./types";
 import { Tag } from "aws-sdk/clients/cloudformation";
-const cloudFormation = new CloudFormation();
-export const getStackTags = (
-  event: CloudFormationEvent,
-  describeStacks: describeStacks
-): Promise<Tag[]> =>
+const { describeStacks } = new CloudFormation();
+export const getStackTags = (event: CloudFormationEvent): Promise<Tag[]> =>
   new Promise((resolve, reject) => {
     try {
       const params = {
@@ -33,7 +30,7 @@ export const getStackTags = (
 export const index = async (event: CloudFormationEvent, _context: Context) => {
   let tagValue: string = CONST.DISABLED;
 
-  const tags = await getStackTags(event, cloudFormation.describeStacks);
+  const tags = await getStackTags(event);
   tags.forEach(tag => {
     if (tag.Key === CONST.TAG) {
       tagValue = tag.Value;
