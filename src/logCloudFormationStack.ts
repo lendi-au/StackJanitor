@@ -1,6 +1,6 @@
 import { CloudFormation } from "aws-sdk";
 import { Context } from "aws-lambda";
-import { CloudFormationEvent, CONST, describeStacks } from "./types";
+import { CloudFormationEvent, CONST } from "./types";
 import { Tag } from "aws-sdk/clients/cloudformation";
 const { describeStacks } = new CloudFormation();
 export const getStackTags = (event: CloudFormationEvent): Promise<Tag[]> =>
