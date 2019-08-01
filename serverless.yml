@@ -20,7 +20,6 @@ provider:
 functions:
   logCloudFormationStack:
     handler: src/logCloudFormationStack.index
-    cfnRole: arn:aws:iam::XXXXXX:role/role
 
   deleteCloudFormationStack:
     handler: src/deleteCloudFormationStack.index
