@@ -2,44 +2,32 @@ import { CloudFormation } from "aws-sdk";
 import { Context } from "aws-lambda";
 import { CloudFormationEvent, CONST } from "./types";
 import { Tag } from "aws-sdk/clients/cloudformation";
-const { describeStacks } = new CloudFormation();
-export const getStackTags = (event: CloudFormationEvent): Promise<Tag[]> =>
-  new Promise((resolve, reject) => {
-    try {
-      const params = {
-        StackName: event.detail.requestParameters.stackName
-      };
+const cloudFormation = new CloudFormation();
 
-      describeStacks(params, (err, data) => {
-        if (err) {
-          return reject(err.message);
-        }
-        let tags: Tag[] = [];
-        data.Stacks.forEach(stack => {
-          stack.Tags.forEach(tag => {
-            tags.push(tag);
-          });
-        });
-        return resolve(tags);
-      });
-    } catch (e) {
-      return reject(e);
-    }
-  });
+export const getStackTags = async (
+  event: CloudFormationEvent
+): Promise<Tag[]> => {
+  try {
+    const params = {
+      StackName: event.detail.requestParameters.stackName
+    };
+
+    const { Stacks } = await cloudFormation.describeStacks(params).promise();
+
+    return Stacks.map(stackInfo => stackInfo.Tags).reduce(
+      (currentTag, accumulatedTags) => accumulatedTags.concat(currentTag)
+    );
+  } catch (e) {
+    return e;
+  }
+};
 
 export const index = async (event: CloudFormationEvent, _context: Context) => {
-  let tagValue: string = CONST.DISABLED;
-
   const tags = await getStackTags(event);
-  tags.forEach(tag => {
-    if (tag.Key === CONST.TAG) {
-      tagValue = tag.Value;
-    }
-  });
-
+  const { Value } = tags.find(tag => tag.Key === CONST.TAG);
   return {
     results: {
-      stackjanitor: tagValue
+      stackjanitor: Value
     }
   };
 };

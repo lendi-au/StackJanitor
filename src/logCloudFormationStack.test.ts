@@ -1,5 +1,5 @@
-// import { APIGatewayEvent, Handler, Callback, Context } from "aws-lambda";
 import { getStackTags, index } from "./logCloudFormationStack";
+import aws from "aws-sdk";
 
 describe("logCloudFormationStack", () => {
   test("logCloudFormationStack should be called", () => {
@@ -30,14 +30,19 @@ describe("logCloudFormationStack:getStackTags", () => {
       }
     };
 
-    const describeStacks = jest.fn();
+    jest.mock("aws-sdk", () => ({
+      cloudFormation: {
+        describeStacks: Promise.reject()
+      }
+    }));
 
-    getStackTags(sample_event, describeStacks).catch(e => {
+    getStackTags(sample_event).catch(e => {
       expect(e).toThrowError();
+      expect(new aws.CloudFormation().describeStacks).toBeCalledTimes(0);
     });
   });
 
-  test("getStackTags should return stackTags with correct inputs", () => {
+  test("getStackTags should return array of Tag", async () => {
     const sample_event = {
       id: "71e8ce4c-d880-c5b9-f14d-672607e28830",
       source: "aws.cloudformation",
@@ -54,33 +59,12 @@ describe("logCloudFormationStack:getStackTags", () => {
         eventName: "UpdateStack",
         requestParameters: {
           parameters: null,
-          stackName: "test"
+          stackName: "StackJanitor"
         }
       }
     };
 
-    const params = {
-      StackName: "test"
-    };
-
-    const data = {
-      Stacks: [
-        {
-          StackName: "test",
-          Tags: [
-            {
-              stackjanitor: "enabled"
-            }
-          ]
-        }
-      ]
-    };
-
-    const describeStacks = jest.fn(cb => cb(params, data));
-
-    getStackTags(sample_event, describeStacks).then(tags => {
-      console.log(tags);
-      expect(tags).toEqual(data.Stacks[0].Tags);
-    });
+    const tags = await getStackTags(sample_event);
+    expect(tags).toEqual([{ Key: "StackJanitor", Value: "enabled" }]);
   });
 });
