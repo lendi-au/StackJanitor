@@ -1,5 +1,6 @@
 class CloudFormation {
   constructor() {}
+
   describeStacks(params) {
     return {
       promise: () => ({
