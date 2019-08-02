@@ -5,6 +5,13 @@ export type parameterKey = {
   [parameterKey: string]: parameterValue;
 };
 
+export interface StackJanitorStatus {
+  [Key: string]: any;
+  results: {
+    stackjanitor: string;
+  };
+}
+
 export enum Const {
   TAG = "stackjanitor",
   ENABLED = "enabled",
