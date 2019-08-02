@@ -1,5 +1,4 @@
 import { getStackTags, index } from "./logCloudFormationStack";
-import aws from "aws-sdk";
 
 describe("logCloudFormationStack", () => {
   test("logCloudFormationStack should be called", () => {
@@ -30,15 +29,8 @@ describe("logCloudFormationStack:getStackTags", () => {
       }
     };
 
-    jest.mock("aws-sdk", () => ({
-      cloudFormation: {
-        describeStacks: Promise.reject()
-      }
-    }));
-
     getStackTags(sample_event).catch(e => {
       expect(e).toThrowError();
-      expect(new aws.CloudFormation().describeStacks).toBeCalledTimes(0);
     });
   });
 
