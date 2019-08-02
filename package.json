@@ -21,12 +21,15 @@
     "@types/aws-lambda": "^8.10.17",
     "@types/jest": "^24.0.15",
     "@types/node": "^10.12.18",
+    "aws-sdk": "^2.502.0",
     "husky": "^1.3.1",
     "jest": "^24.8.0",
     "lint-staged": "^8.1.4",
     "prettier": "1.18.2",
     "prettier-check": "^2.0.0",
     "serverless": "^1.48.2",
+    "serverless-pseudo-parameters": "^2.4.0",
+    "serverless-step-functions": "^2.1.0",
     "serverless-webpack": "^5.2.0",
     "standard-version": "^6.0.1",
     "ts-jest": "^24.0.2",
@@ -51,7 +54,8 @@
       "ts",
       "tsx",
       "js",
-      "jsx"
+      "jsx",
+      "d.ts"
     ]
   },
   "husky": {

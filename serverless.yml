@@ -4,36 +4,68 @@ service:
 # Add the serverless-webpack plugin
 plugins:
   - serverless-webpack
+  - serverless-step-functions
+  - serverless-pseudo-parameters
 
 provider:
   name: aws
   runtime: nodejs10.x
   region: ap-southeast-2
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "cloudformation:DescribeStack*"
+      Resource: "*"
 
 functions:
   logCloudFormationStack:
     handler: src/logCloudFormationStack.index
-    events:
-      - cloudwatchEvent:
-          event:
-            source:
-              - "aws.cloudformation"
-            detail:
-              eventSource:
-                - "cloudformation.amazonaws.com"
-              eventName:
-                - "CreateStack"
-                - "UpdateStack"
 
   deleteCloudFormationStack:
     handler: src/deleteCloudFormationStack.index
-    events:
-      - cloudwatchEvent:
-          event:
-            source:
-              - "aws.cloudformation"
-            detail:
-              eventSource:
-                - "cloudformation.amazonaws.com"
-              eventName:
-                - "DeleteStack"
+
+stepFunctions:
+  stateMachines:
+    StackJanitor:
+      name: StackJanitorStateMachine
+      definition:
+        Comment: "StackJanitor State Machine"
+        StartAt: logCloudFormationStack
+        States:
+          logCloudFormationStack:
+            Type: Task
+            Next: checkStackJanitorTag
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-logCloudFormationStack
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: EndStackMonitoring
+
+          checkStackJanitorTag:
+            Type: Choice
+            Choices:
+              - Variable: $.results.stackjanitor
+                StringEquals: enabled
+                Next: MonitorStack
+            Default: EndStackMonitoring
+
+          EndStackMonitoring:
+            Type: Pass
+            End: true
+
+          MonitorStack:
+            Type: Pass
+            End: true
+
+      events:
+        - cloudwatchEvent:
+            event:
+              source:
+                - "aws.cloudformation"
+              detail:
+                eventSource:
+                  - "cloudformation.amazonaws.com"
+                eventName:
+                  - "CreateStack"
+                  - "UpdateStack"
+                  - "DeleteStack"
