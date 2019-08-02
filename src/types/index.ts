@@ -5,7 +5,7 @@ export type parameterKey = {
   [parameterKey: string]: parameterValue;
 };
 
-export enum CONST {
+export enum Const {
   TAG = "stackjanitor",
   ENABLED = "enabled",
   DISABLED = "disabled"

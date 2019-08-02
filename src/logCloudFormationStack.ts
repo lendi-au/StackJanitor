@@ -1,6 +1,6 @@
 import { CloudFormation } from "aws-sdk";
 import { Context } from "aws-lambda";
-import { CloudFormationEvent, CONST } from "./types";
+import { CloudFormationEvent, Const } from "./types";
 import { Tag } from "aws-sdk/clients/cloudformation";
 const cloudFormation = new CloudFormation();
 
@@ -24,7 +24,7 @@ export const getStackTags = async (
 
 export const index = async (event: CloudFormationEvent, _context: Context) => {
   const tags = await getStackTags(event);
-  const { Value } = tags.find(tag => tag.Key === CONST.TAG);
+  const { Value } = tags.find(tag => tag.Key === Const.TAG);
   return {
     results: {
       stackjanitor: Value
