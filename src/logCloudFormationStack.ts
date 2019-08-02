@@ -1,9 +1,15 @@
 import { CloudFormation } from "aws-sdk";
 import { Context } from "aws-lambda";
-import { CloudFormationEvent, Const, StackJanitorStatus } from "./types";
+import { CloudFormationEvent, StackJanitorStatus } from "stackjanitor";
 import { logger } from "./helpers";
 
 const cloudFormation = new CloudFormation();
+
+export enum Const {
+  TAG = "stackjanitor",
+  ENABLED = "enabled",
+  DISABLED = "disabled"
+}
 
 export const getTagsFromStacks = async (
   stacks: CloudFormation.Stack[]

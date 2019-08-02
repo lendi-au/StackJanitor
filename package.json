@@ -54,7 +54,8 @@
       "ts",
       "tsx",
       "js",
-      "jsx"
+      "jsx",
+      "d.ts"
     ]
   },
   "husky": {
