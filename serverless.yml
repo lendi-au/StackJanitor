@@ -54,7 +54,6 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
 
-
 functions:
   logCloudFormationStack:
     handler: src/logCloudFormationStack.index
