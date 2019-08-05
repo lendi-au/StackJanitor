@@ -15,11 +15,54 @@ provider:
     - Effect: "Allow"
       Action:
         - "cloudformation:DescribeStack*"
+        - "dynamodb:DescribeTable"
+        - "dynamodb:Query"
+        - "dynamodb:Scan"
+        - "dynamodb:GetItem"
+        - "dynamodb:PutItem"
+        - "dynamodb:UpdateItem"
+        - "dynamodb:DeleteItem"
       Resource: "*"
+
+resources:
+  Resources:
+    stackJanitorTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: stackJanitorTable
+        AttributeDefinitions:
+          - AttributeName: stackName
+            AttributeType: S
+          - AttributeName: stackId
+            AttributeType: S
+          - AttributeName: expirationTime
+            AttributeType: N
+
+        KeySchema:
+          - AttributeName: stackName
+            KeyType: HASH
+          - AttributeName: stackId
+            KeyType: HASH
+          - AttributeName: expirationTime
+            KeyType: HASH
+
+        TimeToLiveSpecification:
+          - AttributeName: expirationTime
+            Enabled: true
+
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+        # set the capacity to auto-scale
+        BillingMode: PAY_PER_REQUEST
 
 functions:
   logCloudFormationStack:
     handler: src/logCloudFormationStack.index
+
+  monitorCloudFormationStack:
+    handler: src/monitorCloudFormationStack.index
 
   deleteCloudFormationStack:
     handler: src/deleteCloudFormationStack.index
@@ -54,8 +97,13 @@ stepFunctions:
             End: true
 
           MonitorStack:
-            Type: Pass
-            End: true
+            Type: Task
+            Next: EndStackMonitoring
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-monitorCloudFormationStack
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: EndStackMonitoring
 
       events:
         - cloudwatchEvent:
