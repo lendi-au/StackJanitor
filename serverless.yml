@@ -47,8 +47,8 @@ resources:
             KeyType: HASH
 
         TimeToLiveSpecification:
-          - AttributeName: expirationTime
-            Enabled: true
+          AttributeName: expirationTime
+          Enabled: true
 
         ProvisionedThroughput:
           ReadCapacityUnits: 1
