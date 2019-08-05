@@ -54,8 +54,6 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
 
-        # set the capacity to auto-scale
-        BillingMode: PAY_PER_REQUEST
 
 functions:
   logCloudFormationStack:
