@@ -33,15 +33,13 @@ resources:
         AttributeDefinitions:
           - AttributeName: stackName
             AttributeType: S
-          - AttributeName: stackId
-            AttributeType: S
           - AttributeName: expirationTime
             AttributeType: N
 
         KeySchema:
-          - AttributeName: stackId
-            KeyType: HASH
           - AttributeName: stackName
+            KeyType: HASH
+          - AttributeName: expirationTime
             KeyType: RANGE
 
         TimeToLiveSpecification:
