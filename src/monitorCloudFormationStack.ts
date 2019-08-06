@@ -1,6 +1,6 @@
 import config from "./config";
 import { DynamoDB } from "aws-sdk";
-import { CloudFormationEvent } from "stackjanitor";
+import { StackJanitorStatus } from "stackjanitor";
 import { logger } from "./helpers";
 import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
 
@@ -34,8 +34,9 @@ export const updateItem = async (
   }
 };
 
-export const index = async (event: CloudFormationEvent) => {
+export const index = async (stackJanitorStatus: StackJanitorStatus) => {
   const tableName = config.DYNAMODB_TABLE;
+  const { event } = stackJanitorStatus;
 
   if (event.detail.eventName == RequestType.CREATE) {
     const inputParams = {
