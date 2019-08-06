@@ -3,6 +3,6 @@ import { index } from "./deleteCloudFormationStack";
 
 describe("deleteCloudFormationStack", () => {
   test("deleteCloudFormationStack should be called", () => {
-    expect(index(null, null));
+    expect(index(null));
   });
 });

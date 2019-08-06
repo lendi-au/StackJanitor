@@ -17,6 +17,8 @@ class CloudFormation {
       })
     };
   }
+
+  deleteStack(_params) {}
 }
 
 const DynamoDB = {

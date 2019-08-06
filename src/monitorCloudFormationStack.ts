@@ -47,7 +47,7 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
   const tableName = config.DYNAMODB_TABLE;
   const { event } = stackJanitorStatus;
 
-  if (event.detail.eventName == RequestType.CREATE) {
+  if (event.detail.eventName === RequestType.CREATE) {
     const inputParams = {
       TableName: tableName,
       Item: {
@@ -62,7 +62,7 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
       return Const.SUCCESS;
     }
   }
-  if (event.detail.eventName == RequestType.UPDATE) {
+  if (event.detail.eventName === RequestType.UPDATE) {
     const updateParams = {
       TableName: tableName,
       Key: {
