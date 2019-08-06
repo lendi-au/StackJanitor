@@ -8,6 +8,7 @@ declare module "stackjanitor" {
 
   export interface StackJanitorStatus {
     [Key: string]: any;
+    event: CloudFormationEvent;
     results: {
       stackjanitor: string;
     };

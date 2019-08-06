@@ -2,6 +2,7 @@ import { CloudFormation } from "aws-sdk";
 import { Context } from "aws-lambda";
 import { CloudFormationEvent, StackJanitorStatus } from "stackjanitor";
 import { logger } from "./helpers";
+import { Stack, Tag } from "aws-sdk/clients/cloudformation";
 
 const cloudFormation = new CloudFormation();
 
@@ -11,16 +12,14 @@ export enum Const {
   DISABLED = "disabled"
 }
 
-export const getTagsFromStacks = async (
-  stacks: CloudFormation.Stack[]
-): Promise<CloudFormation.Tag[]> =>
+export const getTagsFromStacks = async (stacks: Stack[]): Promise<Tag[]> =>
   stacks
     .map(stackInfo => stackInfo.Tags)
     .reduce((currentTag, accumulatedTags) =>
       accumulatedTags.concat(currentTag)
     );
 
-export const getStackJanitorStatus = (tags: CloudFormation.Tag[]): string => {
+export const getStackJanitorStatus = (tags: Tag[]): string => {
   const tag = tags.find(tag => tag.Key === Const.TAG);
   return tag ? tag.Value : "disabled";
 };
@@ -45,6 +44,7 @@ export const index = async (
   }
 
   return {
+    event,
     results: {
       stackjanitor: Status
     }

@@ -7,6 +7,9 @@ plugins:
   - serverless-step-functions
   - serverless-pseudo-parameters
 
+custom:
+  DYNAMO_DB_TABLE: stackJanitorTable
+
 provider:
   name: aws
   runtime: nodejs10.x
@@ -29,7 +32,7 @@ resources:
     stackJanitorTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: stackJanitorTable
+        TableName: ${self:custom.DYNAMO_DB_TABLE}
         AttributeDefinitions:
           - AttributeName: stackName
             AttributeType: S
@@ -50,6 +53,9 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
 
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+
 functions:
   logCloudFormationStack:
     handler: src/logCloudFormationStack.index
@@ -59,6 +65,11 @@ functions:
 
   deleteCloudFormationStack:
     handler: src/deleteCloudFormationStack.index
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt: [stackJanitorTable, StreamArn]
 
 stepFunctions:
   stateMachines:
