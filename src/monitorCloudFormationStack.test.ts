@@ -3,6 +3,6 @@ import { index } from "./monitorCloudFormationStack";
 
 describe("monitorCloudFormationStack", () => {
   test("monitorCloudFormationStack should be called", () => {
-    expect(index(null, null));
+    expect(index(null));
   });
 });

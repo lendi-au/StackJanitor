@@ -173,10 +173,13 @@ describe("logCloudFormationStack:index", () => {
       }
     };
 
-    const stackJanitorStatus = await index(sample_event, null);
-    expect(stackJanitorStatus).toStrictEqual({
-      results: { stackjanitor: "enabled" }
+    const logStackOutput = await index(sample_event, null);
+
+    expect(logStackOutput).toHaveProperty("results");
+    expect(logStackOutput.results).toStrictEqual({
+      stackjanitor: "enabled"
     });
+    expect(logStackOutput).toHaveProperty("event");
   });
 
   test("index should return array of Tag", async () => {
@@ -201,9 +204,11 @@ describe("logCloudFormationStack:index", () => {
       }
     };
 
-    const stackJanitorStatus = await index(sample_event, null);
-    expect(stackJanitorStatus).toStrictEqual({
-      results: { stackjanitor: "disabled" }
+    const logStackOutput = await index(sample_event, null);
+    expect(logStackOutput).toHaveProperty("results");
+    expect(logStackOutput.results).toStrictEqual({
+      stackjanitor: "disabled"
     });
+    expect(logStackOutput).toHaveProperty("event");
   });
 });
