@@ -56,10 +56,10 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
       }
     };
     if (checkExpirationTime(inputParams.Item.expirationTime)) {
-      logger(new Error(Const.EXPIRATION_MESSAGE));
-    } else {
       await putItem(inputParams);
       return Const.SUCCESS;
+    } else {
+      logger(new Error(Const.EXPIRATION_MESSAGE));
     }
   }
   if (event.detail.eventName === RequestType.UPDATE) {
@@ -71,10 +71,10 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
       }
     };
     if (checkExpirationTime(updateParams.Key.expirationTime)) {
-      logger(new Error(Const.EXPIRATION_MESSAGE));
-    } else {
       await updateItem(updateParams);
       return Const.SUCCESS;
+    } else {
+      logger(new Error(Const.EXPIRATION_MESSAGE));
     }
   }
 
