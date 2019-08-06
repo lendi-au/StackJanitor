@@ -7,28 +7,28 @@ import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
 const documentClient = new DynamoDB.DocumentClient();
 
 export enum RequestType {
-  CREATE = "Create",
-  UPDATE = "Update"
+  CREATE = "CreateStack",
+  UPDATE = "UpdateStack"
 }
 
 const ExpirationTime =
   new Date().getTime() + 1000 * 60 * 60 * config.DEFAULT_EXPIRATION_HOURS;
 
-export const putItem = async (
+export const putItem = (
   params: DocumentClient.PutItemInput
 ): Promise<DocumentClient.PutItemOutput> => {
   try {
-    return await documentClient.put(params).promise();
+    return documentClient.put(params).promise();
   } catch (e) {
     logger(e.message);
   }
 };
 
-export const updateItem = async (
+export const updateItem = (
   params: DocumentClient.UpdateItemInput
 ): Promise<DocumentClient.UpdateItemOutput> => {
   try {
-    return await documentClient.update(params).promise();
+    return documentClient.update(params).promise();
   } catch (e) {
     logger(e.message);
   }
@@ -46,7 +46,7 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
         expirationTime: ExpirationTime
       }
     };
-    return putItem(inputParams);
+    return await putItem(inputParams);
   }
   if (event.detail.eventName == RequestType.UPDATE) {
     const updateParams = {
@@ -56,6 +56,6 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
         expirationTime: ExpirationTime
       }
     };
-    return updateItem(updateParams);
+    return await updateItem(updateParams);
   }
 };

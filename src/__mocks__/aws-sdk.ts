@@ -19,4 +19,10 @@ class CloudFormation {
   }
 }
 
-module.exports = { CloudFormation };
+const DynamoDB = {
+  DocumentClient: class {
+    constructor() {}
+  }
+};
+
+module.exports = { CloudFormation, DynamoDB };
