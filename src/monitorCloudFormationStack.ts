@@ -11,8 +11,17 @@ export enum RequestType {
   UPDATE = "UpdateStack"
 }
 
-const ExpirationTime =
+export enum Const {
+  EXPIRATION_MESSAGE = "Expiration time should be greater than current time.",
+  SUCCESS = "success",
+  IGNORE = "ignore"
+}
+
+const ExpirationTime: number =
   new Date().getTime() + 1000 * 60 * 60 * config.DEFAULT_EXPIRATION_HOURS;
+
+const checkExpirationTime = (time: number): boolean =>
+  time > new Date().getTime();
 
 export const putItem = (
   params: DocumentClient.PutItemInput
@@ -46,7 +55,12 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
         expirationTime: ExpirationTime
       }
     };
-    return await putItem(inputParams);
+    if (checkExpirationTime(inputParams.Item.expirationTime)) {
+      logger(new Error(Const.EXPIRATION_MESSAGE));
+    } else {
+      await putItem(inputParams);
+      return Const.SUCCESS;
+    }
   }
   if (event.detail.eventName == RequestType.UPDATE) {
     const updateParams = {
@@ -56,6 +70,13 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
         expirationTime: ExpirationTime
       }
     };
-    return await updateItem(updateParams);
+    if (checkExpirationTime(updateParams.Key.expirationTime)) {
+      logger(new Error(Const.EXPIRATION_MESSAGE));
+    } else {
+      await updateItem(updateParams);
+      return Const.SUCCESS;
+    }
   }
+
+  return Const.IGNORE;
 };

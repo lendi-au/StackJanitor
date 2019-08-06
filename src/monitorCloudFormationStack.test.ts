@@ -1,8 +1,15 @@
 // import { APIGatewayEvent, Handler, Callback, Context } from "aws-lambda";
-import { index } from "./monitorCloudFormationStack";
+import { putItem } from "./monitorCloudFormationStack";
 
-describe("monitorCloudFormationStack", () => {
+describe("monitorCloudFormationStack:putItem", () => {
   test("monitorCloudFormationStack should be called", () => {
-    expect(index(null));
+    const inputParams = {
+      TableName: "stackJanitorTable",
+      Item: {
+        stackName: "stackJanitorTest",
+        expirationTime: new Date().getTime()
+      }
+    };
+    putItem(inputParams);
   });
 });
