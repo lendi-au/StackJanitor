@@ -32,23 +32,4 @@ declare module "stackjanitor" {
       };
     };
   }
-
-  export interface DynamoDBStrem {
-    ApproximateCreationDateTime: 1565073920;
-    Keys: {
-      expirationTime: { N: "1565675761664" };
-      stackName: {
-        S: "webhook-delivery-delivery-worker-COR-443-pipline-01-development";
-      };
-    };
-    NewImage: {
-      expirationTime: { N: "1565675761664" };
-      stackName: {
-        S: "webhook-delivery-delivery-worker-COR-443-pipline-01-development";
-      };
-    };
-    SequenceNumber: "4004600000000000065604158";
-    SizeBytes: 188;
-    StreamViewType: "NEW_IMAGE";
-  }
 }
