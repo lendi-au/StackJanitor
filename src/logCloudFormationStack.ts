@@ -33,7 +33,8 @@ export const index = async (
 
   try {
     const params = {
-      StackName: event.detail.requestParameters.stackName
+      StackName: event.detail.requestParameters.stackName,
+      stackId: event.detail.responseElements.stackId
     };
 
     const { Stacks } = await cloudFormation.describeStacks(params).promise();

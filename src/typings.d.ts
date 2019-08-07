@@ -30,6 +30,9 @@ declare module "stackjanitor" {
         parameters: parameterKey[];
         stackName: string;
       };
+      responseElements: {
+        stackId: string;
+      };
     };
   }
 }

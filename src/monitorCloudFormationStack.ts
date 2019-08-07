@@ -61,6 +61,7 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
       TableName: tableName,
       Item: {
         stackName: event.detail.requestParameters.stackName,
+        stackId: event.detail.responseElements.stackId,
         expirationTime: config.EXPIRATION_TIME
       }
     };
@@ -76,6 +77,7 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
       TableName: tableName,
       Key: {
         stackName: event.detail.requestParameters.stackName,
+        stackId: event.detail.responseElements.stackId,
         expirationTime: config.EXPIRATION_TIME
       }
     };
@@ -91,7 +93,8 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
     const deleteParams = {
       TableName: tableName,
       Key: {
-        stackName: event.detail.requestParameters.stackName
+        stackName: event.detail.requestParameters.stackName,
+        stackId: event.detail.responseElements.stackId
       }
     };
     try {
