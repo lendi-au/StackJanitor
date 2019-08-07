@@ -8,7 +8,8 @@ const documentClient = new DynamoDB.DocumentClient();
 
 export enum RequestType {
   CREATE = "CreateStack",
-  UPDATE = "UpdateStack"
+  UPDATE = "UpdateStack",
+  DELETE = "DeleteStack"
 }
 
 export enum Const {
@@ -17,11 +18,8 @@ export enum Const {
   IGNORE = "ignore"
 }
 
-const ExpirationTime: number =
-  new Date().getTime() + 1000 * 60 * 60 * config.DEFAULT_EXPIRATION_HOURS;
-
-const checkExpirationTime = (time: number): boolean =>
-  time > new Date().getTime();
+export const checkExpirationTime = (time: number): boolean =>
+  time > config.SECONDS_SINCE_EPOCH;
 
 export const putItem = (
   params: DocumentClient.PutItemInput
@@ -29,7 +27,7 @@ export const putItem = (
   try {
     return documentClient.put(params).promise();
   } catch (e) {
-    logger(e.message);
+    logger(e);
   }
 };
 
@@ -39,12 +37,23 @@ export const updateItem = (
   try {
     return documentClient.update(params).promise();
   } catch (e) {
-    logger(e.message);
+    logger(e);
+  }
+};
+
+export const deleteItem = (
+  params: DocumentClient.DeleteItemInput
+): Promise<DocumentClient.DeleteItemOutput> => {
+  try {
+    return documentClient.delete(params).promise();
+  } catch (e) {
+    logger(e);
   }
 };
 
 export const index = async (stackJanitorStatus: StackJanitorStatus) => {
-  const tableName = config.DYNAMODB_TABLE;
+  logger(stackJanitorStatus);
+  const tableName = config.DEFAULT_DYNAMODB_TABLE;
   const { event } = stackJanitorStatus;
 
   if (event.detail.eventName === RequestType.CREATE) {
@@ -52,7 +61,7 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
       TableName: tableName,
       Item: {
         stackName: event.detail.requestParameters.stackName,
-        expirationTime: ExpirationTime
+        expirationTime: config.EXPIRATION_TIME
       }
     };
     if (checkExpirationTime(inputParams.Item.expirationTime)) {
@@ -67,7 +76,7 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
       TableName: tableName,
       Key: {
         stackName: event.detail.requestParameters.stackName,
-        expirationTime: ExpirationTime
+        expirationTime: config.EXPIRATION_TIME
       }
     };
     if (checkExpirationTime(updateParams.Key.expirationTime)) {
@@ -76,6 +85,21 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
     } else {
       logger(new Error(Const.EXPIRATION_MESSAGE));
     }
+  }
+
+  if (event.detail.eventName === RequestType.DELETE) {
+    const deleteParams = {
+      TableName: tableName,
+      Key: {
+        stackName: event.detail.requestParameters.stackName
+      }
+    };
+    try {
+      await deleteItem(deleteParams);
+    } catch (e) {
+      logger(e);
+    }
+    return Const.SUCCESS;
   }
 
   return Const.IGNORE;

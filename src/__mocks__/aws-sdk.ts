@@ -1,3 +1,5 @@
+const aws: any = jest.genMockFromModule("aws-sdk");
+
 class CloudFormation {
   constructor() {}
 
@@ -18,13 +20,41 @@ class CloudFormation {
     };
   }
 
-  deleteStack(_params) {}
+  deleteStack(_params) {
+    return jest.fn(() => {});
+  }
 }
 
 const DynamoDB = {
   DocumentClient: class {
     constructor() {}
+    put() {
+      return {
+        promise: () => {
+          return true;
+        }
+      };
+    }
+
+    update() {
+      return {
+        promise: () => {
+          return true;
+        }
+      };
+    }
+
+    delete() {
+      return {
+        promise: () => {
+          return true;
+        }
+      };
+    }
   }
 };
 
-module.exports = { CloudFormation, DynamoDB };
+aws.CloudFormation = CloudFormation;
+aws.DynamoDB = DynamoDB;
+
+module.exports = aws;

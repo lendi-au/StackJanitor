@@ -28,6 +28,7 @@ export const index = async (
   event: CloudFormationEvent,
   _context: Context
 ): Promise<StackJanitorStatus> => {
+  logger(event);
   let Status: string = Const.DISABLED;
 
   try {
