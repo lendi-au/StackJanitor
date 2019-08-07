@@ -18,6 +18,7 @@ provider:
     - Effect: "Allow"
       Action:
         - "cloudformation:DescribeStack*"
+        - "cloudformation:DeleteStack"
         - "dynamodb:DescribeTable"
         - "dynamodb:Query"
         - "dynamodb:Scan"
