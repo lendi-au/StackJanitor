@@ -81,6 +81,7 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
         expirationTime: config.EXPIRATION_TIME
       }
     };
+    // TODO: if does not exist in DynamoDB --> put instead of update
     if (checkExpirationTime(updateParams.Key.expirationTime)) {
       await updateItem(updateParams);
       return Const.SUCCESS;
