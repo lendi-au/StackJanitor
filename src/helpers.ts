@@ -1,5 +1,5 @@
-import log from "pino";
+const log = require("pino")();
 
 export const logger = data => {
-  log(data);
+  log.info(data);
 };
