@@ -63,6 +63,9 @@ functions:
 
   monitorCloudFormationStack:
     handler: src/monitorCloudFormationStack.index
+    environment:
+      DEFAULT_DYNAMODB_TABLE: stackJanitorTable
+      DEFAULT_EXPIRATION_PERIOD: "7 * 24 * 60 * 60"
 
   deleteCloudFormationStack:
     handler: src/deleteCloudFormationStack.index

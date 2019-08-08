@@ -49,7 +49,8 @@ export const deleteItem = (
 };
 
 export const getExirationTime = (eventTime: string): number =>
-  new Date(eventTime).getTime() / 1000 + config.DEFAULT_EXPIRATION_PERIOD;
+  new Date(eventTime).getTime() / 1000 +
+  Number(config.DEFAULT_EXPIRATION_PERIOD);
 
 export const index = async (stackJanitorStatus: StackJanitorStatus) => {
   logger(stackJanitorStatus);
