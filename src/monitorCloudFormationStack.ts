@@ -2,9 +2,16 @@ import config from "./config";
 import { DynamoDB } from "aws-sdk";
 import { StackJanitorStatus } from "stackjanitor";
 import { logger } from "./helpers";
-import { DocumentClient } from "aws-sdk/lib/dynamodb/document_client";
+import {
+  DeleteItemInput,
+  DeleteItemOutput,
+  PutItemInput,
+  PutItemOutput,
+  UpdateItemInput,
+  UpdateItemOutput
+} from "aws-sdk/clients/dynamodb";
 
-const documentClient = new DynamoDB.DocumentClient();
+const documentClient = new DynamoDB();
 
 export enum RequestType {
   CREATE = "CreateStack",
@@ -17,31 +24,29 @@ export enum Response {
   IGNORE = "ignore"
 }
 
-export const putItem = (
-  params: DocumentClient.PutItemInput
-): Promise<DocumentClient.PutItemOutput> => {
+export const putItem = (params: PutItemInput): Promise<PutItemOutput> => {
   try {
-    return documentClient.put(params).promise();
+    return documentClient.putItem(params).promise();
   } catch (e) {
     logger(e);
   }
 };
 
 export const updateItem = (
-  params: DocumentClient.UpdateItemInput
-): Promise<DocumentClient.UpdateItemOutput> => {
+  params: UpdateItemInput
+): Promise<UpdateItemOutput> => {
   try {
-    return documentClient.update(params).promise();
+    return documentClient.updateItem(params).promise();
   } catch (e) {
     logger(e);
   }
 };
 
 export const deleteItem = (
-  params: DocumentClient.DeleteItemInput
-): Promise<DocumentClient.DeleteItemOutput> => {
+  params: DeleteItemInput
+): Promise<DeleteItemOutput> => {
   try {
-    return documentClient.delete(params).promise();
+    return documentClient.deleteItem(params).promise();
   } catch (e) {
     logger(e);
   }
@@ -62,9 +67,15 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
     const inputParams = {
       TableName: tableName,
       Item: {
-        stackName: event.detail.requestParameters.stackName,
-        stackId: event.detail.responseElements.stackId,
-        expirationTime: expirationTime
+        stackName: {
+          S: event.detail.requestParameters.stackName
+        },
+        stackId: {
+          S: event.detail.responseElements.stackId
+        },
+        expirationTime: {
+          S: `${expirationTime}`
+        }
       }
     };
     try {
@@ -76,18 +87,25 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
   }
   if (event.detail.eventName === RequestType.UPDATE) {
     const updateParams = {
-      TableName: tableName,
-      Key: { HashKey: "stackName" },
-      UpdateExpression: "set #et = :t",
-      ConditionExpression: "#sn = :s",
       ExpressionAttributeNames: {
-        "#sn": "stackName",
-        "#et": "expirationTime"
+        "#ET": "expirationTime"
       },
       ExpressionAttributeValues: {
-        ":t": `${expirationTime}`,
-        ":s": event.detail.requestParameters.stackName
-      }
+        ":e": {
+          N: "" + expirationTime
+        }
+      },
+      Key: {
+        stackName: {
+          S: event.detail.requestParameters.stackName
+        },
+        stackId: {
+          S: event.detail.responseElements.stackId
+        }
+      },
+      ReturnValues: "ALL_NEW",
+      TableName: tableName,
+      UpdateExpression: "SET #ET = :e"
     };
 
     try {
@@ -100,10 +118,15 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
 
   if (event.detail.eventName === RequestType.DELETE) {
     const deleteParams = {
-      TableName: tableName,
       Key: {
-        stackName: event.detail.requestParameters.stackName
-      }
+        stackName: {
+          S: event.detail.requestParameters.stackName
+        },
+        stackId: {
+          S: event.detail.responseElements.stackId
+        }
+      },
+      TableName: tableName
     };
     try {
       await deleteItem(deleteParams);
