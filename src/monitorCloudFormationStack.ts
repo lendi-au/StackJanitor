@@ -12,8 +12,7 @@ export enum RequestType {
   DELETE = "DeleteStack"
 }
 
-export enum Const {
-  EXPIRATION_MESSAGE = "Expiration time should be greater than current time.",
+export enum Response {
   SUCCESS = "success",
   IGNORE = "ignore"
 }
@@ -70,7 +69,7 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
     };
     try {
       await putItem(inputParams);
-      return Const.SUCCESS;
+      return Response.SUCCESS;
     } catch (e) {
       logger(e);
     }
@@ -85,7 +84,7 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
     // TODO: if does not exist in DynamoDB --> put instead of update
     try {
       await updateItem(updateParams);
-      return Const.SUCCESS;
+      return Response.SUCCESS;
     } catch (e) {
       logger(e);
     }
@@ -103,8 +102,8 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
     } catch (e) {
       logger(e);
     }
-    return Const.SUCCESS;
+    return Response.SUCCESS;
   }
 
-  return Const.IGNORE;
+  return Response.IGNORE;
 };

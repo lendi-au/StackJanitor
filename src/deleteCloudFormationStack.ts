@@ -4,14 +4,14 @@ import { logger } from "./helpers";
 
 const cloudFormation = new CloudFormation();
 
-export enum Const {
+export enum Action {
   REMOVE = "REMOVE"
 }
 
 export const getStackNamesFromStreamEvent = (
   event: DynamoDBStreamEvent
 ): string[] =>
-  event.Records.filter(record => record.eventName === Const.REMOVE).map(
+  event.Records.filter(record => record.eventName === Action.REMOVE).map(
     record => record.dynamodb.Keys.stackName.S
   );
 

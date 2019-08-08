@@ -6,7 +6,7 @@ import { Stack, Tag } from "aws-sdk/clients/cloudformation";
 
 const cloudFormation = new CloudFormation();
 
-export enum Const {
+export enum StackTag {
   TAG = "stackjanitor",
   ENABLED = "enabled",
   DISABLED = "disabled"
@@ -20,7 +20,7 @@ export const getTagsFromStacks = async (stacks: Stack[]): Promise<Tag[]> =>
     );
 
 export const getStackJanitorStatus = (tags: Tag[]): string => {
-  const tag = tags.find(tag => tag.Key === Const.TAG);
+  const tag = tags.find(tag => tag.Key === StackTag.TAG);
   return tag ? tag.Value : "disabled";
 };
 
@@ -29,7 +29,7 @@ export const index = async (
   _context: Context
 ): Promise<StackJanitorStatus> => {
   logger(event);
-  let Status: string = Const.DISABLED;
+  let Status: string = StackTag.DISABLED;
 
   try {
     const params = {
