@@ -1,3 +1,5 @@
+const log = require("pino")();
+
 export const logger = data => {
-  console.log(data);
+  log.info(data);
 };

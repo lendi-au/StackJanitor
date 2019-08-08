@@ -169,14 +169,21 @@ describe("logCloudFormationStack:index", () => {
         requestParameters: {
           parameters: null,
           stackName: "stackjanitor"
+        },
+        responseElements: {
+          stackId:
+            "arn:aws:cloudformation:ap-southeast-2:702880128631:stack/test/36ad7930-b8c4-11e9-aadd-0ae3f52010f8"
         }
       }
     };
 
-    const stackJanitorStatus = await index(sample_event, null);
-    expect(stackJanitorStatus).toStrictEqual({
-      results: { stackjanitor: "enabled" }
+    const logStackOutput = await index(sample_event, null);
+
+    expect(logStackOutput).toHaveProperty("results");
+    expect(logStackOutput.results).toStrictEqual({
+      stackjanitor: "enabled"
     });
+    expect(logStackOutput).toHaveProperty("event");
   });
 
   test("index should return array of Tag", async () => {
@@ -201,9 +208,11 @@ describe("logCloudFormationStack:index", () => {
       }
     };
 
-    const stackJanitorStatus = await index(sample_event, null);
-    expect(stackJanitorStatus).toStrictEqual({
-      results: { stackjanitor: "disabled" }
+    const logStackOutput = await index(sample_event, null);
+    expect(logStackOutput).toHaveProperty("results");
+    expect(logStackOutput.results).toStrictEqual({
+      stackjanitor: "disabled"
     });
+    expect(logStackOutput).toHaveProperty("event");
   });
 });

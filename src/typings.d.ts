@@ -8,6 +8,7 @@ declare module "stackjanitor" {
 
   export interface StackJanitorStatus {
     [Key: string]: any;
+    event: CloudFormationEvent;
     results: {
       stackjanitor: string;
     };
@@ -25,9 +26,13 @@ declare module "stackjanitor" {
         };
       };
       eventName: string;
+      eventTime: string;
       requestParameters: {
         parameters: parameterKey[];
         stackName: string;
+      };
+      responseElements: {
+        stackId: string;
       };
     };
   }
