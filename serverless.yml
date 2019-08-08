@@ -91,7 +91,8 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn: !Sub "${stackJanitorTable.StreamArn"
+          arn:
+            Fn::GetAtt: [stackJanitorTable, StreamArn]
 
 stepFunctions:
   stateMachines:

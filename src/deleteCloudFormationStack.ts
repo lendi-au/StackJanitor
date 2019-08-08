@@ -24,7 +24,6 @@ export const index = async (event: DynamoDBStreamEvent) => {
 
     // TODO: Delete CloudJanitorTest only for the time being
     if (StackName === "CloudJanitorTest") {
-      logger("this is getting called");
       logger(params);
       try {
         await cloudFormation.deleteStack(params);
