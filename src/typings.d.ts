@@ -26,6 +26,7 @@ declare module "stackjanitor" {
         };
       };
       eventName: string;
+      eventTime: string;
       requestParameters: {
         parameters: parameterKey[];
         stackName: string;

@@ -1,23 +1,11 @@
-import { checkExpirationTime, index } from "./monitorCloudFormationStack";
-import config from "./config";
+import { getExirationTime, index } from "./monitorCloudFormationStack";
 
-describe("monitorCloudFormationStack:checkExpirationTime", () => {
-  test("checkExpirationTime should return true if EXPIRATION_TIME > current epoch seconds", () => {
-    const SECONDS_IN_AN_HOUR = 60 * 60;
-    const secondsSinceEpoch = Math.round(Date.now() / 1000);
-    const ExpirationTime =
-      secondsSinceEpoch + config.DEFAULT_EXPIRATION_HOURS * SECONDS_IN_AN_HOUR;
-    expect(checkExpirationTime(ExpirationTime)).toEqual(true);
-  });
+describe("monitorCloudFormationStack:getExirationTime", () => {
+  test("getExirationTime should return correct expired EPOCH", () => {
+    const eventTime = "2019-08-08T00:22:00Z";
+    const expectedExpirationEpoch = 1565828520;
 
-  test("checkExpirationTime should return false if EXPIRATION_TIME = current epoch seconds", () => {
-    const ExpirationTime = Math.round(Date.now() / 1000);
-    expect(checkExpirationTime(ExpirationTime)).toEqual(false);
-  });
-
-  test("checkExpirationTime should return false if EXPIRATION_TIME < current epoch seconds", () => {
-    const ExpirationTime = Math.round(Date.now() / 1000) - 1000;
-    expect(checkExpirationTime(ExpirationTime)).toEqual(false);
+    expect(getExirationTime(eventTime)).toEqual(expectedExpirationEpoch);
   });
 });
 
@@ -42,6 +30,9 @@ describe("monitorCloudFormationStack:index", () => {
         requestParameters: {
           stackName:
             "webhook-delivery-classification-worker-COR-443-development"
+        },
+        responseElements: {
+          stackId: "123"
         }
       }
     },

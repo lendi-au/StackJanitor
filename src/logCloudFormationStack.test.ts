@@ -169,6 +169,10 @@ describe("logCloudFormationStack:index", () => {
         requestParameters: {
           parameters: null,
           stackName: "stackjanitor"
+        },
+        responseElements: {
+          stackId:
+            "arn:aws:cloudformation:ap-southeast-2:702880128631:stack/test/36ad7930-b8c4-11e9-aadd-0ae3f52010f8"
         }
       }
     };
