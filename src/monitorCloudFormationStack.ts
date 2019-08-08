@@ -78,10 +78,17 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
     const updateParams = {
       TableName: tableName,
       Key: {
-        stackName: event.detail.requestParameters.stackName
+        stackName: { S: event.detail.requestParameters.stackName }
+      },
+      ReturnConsumedCapacity: "TOTAL",
+      UpdateExpression: "SET #ET = :n",
+      ExpressionAttributeNames: {
+        "#ET": "expirationTime"
+      },
+      ExpressionAttributeValues: {
+        ":n": { N: expirationTime }
       }
     };
-    // TODO: if does not exist in DynamoDB --> put instead of update
     try {
       await updateItem(updateParams);
       return Response.SUCCESS;
