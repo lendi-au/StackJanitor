@@ -78,9 +78,7 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
     const updateParams = {
       TableName: tableName,
       Key: {
-        stackName: event.detail.requestParameters.stackName,
-        stackId: event.detail.responseElements.stackId,
-        expirationTime: expirationTime
+        stackName: event.detail.requestParameters.stackName
       }
     };
     // TODO: if does not exist in DynamoDB --> put instead of update
