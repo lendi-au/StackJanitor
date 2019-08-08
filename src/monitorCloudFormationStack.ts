@@ -77,18 +77,19 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
   if (event.detail.eventName === RequestType.UPDATE) {
     const updateParams = {
       TableName: tableName,
-      Key: {
-        stackName: { S: event.detail.requestParameters.stackName }
-      },
-      ReturnConsumedCapacity: "TOTAL",
-      UpdateExpression: "SET #ET = :n",
+      Key: { HashKey: "stackName" },
+      UpdateExpression: "set #et = :t",
+      ConditionExpression: "#sn = :s",
       ExpressionAttributeNames: {
-        "#ET": "expirationTime"
+        "#sn": "stackName",
+        "#et": "expirationTime"
       },
       ExpressionAttributeValues: {
-        ":n": { N: expirationTime }
+        ":t": `${expirationTime}`,
+        ":s": event.detail.requestParameters.stackName
       }
     };
+
     try {
       await updateItem(updateParams);
       return Response.SUCCESS;

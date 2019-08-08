@@ -17,8 +17,6 @@ provider:
   iamRoleStatements:
     - Effect: "Allow"
       Action:
-        - "cloudformation:DescribeStack*"
-        - "cloudformation:DeleteStack"
         - "dynamodb:DescribeTable"
         - "dynamodb:Query"
         - "dynamodb:Scan"
@@ -26,6 +24,27 @@ provider:
         - "dynamodb:PutItem"
         - "dynamodb:UpdateItem"
         - "dynamodb:DeleteItem"
+      Resource: "arn:aws:dynamodb:*:*:table/${self:custom.DYNAMO_DB_TABLE}"
+    - Effect: "Allow"
+      Action:
+        - "cloudformation:DescribeStack*"
+        - "cloudformation:DeleteStack"
+      Resource: "arn:aws:cloudformation:*:*:*"
+    - Effect: "Allow"
+      Action:
+        - "ec2:*"
+        - "s3:*"
+        - "ecs:*"
+        - "elasticloadbalancing:*"
+        - "elasticloadbalancing:*"
+        - "elasticloadbalancingv2:*"
+        - "logs:*"
+        - "events:*"
+        - "route53:*"
+        - "cloudwatch:*"
+        - "application-autoscaling:*"
+        - "autoscaling:*"
+        - "apigateway:*"
       Resource: "*"
 
 resources:
@@ -64,7 +83,7 @@ functions:
   monitorCloudFormationStack:
     handler: src/monitorCloudFormationStack.index
     environment:
-      DEFAULT_DYNAMODB_TABLE: stackJanitorTable
+      DEFAULT_DYNAMODB_TABLE: ${self:custom.DYNAMO_DB_TABLE}
       DEFAULT_EXPIRATION_PERIOD: "7 * 24 * 60 * 60"
 
   deleteCloudFormationStack:
@@ -72,8 +91,7 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn:
-            Fn::GetAtt: [stackJanitorTable, StreamArn]
+          arn: !Sub "${stackJanitorTable.StreamArn"
 
 stepFunctions:
   stateMachines:
