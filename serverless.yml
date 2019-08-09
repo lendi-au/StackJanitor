@@ -14,6 +14,8 @@ custom:
 provider:
   name: aws
   runtime: nodejs10.x
+  memorySize: 256
+  stage: ${opt:stage, 'dev'}
   region: ap-southeast-2
   iamRoleStatements:
     - Effect: "Allow"
