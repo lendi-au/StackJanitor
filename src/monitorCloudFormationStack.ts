@@ -10,6 +10,7 @@ import {
   UpdateItemInput,
   UpdateItemOutput
 } from "aws-sdk/clients/dynamodb";
+import { Context } from "aws-lambda";
 
 const documentClient = new DynamoDB();
 
@@ -56,14 +57,16 @@ export const getExirationTime = (eventTime: string): number =>
   new Date(eventTime).getTime() / 1000 +
   Number(config.DEFAULT_EXPIRATION_PERIOD);
 
-export const index = async (stackJanitorStatus: StackJanitorStatus) => {
+export const index = async (
+  stackJanitorStatus: StackJanitorStatus,
+  _context: Context
+) => {
   logger(stackJanitorStatus);
+  logger(_context);
   const tableName = config.DEFAULT_DYNAMODB_TABLE;
   const { event } = stackJanitorStatus;
 
   const expirationTime = getExirationTime(event.detail.eventTime);
-
-  console.log(expirationTime);
 
   if (event.detail.eventName === RequestType.CREATE) {
     const inputParams = {
@@ -122,10 +125,10 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
     const deleteParams = {
       Key: {
         stackName: {
-          S: event.detail.requestParameters.stackName
+          S: event.detail.requestParameters.stackName.split("/")[1]
         },
         stackId: {
-          S: event.detail.responseElements.stackId
+          S: event.detail.requestParameters.stackName
         }
       },
       TableName: tableName

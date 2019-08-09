@@ -84,7 +84,7 @@ functions:
     handler: src/monitorCloudFormationStack.index
     environment:
       DEFAULT_DYNAMODB_TABLE: ${self:custom.DYNAMO_DB_TABLE}
-      DEFAULT_EXPIRATION_PERIOD: "7 * 24 * 60 * 60"
+      DEFAULT_EXPIRATION_PERIOD: 604800 # seconds
 
   deleteCloudFormationStack:
     handler: src/deleteCloudFormationStack.index
