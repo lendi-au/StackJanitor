@@ -63,6 +63,8 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
 
   const expirationTime = getExirationTime(event.detail.eventTime);
 
+  console.log(expirationTime);
+
   if (event.detail.eventName === RequestType.CREATE) {
     const inputParams = {
       TableName: tableName,
@@ -74,7 +76,7 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
           S: event.detail.responseElements.stackId
         },
         expirationTime: {
-          S: `${expirationTime}`
+          N: "" + expirationTime
         }
       }
     };

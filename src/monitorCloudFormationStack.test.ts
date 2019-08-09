@@ -19,6 +19,7 @@ describe("monitorCloudFormationStack:index", () => {
       id: "8883c8f7-c987-7ab0-5a50-ab4ef26d26e9",
       detail: {
         eventName: "UpdateStack",
+        eventTime: "2019-08-09T00:44:55Z",
         userIdentity: {
           type: "AssumedRole",
           sessionContext: {
