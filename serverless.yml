@@ -9,6 +9,7 @@ plugins:
 
 custom:
   DYNAMO_DB_TABLE: stackJanitorTable
+  DEFAULT_EXPIRATION_PERIOD: 604800 #seconds
 
 provider:
   name: aws
@@ -84,7 +85,7 @@ functions:
     handler: src/monitorCloudFormationStack.index
     environment:
       DEFAULT_DYNAMODB_TABLE: ${self:custom.DYNAMO_DB_TABLE}
-      DEFAULT_EXPIRATION_PERIOD: 604800 # seconds
+      DEFAULT_EXPIRATION_PERIOD: ${self:custom.DEFAULT_EXPIRATION_PERIOD}
 
   deleteCloudFormationStack:
     handler: src/deleteCloudFormationStack.index
