@@ -26,7 +26,11 @@ export const index = async (event: DynamoDBStreamEvent) => {
     if (StackName === "CloudJanitorTest") {
       logger(params);
       try {
-        await cloudFormation.deleteStack(params);
+        await cloudFormation.deleteStack(params, (err, data) => {
+          logger("getting called");
+          if (err) return logger(err);
+          logger(data);
+        });
       } catch (e) {
         logger(e);
       }

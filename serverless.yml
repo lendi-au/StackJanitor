@@ -11,10 +11,13 @@ custom:
   DYNAMO_DB_TABLE: stackJanitorTable
   DEFAULT_EXPIRATION_PERIOD: 604800 #seconds
 
+package:
+  - lib/**
+
 provider:
   name: aws
   runtime: nodejs10.x
-  memorySize: 256
+  memorySize: 128
   stage: ${opt:stage, 'dev'}
   region: ap-southeast-2
   iamRoleStatements:
@@ -32,7 +35,7 @@ provider:
       Action:
         - "cloudformation:DescribeStack*"
         - "cloudformation:DeleteStack"
-      Resource: "arn:aws:cloudformation:*:*:*"
+      Resource: "*"
     - Effect: "Allow"
       Action:
         - "ec2:*"
