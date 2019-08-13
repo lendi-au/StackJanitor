@@ -16,7 +16,6 @@ export const getStackNamesFromStreamEvent = (
   );
 
 export const index = async (event: DynamoDBStreamEvent) => {
-  logger(event);
   getStackNamesFromStreamEvent(event).map(async StackName => {
     const params = {
       StackName
@@ -24,10 +23,8 @@ export const index = async (event: DynamoDBStreamEvent) => {
 
     // TODO: Delete CloudJanitorTest only for the time being
     if (StackName === "CloudJanitorTest") {
-      logger(params);
       try {
         await cloudFormation.deleteStack(params, (err, data) => {
-          logger("getting called");
           if (err) return logger(err);
           logger(data);
         });

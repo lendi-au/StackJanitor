@@ -1,11 +1,11 @@
-import { getExirationTime, index } from "./monitorCloudFormationStack";
+import { getExpirationTime, index } from "./monitorCloudFormationStack";
 
-describe("monitorCloudFormationStack:getExirationTime", () => {
-  test("getExirationTime should return correct expired EPOCH", () => {
+describe("monitorCloudFormationStack:getExpirationTime", () => {
+  test("getExpirationTime should return correct expired EPOCH", () => {
     const eventTime = "2019-08-09T01:35:55Z";
     const expectedExpirationEpoch = 1565919355;
 
-    expect(getExirationTime(eventTime)).toEqual(expectedExpirationEpoch);
+    expect(getExpirationTime(eventTime)).toEqual(expectedExpirationEpoch);
   });
 });
 

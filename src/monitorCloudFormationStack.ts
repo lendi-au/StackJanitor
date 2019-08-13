@@ -53,7 +53,7 @@ export const deleteItem = (
   }
 };
 
-export const getExirationTime = (eventTime: string): number =>
+export const getExpirationTime = (eventTime: string): number =>
   new Date(eventTime).getTime() / 1000 +
   Number(config.DEFAULT_EXPIRATION_PERIOD);
 
@@ -61,12 +61,10 @@ export const index = async (
   stackJanitorStatus: StackJanitorStatus,
   _context: Context
 ) => {
-  logger(stackJanitorStatus);
-  logger(_context);
   const tableName = config.DEFAULT_DYNAMODB_TABLE;
   const { event } = stackJanitorStatus;
 
-  const expirationTime = getExirationTime(event.detail.eventTime);
+  const expirationTime = getExpirationTime(event.detail.eventTime);
 
   if (event.detail.eventName === RequestType.CREATE) {
     const inputParams = {
