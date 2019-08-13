@@ -11,9 +11,6 @@ custom:
   DYNAMO_DB_TABLE: stackJanitorTable
   DEFAULT_EXPIRATION_PERIOD: 604800 #seconds
 
-package:
-  - lib/**
-
 provider:
   name: aws
   runtime: nodejs10.x
