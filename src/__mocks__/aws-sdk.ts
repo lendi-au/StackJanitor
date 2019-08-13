@@ -51,7 +51,6 @@ class DynamoDB {
     };
   }
 }
-
 aws.CloudFormation = CloudFormation;
 aws.DynamoDB = DynamoDB;
 
