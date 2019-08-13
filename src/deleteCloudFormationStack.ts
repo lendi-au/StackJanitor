@@ -15,22 +15,26 @@ export const getStackNamesFromStreamEvent = (
     record => record.dynamodb.Keys.stackName.S
   );
 
+export const deleteStack = async params => {
+  try {
+    await cloudFormation.deleteStack(params).promise();
+    return true;
+  } catch (e) {
+    logger(e);
+    return false;
+  }
+};
+
 export const index = async (event: DynamoDBStreamEvent) => {
-  getStackNamesFromStreamEvent(event).map(async StackName => {
+  let deleteResult: boolean = false;
+  const StackNames = await getStackNamesFromStreamEvent(event);
+
+  for (let StackName of StackNames) {
     const params = {
       StackName
     };
+    deleteResult = await deleteStack(params);
+  }
 
-    // TODO: Delete CloudJanitorTest only for the time being
-    if (StackName === "CloudJanitorTest") {
-      try {
-        await cloudFormation.deleteStack(params, (err, data) => {
-          if (err) return logger(err);
-          logger(data);
-        });
-      } catch (e) {
-        logger(e);
-      }
-    }
-  });
+  return deleteResult;
 };

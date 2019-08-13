@@ -31,7 +31,7 @@ provider:
     - Effect: "Allow"
       Action:
         - "cloudformation:DescribeStack*"
-        - "cloudformation:DeleteStack"
+        - "cloudformation:DeleteStack*"
       Resource: "*"
     - Effect: "Allow"
       Action:
