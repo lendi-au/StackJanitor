@@ -5,7 +5,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "sourceMap": false,
-    "target": "es5",
+    "target": "es6",
     "outDir": "lib",
     "allowSyntheticDefaultImports": true,
     "types": ["jest", "node"]

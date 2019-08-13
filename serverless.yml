@@ -15,7 +15,7 @@ provider:
   name: aws
   runtime: nodejs10.x
   memorySize: 128
-  stage: ${opt:stage, 'dev'}
+  stage: ${opt:stage, 'development'}
   region: ap-southeast-2
   iamRoleStatements:
     - Effect: "Allow"
