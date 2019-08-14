@@ -1,6 +1,10 @@
 import config from "./config";
 import { DynamoDB } from "aws-sdk";
-import { StackJanitorStatus } from "stackjanitor";
+import {
+  CloudFormationEvent,
+  DynamoDBLog,
+  StackJanitorStatus
+} from "stackjanitor";
 import { logger } from "./helpers";
 import {
   DeleteItemInput,
@@ -13,6 +17,7 @@ import {
 import { Context } from "aws-lambda";
 
 const documentClient = new DynamoDB();
+const tableName = config.DEFAULT_DYNAMODB_TABLE;
 
 export enum RequestType {
   CREATE = "CreateStack",
@@ -25,49 +30,10 @@ export enum Response {
   IGNORE = "ignore"
 }
 
-export const putItem = (params: PutItemInput): Promise<PutItemOutput> => {
+export const putItem = (dynamoDBLog: DynamoDBLog): Promise<PutItemOutput> => {
+  const { event, expirationTime } = dynamoDBLog;
   try {
-    return documentClient.putItem(params).promise();
-  } catch (e) {
-    logger(e);
-  }
-};
-
-export const updateItem = (
-  params: UpdateItemInput
-): Promise<UpdateItemOutput> => {
-  try {
-    return documentClient.updateItem(params).promise();
-  } catch (e) {
-    logger(e);
-  }
-};
-
-export const deleteItem = (
-  params: DeleteItemInput
-): Promise<DeleteItemOutput> => {
-  try {
-    return documentClient.deleteItem(params).promise();
-  } catch (e) {
-    logger(e);
-  }
-};
-
-export const getExpirationTime = (eventTime: string): number =>
-  new Date(eventTime).getTime() / 1000 +
-  Number(config.DEFAULT_EXPIRATION_PERIOD);
-
-export const index = async (
-  stackJanitorStatus: StackJanitorStatus,
-  _context: Context
-) => {
-  const tableName = config.DEFAULT_DYNAMODB_TABLE;
-  const { event } = stackJanitorStatus;
-
-  const expirationTime = getExpirationTime(event.detail.eventTime);
-
-  if (event.detail.eventName === RequestType.CREATE) {
-    const inputParams = {
+    const inputParams: PutItemInput = {
       TableName: tableName,
       Item: {
         stackName: {
@@ -81,15 +47,19 @@ export const index = async (
         }
       }
     };
-    try {
-      await putItem(inputParams);
-      return Response.SUCCESS;
-    } catch (e) {
-      logger(e);
-    }
+    return documentClient.putItem(inputParams).promise();
+  } catch (e) {
+    logger(e);
   }
-  if (event.detail.eventName === RequestType.UPDATE) {
-    const updateParams = {
+};
+
+export const updateItem = (
+  dynamoDBLog: DynamoDBLog
+): Promise<UpdateItemOutput> => {
+  const { event, expirationTime } = dynamoDBLog;
+
+  try {
+    const updateParams: UpdateItemInput = {
       ExpressionAttributeNames: {
         "#ET": "expirationTime"
       },
@@ -110,17 +80,17 @@ export const index = async (
       TableName: tableName,
       UpdateExpression: "SET #ET = :e"
     };
-
-    try {
-      await updateItem(updateParams);
-      return Response.SUCCESS;
-    } catch (e) {
-      logger(e);
-    }
+    return documentClient.updateItem(updateParams).promise();
+  } catch (e) {
+    logger(e);
   }
+};
 
-  if (event.detail.eventName === RequestType.DELETE) {
-    const deleteParams = {
+export const deleteItem = (
+  event: CloudFormationEvent
+): Promise<DeleteItemOutput> => {
+  try {
+    const deleteParams: DeleteItemInput = {
       Key: {
         stackName: {
           S: event.detail.requestParameters.stackName.split("/")[1]
@@ -131,8 +101,43 @@ export const index = async (
       },
       TableName: tableName
     };
+    return documentClient.deleteItem(deleteParams).promise();
+  } catch (e) {
+    logger(e);
+  }
+};
+
+export const getExpirationTime = (eventTime: string): number =>
+  new Date(eventTime).getTime() / 1000 +
+  Number(config.DEFAULT_EXPIRATION_PERIOD);
+
+export const index = async (
+  stackJanitorStatus: StackJanitorStatus,
+  _context: Context
+) => {
+  const { event } = stackJanitorStatus;
+  const expirationTime = getExpirationTime(event.detail.eventTime);
+
+  if (event.detail.eventName === RequestType.CREATE) {
     try {
-      await deleteItem(deleteParams);
+      await putItem({ event, expirationTime });
+      return Response.SUCCESS;
+    } catch (e) {
+      logger(e);
+    }
+  }
+  if (event.detail.eventName === RequestType.UPDATE) {
+    try {
+      await updateItem({ event, expirationTime });
+      return Response.SUCCESS;
+    } catch (e) {
+      logger(e);
+    }
+  }
+
+  if (event.detail.eventName === RequestType.DELETE) {
+    try {
+      await deleteItem(event);
     } catch (e) {
       logger(e);
     }

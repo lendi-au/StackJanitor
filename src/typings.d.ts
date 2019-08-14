@@ -1,4 +1,5 @@
 declare module "stackjanitor" {
+  import { int } from "aws-sdk/clients/datapipeline";
   export type parameterValue = "Environment";
   export type EventName = "UpdateStack" | "CreateStack" | "DeleteStack";
 
@@ -12,6 +13,11 @@ declare module "stackjanitor" {
     results: {
       stackjanitor: string;
     };
+  }
+
+  export interface DynamoDBLog {
+    event: CloudFormationEvent;
+    expirationTime: number;
   }
 
   export interface CloudFormationEvent {
