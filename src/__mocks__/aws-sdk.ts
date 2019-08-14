@@ -29,25 +29,19 @@ class DynamoDB {
   constructor() {}
   putItem() {
     return {
-      promise: () => {
-        return true;
-      }
+      promise: () => true
     };
   }
 
   updateItem() {
     return {
-      promise: () => {
-        return true;
-      }
+      promise: () => true
     };
   }
 
   deleteItem() {
     return {
-      promise: () => {
-        return true;
-      }
+      promise: () => true
     };
   }
 }
