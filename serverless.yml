@@ -1,5 +1,5 @@
 service:
-  name: StackJanitorV1
+  name: StackJanitor
 
 # Add the serverless-webpack plugin
 plugins:
@@ -9,10 +9,13 @@ plugins:
 
 custom:
   DYNAMO_DB_TABLE: stackJanitorTable
+  DEFAULT_EXPIRATION_PERIOD: 604800 #seconds
 
 provider:
   name: aws
   runtime: nodejs10.x
+  memorySize: 128
+  stage: ${opt:stage, 'development'}
   region: ap-southeast-2
   iamRoleStatements:
     - Effect: "Allow"
@@ -28,8 +31,8 @@ provider:
     - Effect: "Allow"
       Action:
         - "cloudformation:DescribeStack*"
-        - "cloudformation:DeleteStack"
-      Resource: "arn:aws:cloudformation:*:*:*"
+        - "cloudformation:DeleteStack*"
+      Resource: "*"
     - Effect: "Allow"
       Action:
         - "ec2:*"
@@ -69,9 +72,7 @@ resources:
           AttributeName: expirationTime
           Enabled: true
 
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        BillingMode: PAY_PER_REQUEST
 
         StreamSpecification:
           StreamViewType: NEW_IMAGE
@@ -84,14 +85,15 @@ functions:
     handler: src/monitorCloudFormationStack.index
     environment:
       DEFAULT_DYNAMODB_TABLE: ${self:custom.DYNAMO_DB_TABLE}
-      DEFAULT_EXPIRATION_PERIOD: "7 * 24 * 60 * 60"
+      DEFAULT_EXPIRATION_PERIOD: ${self:custom.DEFAULT_EXPIRATION_PERIOD}
 
   deleteCloudFormationStack:
     handler: src/deleteCloudFormationStack.index
     events:
       - stream:
           type: dynamodb
-          arn: !Sub "${stackJanitorTable.StreamArn"
+          arn:
+            Fn::GetAtt: [stackJanitorTable, StreamArn]
 
 stepFunctions:
   stateMachines:
