@@ -2,7 +2,7 @@ import config from "./config";
 import { DynamoDB } from "aws-sdk";
 import {
   CloudFormationEvent,
-  DynamoDBLog,
+  DynamoDbLog,
   StackJanitorStatus
 } from "stackjanitor";
 import { logger } from "./helpers";
@@ -30,7 +30,7 @@ export enum Response {
   IGNORE = "ignore"
 }
 
-export const putItem = (dynamoDBLog: DynamoDBLog): Promise<PutItemOutput> => {
+export const putItem = (dynamoDBLog: DynamoDbLog): Promise<PutItemOutput> => {
   const { event, expirationTime } = dynamoDBLog;
   try {
     const inputParams: PutItemInput = {
@@ -54,7 +54,7 @@ export const putItem = (dynamoDBLog: DynamoDBLog): Promise<PutItemOutput> => {
 };
 
 export const updateItem = (
-  dynamoDBLog: DynamoDBLog
+  dynamoDBLog: DynamoDbLog
 ): Promise<UpdateItemOutput> => {
   const { event, expirationTime } = dynamoDBLog;
 
