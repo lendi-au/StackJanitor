@@ -30,25 +30,19 @@ const DynamoDB = {
     constructor() {}
     put() {
       return {
-        promise: () => {
-          return true;
-        }
+        promise: () => true
       };
     }
 
     update() {
       return {
-        promise: () => {
-          return true;
-        }
+        promise: () => true
       };
     }
 
     delete() {
       return {
-        promise: () => {
-          return true;
-        }
+        promise: () => true
       };
     }
   }
