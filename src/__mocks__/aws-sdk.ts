@@ -25,29 +25,32 @@ class CloudFormation {
   }
 }
 
-const DynamoDB = {
-  DocumentClient: class {
-    constructor() {}
-    put() {
-      return {
-        promise: () => true
-      };
-    }
-
-    update() {
-      return {
-        promise: () => true
-      };
-    }
-
-    delete() {
-      return {
-        promise: () => true
-      };
-    }
+class DynamoDB {
+  constructor() {}
+  putItem() {
+    return {
+      promise: () => {
+        return true;
+      }
+    };
   }
-};
 
+  updateItem() {
+    return {
+      promise: () => {
+        return true;
+      }
+    };
+  }
+
+  deleteItem() {
+    return {
+      promise: () => {
+        return true;
+      }
+    };
+  }
+}
 aws.CloudFormation = CloudFormation;
 aws.DynamoDB = DynamoDB;
 
