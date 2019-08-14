@@ -6,7 +6,7 @@ StackJanitor will monitor deployed development AWS CloudFormation Stacks and eli
 
 ## How it works
 
-![StackJanitor Architecture](https://github.com/lendi-au/StackJanitor/blob/PLAT-111-documentation-guides/StackJanitor.png "StackJanitor Architecture")
+![StackJanitor Architecture](https://github.com/lendi-au/StackJanitor/blob/PLAT-111-documentation-guides/StackJanitor.png =640x "StackJanitor Architecture")
 
 CloudFormation stack creation event will produce a CloudTrail log which will trigger a step function/lambda to set a TTL for fresh stacks in a DynamoDB table.
 CloudTrail logs from any update stack events concerning that development stack will reinvoke the Lambda function to refresh the TTL.
