@@ -24,6 +24,7 @@ However, If stack resources remain unused for certain period of time, TTL expira
    Follow [this guide](https://serverless.com/framework/docs/providers/aws/guide/credentials/) to setup AWS credentials for serverless.
 
 5. Deploy StackJanitor by running `sls deploy`
+6. Put a tag in CloudFormation stack `stackjanitor = "enabled"` to enable monitoring.
 
 ## Configuration
 
