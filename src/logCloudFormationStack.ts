@@ -2,7 +2,7 @@ import { CloudFormation } from "aws-sdk";
 import { Context } from "aws-lambda";
 import { CloudFormationEvent, StackJanitorStatus } from "stackjanitor";
 import { logger } from "./helpers";
-import { Stack, Tag } from "aws-sdk/clients/cloudformation";
+import { Stack, StackName, Tag } from "aws-sdk/clients/cloudformation";
 import { deleteItem, RequestType } from "./monitorCloudFormationStack";
 
 const cloudFormation = new CloudFormation();
@@ -25,7 +25,7 @@ export const getStackJanitorStatus = (tags: Tag[]): string => {
   return tag ? tag.Value : StackTag.DISABLED;
 };
 
-export const describeStacks = async StackName => {
+export const describeStacks = async (StackName: StackName) => {
   const { Stacks } = await cloudFormation
     .describeStacks({
       StackName
@@ -34,7 +34,7 @@ export const describeStacks = async StackName => {
   return Stacks;
 };
 
-export const checkStackJanitorStatus = async StackName => {
+export const checkStackJanitorStatus = async (StackName: StackName) => {
   const Stacks = await describeStacks(StackName);
   const tags = getTagsFromStacks(Stacks);
   return getStackJanitorStatus(tags);

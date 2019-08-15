@@ -2,6 +2,7 @@ import { DynamoDBStreamEvent } from "aws-lambda";
 import { CloudFormation } from "aws-sdk";
 import { logger } from "./helpers";
 import { checkStackJanitorStatus, StackTag } from "./logCloudFormationStack";
+import { DeleteStackInput } from "aws-sdk/clients/cloudformation";
 
 const cloudFormation = new CloudFormation();
 
@@ -16,7 +17,7 @@ export const getStackNamesFromStreamEvent = (
     record => record.dynamodb.Keys.stackName.S
   );
 
-export const deleteStack = async params => {
+export const deleteStack = async (params: DeleteStackInput) => {
   try {
     await cloudFormation.deleteStack(params).promise();
     return true;
