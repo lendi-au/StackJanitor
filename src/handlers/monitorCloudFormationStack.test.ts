@@ -4,7 +4,7 @@ import {
   index,
   putItem,
   updateItem
-} from "../monitorCloudFormationStack";
+} from "./monitorCloudFormationStack";
 
 describe("monitorCloudFormationStack:getExpirationTime", () => {
   test("getExpirationTime should return correct expired EPOCH", () => {
