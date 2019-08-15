@@ -10,7 +10,8 @@ const cloudFormation = new CloudFormation();
 
 export const getTagsFromStacks = (stacks: Stack[]): Tag[] =>
   stacks
-    .map(stackInfo => stackInfo.Tags)
+    .filter(stackInfo => Array.isArray(stackInfo.Tags))
+    .map(stackInfo => stackInfo.Tags!)
     .reduce((currentTag, accumulatedTags) =>
       accumulatedTags.concat(currentTag)
     );
@@ -18,7 +19,7 @@ export const getTagsFromStacks = (stacks: Stack[]): Tag[] =>
 export const getStackJanitorStatus = (tags: Tag[]): StackStatus => {
   const tag = tags.find(tag => tag.Key === TagName);
 
-  if (tag.Value === StackStatus.Enabled) {
+  if (tag && tag.Value === StackStatus.Enabled) {
     return StackStatus.Enabled;
   } else {
     return StackStatus.Disabled;
@@ -37,8 +38,8 @@ export const describeStacks = async (StackName: StackName) => {
 export const checkStackJanitorStatus = async (
   StackName: StackName
 ): Promise<StackStatus> => {
-  const Stacks = await describeStacks(StackName);
-  const tags = getTagsFromStacks(Stacks);
+  const stacks = await describeStacks(StackName);
+  const tags = getTagsFromStacks(stacks);
   return getStackJanitorStatus(tags);
 };
 

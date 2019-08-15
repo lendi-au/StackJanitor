@@ -31,20 +31,16 @@ export enum MonitoringResultStatus {
 
 export const putItem = (dynamoDBLog: DynamoDbLog): Promise<PutItemOutput> => {
   const { event, expirationTime } = dynamoDBLog;
-  try {
-    return documentClient
-      .put({
-        TableName: tableName,
-        Item: {
-          stackName: event.detail.requestParameters.stackName,
-          stackId: event.detail.responseElements.stackId,
-          expirationTime: expirationTime
-        }
-      })
-      .promise();
-  } catch (e) {
-    logger.error(e);
-  }
+  return documentClient
+    .put({
+      TableName: tableName,
+      Item: {
+        stackName: event.detail.requestParameters.stackName,
+        stackId: event.detail.responseElements.stackId,
+        expirationTime: expirationTime
+      }
+    })
+    .promise();
 };
 
 export const updateItem = (
@@ -52,61 +48,53 @@ export const updateItem = (
 ): Promise<UpdateItemOutput> => {
   const { event, expirationTime } = dynamoDBLog;
 
-  try {
-    const updateParams: UpdateItemInput = {
-      ExpressionAttributeNames: {
-        "#ET": "expirationTime"
+  const updateParams: UpdateItemInput = {
+    ExpressionAttributeNames: {
+      "#ET": "expirationTime"
+    },
+    ExpressionAttributeValues: {
+      ":e": {
+        N: "" + expirationTime
+      }
+    },
+    Key: {
+      stackName: {
+        S: event.detail.requestParameters.stackName
       },
-      ExpressionAttributeValues: {
-        ":e": {
-          N: "" + expirationTime
-        }
-      },
-      Key: {
-        stackName: {
-          S: event.detail.requestParameters.stackName
-        },
-        stackId: {
-          S: event.detail.responseElements.stackId
-        }
-      },
-      ReturnValues: "ALL_NEW",
-      TableName: tableName,
-      UpdateExpression: "SET #ET = :e"
-    };
-    return dynamoDb.updateItem(updateParams).promise();
-  } catch (e) {
-    logger.error(e);
-  }
+      stackId: {
+        S: event.detail.responseElements.stackId
+      }
+    },
+    ReturnValues: "ALL_NEW",
+    TableName: tableName,
+    UpdateExpression: "SET #ET = :e"
+  };
+  return dynamoDb.updateItem(updateParams).promise();
 };
 
 export const deleteItem = (
   event: CloudFormationEvent
 ): Promise<DeleteItemOutput> => {
-  try {
-    let stackName: string;
-    let stackId: string;
+  let stackName: string;
+  let stackId: string;
 
-    if (event.detail.eventName === RequestType.Delete) {
-      stackName = event.detail.requestParameters.stackName.split("/")[1];
-      stackId = event.detail.requestParameters.stackName;
-    } else {
-      stackName = event.detail.requestParameters.stackName;
-      stackId = event.detail.responseElements.stackId;
-    }
-
-    return documentClient
-      .delete({
-        TableName: tableName,
-        Key: {
-          stackName,
-          stackId
-        }
-      })
-      .promise();
-  } catch (e) {
-    logger.error(e);
+  if (event.detail.eventName === RequestType.Delete) {
+    stackName = event.detail.requestParameters.stackName.split("/")[1];
+    stackId = event.detail.requestParameters.stackName;
+  } else {
+    stackName = event.detail.requestParameters.stackName;
+    stackId = event.detail.responseElements.stackId;
   }
+
+  return documentClient
+    .delete({
+      TableName: tableName,
+      Key: {
+        stackName,
+        stackId
+      }
+    })
+    .promise();
 };
 
 export const getExpirationTime = (eventTime: string): number =>

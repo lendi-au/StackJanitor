@@ -11,9 +11,14 @@ export const index = async (event: DynamoDBStreamEvent): Promise<void> => {
     record => record.eventName === "REMOVE"
   );
 
-  const items = removeRecords.map(i =>
-    DynamoDB.Converter.unmarshall(i.dynamodb.NewImage)
-  );
+  const items = removeRecords.map(i => {
+    if (i.dynamodb && i.dynamodb.NewImage) {
+      const image = i.dynamodb.NewImage;
+      return DynamoDB.Converter.unmarshall(image);
+    } else {
+      return {};
+    }
+  });
   const stackNames = items.map(i => i.stackName);
 
   for (let stackName of stackNames) {
