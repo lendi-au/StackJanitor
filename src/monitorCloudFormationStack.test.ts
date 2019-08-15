@@ -1,74 +1,10 @@
 import {
   deleteItem,
-  generateDeleteParams,
   getExpirationTime,
   index,
   putItem,
   updateItem
 } from "./monitorCloudFormationStack";
-import config from "./config";
-
-describe("monitorCloudFormationStack:generateDeleteParams", () => {
-  test("generateDeleteParams should return correct deleteParams for delete eventType", () => {
-    const event = {
-      detail: {
-        userIdentity: {
-          userName: "jordan.simonovski"
-        },
-        eventTime: "2019-07-21T22:41:21Z",
-        eventName: "DeleteStack",
-        requestParameters: {
-          stackName:
-            "arn:aws:cloudformation:ap-southeast-2:291089888569:stack/lendi-datadog-log-archive-management/16921510-a9e8-11e9-a24e-02d286d7265a"
-        },
-        responseElements: null
-      }
-    };
-    expect(generateDeleteParams(event)).toStrictEqual({
-      Key: {
-        stackName: {
-          S: "lendi-datadog-log-archive-management"
-        },
-        stackId: {
-          S:
-            "arn:aws:cloudformation:ap-southeast-2:291089888569:stack/lendi-datadog-log-archive-management/16921510-a9e8-11e9-a24e-02d286d7265a"
-        }
-      },
-      TableName: config.DEFAULT_DYNAMODB_TABLE
-    });
-  });
-
-  test("generateDeleteParams should return correct deleteParams for update eventType", () => {
-    const event = {
-      detail: {
-        userIdentity: {
-          userName: "jordan.simonovski"
-        },
-        eventTime: "2019-07-21T22:41:21Z",
-        eventName: "UpdateStack",
-        requestParameters: {
-          stackName: "product-api-latest-development"
-        },
-        responseElements: {
-          stackId:
-            "arn:aws:cloudformation:ap-southeast-2:702880128631:stack/product-api-latest-development/8c0e2370-b9a5-11e9-abf5-02afb887c468"
-        }
-      }
-    };
-    expect(generateDeleteParams(event)).toStrictEqual({
-      Key: {
-        stackName: {
-          S: "product-api-latest-development"
-        },
-        stackId: {
-          S:
-            "arn:aws:cloudformation:ap-southeast-2:702880128631:stack/product-api-latest-development/8c0e2370-b9a5-11e9-abf5-02afb887c468"
-        }
-      },
-      TableName: config.DEFAULT_DYNAMODB_TABLE
-    });
-  });
-});
 
 describe("monitorCloudFormationStack:getExpirationTime", () => {
   test("getExpirationTime should return correct expired EPOCH", () => {

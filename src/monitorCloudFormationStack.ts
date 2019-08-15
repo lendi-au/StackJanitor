@@ -7,16 +7,15 @@ import {
 } from "stackjanitor";
 import { logger } from "./logger";
 import {
-  DeleteItemInput,
   DeleteItemOutput,
-  PutItemInput,
   PutItemOutput,
   UpdateItemInput,
   UpdateItemOutput
 } from "aws-sdk/clients/dynamodb";
 import { Context } from "aws-lambda";
 
-const documentClient = new DynamoDB();
+const dynamoDb = new DynamoDB();
+const documentClient = new DynamoDB.DocumentClient();
 const tableName = config.DEFAULT_DYNAMODB_TABLE;
 
 export enum RequestType {
@@ -33,21 +32,16 @@ export enum Response {
 export const putItem = (dynamoDBLog: DynamoDbLog): Promise<PutItemOutput> => {
   const { event, expirationTime } = dynamoDBLog;
   try {
-    const inputParams: PutItemInput = {
-      TableName: tableName,
-      Item: {
-        stackName: {
-          S: event.detail.requestParameters.stackName
-        },
-        stackId: {
-          S: event.detail.responseElements.stackId
-        },
-        expirationTime: {
-          N: "" + expirationTime
+    return documentClient
+      .put({
+        TableName: tableName,
+        Item: {
+          stackName: event.detail.requestParameters.stackName,
+          stackId: event.detail.responseElements.stackId,
+          expirationTime: expirationTime
         }
-      }
-    };
-    return documentClient.putItem(inputParams).promise();
+      })
+      .promise();
   } catch (e) {
     logger.error(e);
   }
@@ -80,43 +74,36 @@ export const updateItem = (
       TableName: tableName,
       UpdateExpression: "SET #ET = :e"
     };
-    return documentClient.updateItem(updateParams).promise();
+    return dynamoDb.updateItem(updateParams).promise();
   } catch (e) {
     logger.error(e);
   }
-};
-
-export const generateDeleteParams = (event: CloudFormationEvent) => {
-  let stackName: string;
-  let stackId: string;
-
-  if (event.detail.eventName === RequestType.DELETE) {
-    stackName = event.detail.requestParameters.stackName.split("/")[1];
-    stackId = event.detail.requestParameters.stackName;
-  } else {
-    stackName = event.detail.requestParameters.stackName;
-    stackId = event.detail.responseElements.stackId;
-  }
-
-  return {
-    Key: {
-      stackName: {
-        S: stackName
-      },
-      stackId: {
-        S: stackId
-      }
-    },
-    TableName: tableName
-  };
 };
 
 export const deleteItem = (
   event: CloudFormationEvent
 ): Promise<DeleteItemOutput> => {
   try {
-    const deleteParams: DeleteItemInput = generateDeleteParams(event);
-    return documentClient.deleteItem(deleteParams).promise();
+    let stackName: string;
+    let stackId: string;
+
+    if (event.detail.eventName === RequestType.DELETE) {
+      stackName = event.detail.requestParameters.stackName.split("/")[1];
+      stackId = event.detail.requestParameters.stackName;
+    } else {
+      stackName = event.detail.requestParameters.stackName;
+      stackId = event.detail.responseElements.stackId;
+    }
+
+    return documentClient
+      .delete({
+        TableName: tableName,
+        Key: {
+          stackName,
+          stackId
+        }
+      })
+      .promise();
   } catch (e) {
     logger.error(e);
   }
@@ -129,7 +116,7 @@ export const getExpirationTime = (eventTime: string): number =>
 export const index = async (
   stackJanitorStatus: StackJanitorStatus,
   _context: Context
-) => {
+): Promise<Response> => {
   const { event } = stackJanitorStatus;
   const expirationTime = getExpirationTime(event.detail.eventTime);
 
