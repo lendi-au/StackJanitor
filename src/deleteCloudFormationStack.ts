@@ -1,6 +1,7 @@
 import { DynamoDBStreamEvent } from "aws-lambda";
 import { CloudFormation } from "aws-sdk";
 import { logger } from "./helpers";
+import { checkStackJanitorStatus, StackTag } from "./logCloudFormationStack";
 
 const cloudFormation = new CloudFormation();
 
@@ -30,10 +31,10 @@ export const index = async (event: DynamoDBStreamEvent) => {
   const StackNames = await getStackNamesFromStreamEvent(event);
 
   for (let StackName of StackNames) {
-    const params = {
-      StackName
-    };
-    deleteResult = await deleteStack(params);
+    const status = await checkStackJanitorStatus(StackName);
+    if (status === StackTag.ENABLED) {
+      deleteResult = await deleteStack({ StackName });
+    }
   }
 
   return deleteResult;
