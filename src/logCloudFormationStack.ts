@@ -22,7 +22,7 @@ export const getTagsFromStacks = (stacks: Stack[]): Tag[] =>
 
 export const getStackJanitorStatus = (tags: Tag[]): string => {
   const tag = tags.find(tag => tag.Key === StackTag.TAG);
-  return tag ? tag.Value : "disabled";
+  return tag ? tag.Value : StackTag.DISABLED;
 };
 
 export const describeStacks = async StackName => {
