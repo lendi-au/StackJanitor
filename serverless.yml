@@ -79,16 +79,16 @@ resources:
 
 functions:
   logCloudFormationStack:
-    handler: src/logCloudFormationStack.index
+    handler: src/handlers/logCloudFormationStack.index
 
   monitorCloudFormationStack:
-    handler: src/monitorCloudFormationStack.index
+    handler: src/handlers/monitorCloudFormationStack.index
     environment:
       DEFAULT_DYNAMODB_TABLE: ${self:custom.DYNAMO_DB_TABLE}
       DEFAULT_EXPIRATION_PERIOD: ${self:custom.DEFAULT_EXPIRATION_PERIOD}
 
   deleteCloudFormationStack:
-    handler: src/deleteCloudFormationStack.index
+    handler: src/handlers/deleteCloudFormationStack.index
     events:
       - stream:
           type: dynamodb
