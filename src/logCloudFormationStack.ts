@@ -3,6 +3,7 @@ import { Context } from "aws-lambda";
 import { CloudFormationEvent, StackJanitorStatus } from "stackjanitor";
 import { logger } from "./helpers";
 import { Stack, Tag } from "aws-sdk/clients/cloudformation";
+import { deleteItem, RequestType } from "./monitorCloudFormationStack";
 
 const cloudFormation = new CloudFormation();
 
@@ -41,6 +42,10 @@ export const index = async (
     Status = getStackJanitorStatus(tags);
   } catch (e) {
     logger(e);
+  }
+
+  if (event.detail.eventName === RequestType.UPDATE && Status === "disabled") {
+    await deleteItem(event);
   }
 
   return {
