@@ -57,7 +57,7 @@ export const index = async (
   }
 
   if (
-    event.detail.eventName === RequestType.UPDATE &&
+    event.detail.eventName === RequestType.Update &&
     status !== StackStatus.Enabled
   ) {
     await deleteItem(event);

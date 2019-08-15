@@ -2,7 +2,7 @@ import { DynamoDBStreamEvent } from "aws-lambda";
 import { CloudFormation, DynamoDB } from "aws-sdk";
 import { logger } from "../logger";
 import { checkStackJanitorStatus } from "./logCloudFormationStack";
-import { StackTagValue } from "../StackTag";
+import { StackStatus } from "../StackStatusTag";
 
 const cloudFormation = new CloudFormation();
 
@@ -18,7 +18,7 @@ export const index = async (event: DynamoDBStreamEvent): Promise<void> => {
 
   for (let stackName of stackNames) {
     const status = await checkStackJanitorStatus(stackName);
-    if (status === StackTagValue.ENABLED) {
+    if (status === StackStatus.Enabled) {
       try {
         await cloudFormation.deleteStack({ StackName: stackName }).promise();
       } catch (e) {
