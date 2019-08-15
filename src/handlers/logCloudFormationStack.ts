@@ -1,17 +1,12 @@
 import { CloudFormation } from "aws-sdk";
 import { Context } from "aws-lambda";
 import { CloudFormationEvent, StackJanitorStatus } from "stackjanitor";
-import { logger } from "./logger";
+import { logger } from "../logger";
 import { Stack, StackName, Tag } from "aws-sdk/clients/cloudformation";
 import { deleteItem, RequestType } from "./monitorCloudFormationStack";
+import { StackStatus, TagName } from "../StackStatusTag";
 
 const cloudFormation = new CloudFormation();
-
-export enum StackTag {
-  TAG = "stackjanitor",
-  ENABLED = "enabled",
-  DISABLED = "disabled"
-}
 
 export const getTagsFromStacks = (stacks: Stack[]): Tag[] =>
   stacks
@@ -21,8 +16,8 @@ export const getTagsFromStacks = (stacks: Stack[]): Tag[] =>
     );
 
 export const getStackJanitorStatus = (tags: Tag[]): string => {
-  const tag = tags.find(tag => tag.Key === StackTag.TAG);
-  return tag ? tag.Value : StackTag.DISABLED;
+  const tag = tags.find(tag => tag.Key === TagName);
+  return tag ? tag.Value : StackStatus.Disabled;
 };
 
 export const describeStacks = async (StackName: StackName) => {
@@ -44,7 +39,7 @@ export const index = async (
   event: CloudFormationEvent,
   _context: Context
 ): Promise<StackJanitorStatus> => {
-  let status: string = StackTag.DISABLED;
+  let status: string = StackStatus.Disabled;
 
   try {
     status = await checkStackJanitorStatus(
@@ -56,7 +51,7 @@ export const index = async (
 
   if (
     event.detail.eventName === RequestType.UPDATE &&
-    status !== StackTag.ENABLED
+    status !== StackStatus.Enabled
   ) {
     await deleteItem(event);
   }
