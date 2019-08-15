@@ -45,15 +45,32 @@ export const index = async (
   _context: Context
 ): Promise<StackJanitorStatus> => {
   let status: string = StackTag.DISABLED;
+  let tags: Tag[];
 
+  // CreateEvent has tags in event->detail->requestParameters
+  if (event.detail.eventName === RequestType.CREATE) {
+    tags = event.detail.requestParameters.tags;
+    status = getStackJanitorStatus(tags);
+    return {
+      event,
+      results: {
+        stackjanitor: status
+      }
+    };
+  }
+
+  // For all other types of Stack events tags need to fetched
   try {
-    status = await checkStackJanitorStatus(
+    const Stacks = await describeStacks(
       event.detail.requestParameters.stackName
     );
+    tags = getTagsFromStacks(Stacks);
+    status = getStackJanitorStatus(tags);
   } catch (e) {
     logger(e);
   }
 
+  // if updated stack has no or disabled stackjanitor tag remove DD row
   if (
     event.detail.eventName === RequestType.UPDATE &&
     status !== StackTag.ENABLED
@@ -63,6 +80,7 @@ export const index = async (
 
   return {
     event,
+    tags: tags,
     results: {
       stackjanitor: status
     }
