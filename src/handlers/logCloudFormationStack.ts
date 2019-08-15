@@ -15,9 +15,14 @@ export const getTagsFromStacks = (stacks: Stack[]): Tag[] =>
       accumulatedTags.concat(currentTag)
     );
 
-export const getStackJanitorStatus = (tags: Tag[]): string => {
+export const getStackJanitorStatus = (tags: Tag[]): StackStatus => {
   const tag = tags.find(tag => tag.Key === TagName);
-  return tag ? tag.Value : StackStatus.Disabled;
+
+  if (tag.Value === StackStatus.Enabled) {
+    return StackStatus.Enabled;
+  } else {
+    return StackStatus.Disabled;
+  }
 };
 
 export const describeStacks = async (StackName: StackName) => {
@@ -29,7 +34,9 @@ export const describeStacks = async (StackName: StackName) => {
   return Stacks;
 };
 
-export const checkStackJanitorStatus = async (StackName: StackName) => {
+export const checkStackJanitorStatus = async (
+  StackName: StackName
+): Promise<StackStatus> => {
   const Stacks = await describeStacks(StackName);
   const tags = getTagsFromStacks(Stacks);
   return getStackJanitorStatus(tags);
@@ -39,7 +46,7 @@ export const index = async (
   event: CloudFormationEvent,
   _context: Context
 ): Promise<StackJanitorStatus> => {
-  let status: string = StackStatus.Disabled;
+  let status: StackStatus = StackStatus.Disabled;
 
   try {
     status = await checkStackJanitorStatus(
