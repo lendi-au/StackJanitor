@@ -86,21 +86,36 @@ export const updateItem = (
   }
 };
 
+export const generateDeleteParams = (event: CloudFormationEvent) => {
+  let stackName: string;
+  let stackId: string;
+
+  if (event.detail.eventName === RequestType.DELETE) {
+    stackName = event.detail.requestParameters.stackName.split("/")[1];
+    stackId = event.detail.requestParameters.stackName;
+  } else {
+    stackName = event.detail.requestParameters.stackName;
+    stackId = event.detail.responseElements.stackId;
+  }
+
+  return {
+    Key: {
+      stackName: {
+        S: stackName
+      },
+      stackId: {
+        S: stackId
+      }
+    },
+    TableName: tableName
+  };
+};
+
 export const deleteItem = (
   event: CloudFormationEvent
 ): Promise<DeleteItemOutput> => {
   try {
-    const deleteParams: DeleteItemInput = {
-      Key: {
-        stackName: {
-          S: event.detail.requestParameters.stackName.split("/")[1]
-        },
-        stackId: {
-          S: event.detail.requestParameters.stackName
-        }
-      },
-      TableName: tableName
-    };
+    const deleteParams: DeleteItemInput = generateDeleteParams(event);
     return documentClient.deleteItem(deleteParams).promise();
   } catch (e) {
     logger(e);

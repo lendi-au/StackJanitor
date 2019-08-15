@@ -2,7 +2,8 @@ import { CloudFormation } from "aws-sdk";
 import { Context } from "aws-lambda";
 import { CloudFormationEvent, StackJanitorStatus } from "stackjanitor";
 import { logger } from "./helpers";
-import { Stack, Tag } from "aws-sdk/clients/cloudformation";
+import { Stack, StackName, Tag } from "aws-sdk/clients/cloudformation";
+import { deleteItem, RequestType } from "./monitorCloudFormationStack";
 
 const cloudFormation = new CloudFormation();
 
@@ -12,7 +13,7 @@ export enum StackTag {
   DISABLED = "disabled"
 }
 
-export const getTagsFromStacks = async (stacks: Stack[]): Promise<Tag[]> =>
+export const getTagsFromStacks = (stacks: Stack[]): Tag[] =>
   stacks
     .map(stackInfo => stackInfo.Tags)
     .reduce((currentTag, accumulatedTags) =>
@@ -21,32 +22,49 @@ export const getTagsFromStacks = async (stacks: Stack[]): Promise<Tag[]> =>
 
 export const getStackJanitorStatus = (tags: Tag[]): string => {
   const tag = tags.find(tag => tag.Key === StackTag.TAG);
-  return tag ? tag.Value : "disabled";
+  return tag ? tag.Value : StackTag.DISABLED;
+};
+
+export const describeStacks = async (StackName: StackName) => {
+  const { Stacks } = await cloudFormation
+    .describeStacks({
+      StackName
+    })
+    .promise();
+  return Stacks;
+};
+
+export const checkStackJanitorStatus = async (StackName: StackName) => {
+  const Stacks = await describeStacks(StackName);
+  const tags = getTagsFromStacks(Stacks);
+  return getStackJanitorStatus(tags);
 };
 
 export const index = async (
   event: CloudFormationEvent,
   _context: Context
 ): Promise<StackJanitorStatus> => {
-  let Status: string = StackTag.DISABLED;
+  let status: string = StackTag.DISABLED;
 
   try {
-    const params = {
-      StackName: event.detail.requestParameters.stackName
-    };
-
-    const { Stacks } = await cloudFormation.describeStacks(params).promise();
-
-    const tags = await getTagsFromStacks(Stacks);
-    Status = getStackJanitorStatus(tags);
+    status = await checkStackJanitorStatus(
+      event.detail.requestParameters.stackName
+    );
   } catch (e) {
     logger(e);
+  }
+
+  if (
+    event.detail.eventName === RequestType.UPDATE &&
+    status !== StackTag.ENABLED
+  ) {
+    await deleteItem(event);
   }
 
   return {
     event,
     results: {
-      stackjanitor: Status
+      stackjanitor: status
     }
   };
 };
