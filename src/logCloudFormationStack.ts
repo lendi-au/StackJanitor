@@ -56,7 +56,7 @@ export const index = async (
 
   if (
     event.detail.eventName === RequestType.UPDATE &&
-    status === StackTag.DISABLED
+    status !== StackTag.ENABLED
   ) {
     await deleteItem(event);
   }
