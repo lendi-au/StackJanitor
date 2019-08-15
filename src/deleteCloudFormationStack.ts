@@ -17,7 +17,9 @@ export const getStackNamesFromStreamEvent = (
     record => record.dynamodb.Keys.stackName.S
   );
 
-export const deleteStack = async (params: DeleteStackInput) => {
+export const deleteStack = async (
+  params: DeleteStackInput
+): Promise<boolean> => {
   try {
     await cloudFormation.deleteStack(params).promise();
     return true;
@@ -27,7 +29,7 @@ export const deleteStack = async (params: DeleteStackInput) => {
   }
 };
 
-export const index = async (event: DynamoDBStreamEvent) => {
+export const index = async (event: DynamoDBStreamEvent): Promise<boolean> => {
   let deleteResult: boolean = false;
   const StackNames = await getStackNamesFromStreamEvent(event);
 
