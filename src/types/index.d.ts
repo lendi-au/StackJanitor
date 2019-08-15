@@ -1,3 +1,5 @@
+import { StackStatus } from "../StackStatusTag";
+
 declare module "stackjanitor" {
   export type parameterValue = "Environment";
   export type EventName = "UpdateStack" | "CreateStack" | "DeleteStack";
@@ -10,7 +12,7 @@ declare module "stackjanitor" {
     [Key: string]: any;
     event: CloudFormationEvent;
     results: {
-      stackjanitor: string;
+      stackjanitor: StackStatus;
     };
   }
 
