@@ -5,7 +5,7 @@ import {
   DynamoDbLog,
   StackJanitorStatus
 } from "stackjanitor";
-import { logger } from "./helpers";
+import { logger } from "./logger";
 import {
   DeleteItemInput,
   DeleteItemOutput,
@@ -49,7 +49,7 @@ export const putItem = (dynamoDBLog: DynamoDbLog): Promise<PutItemOutput> => {
     };
     return documentClient.putItem(inputParams).promise();
   } catch (e) {
-    logger(e);
+    logger.error(e);
   }
 };
 
@@ -82,7 +82,7 @@ export const updateItem = (
     };
     return documentClient.updateItem(updateParams).promise();
   } catch (e) {
-    logger(e);
+    logger.error(e);
   }
 };
 
@@ -118,7 +118,7 @@ export const deleteItem = (
     const deleteParams: DeleteItemInput = generateDeleteParams(event);
     return documentClient.deleteItem(deleteParams).promise();
   } catch (e) {
-    logger(e);
+    logger.error(e);
   }
 };
 
@@ -138,7 +138,7 @@ export const index = async (
       await putItem({ event, expirationTime });
       return Response.SUCCESS;
     } catch (e) {
-      logger(e);
+      logger.error(e);
     }
   }
   if (event.detail.eventName === RequestType.UPDATE) {
@@ -146,7 +146,7 @@ export const index = async (
       await updateItem({ event, expirationTime });
       return Response.SUCCESS;
     } catch (e) {
-      logger(e);
+      logger.error(e);
     }
   }
 
@@ -154,7 +154,7 @@ export const index = async (
     try {
       await deleteItem(event);
     } catch (e) {
-      logger(e);
+      logger.error(e);
     }
     return Response.SUCCESS;
   }

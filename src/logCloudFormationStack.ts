@@ -1,7 +1,7 @@
 import { CloudFormation } from "aws-sdk";
 import { Context } from "aws-lambda";
 import { CloudFormationEvent, StackJanitorStatus } from "stackjanitor";
-import { logger } from "./helpers";
+import { logger } from "./logger";
 import { Stack, StackName, Tag } from "aws-sdk/clients/cloudformation";
 import { deleteItem, RequestType } from "./monitorCloudFormationStack";
 
@@ -51,7 +51,7 @@ export const index = async (
       event.detail.requestParameters.stackName
     );
   } catch (e) {
-    logger(e);
+    logger.error(e);
   }
 
   if (
