@@ -2,7 +2,7 @@ import { DynamoDBStreamEvent } from "aws-lambda";
 import { CloudFormation, DynamoDB } from "aws-sdk";
 import { logger } from "../logger";
 import { checkStackJanitorStatus } from "./logCloudFormationStack";
-import { StackStatus } from "../StackStatusTag";
+import { StackStatus } from "../tag/StackStatusTag";
 
 const cloudFormation = new CloudFormation();
 

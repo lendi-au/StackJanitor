@@ -4,7 +4,7 @@ import { CloudFormationEvent, StackJanitorStatus } from "stackjanitor";
 import { logger } from "../logger";
 import { Stack, StackName, Tag } from "aws-sdk/clients/cloudformation";
 import { deleteItem, RequestType } from "./monitorCloudFormationStack";
-import { StackStatus, TagName } from "../StackStatusTag";
+import { StackStatus, TagName } from "../tag/StackStatusTag";
 
 const cloudFormation = new CloudFormation();
 
@@ -26,20 +26,22 @@ export const getStackJanitorStatus = (tags: Tag[]): StackStatus => {
   }
 };
 
-export const describeStacks = async (StackName: StackName) => {
-  const { Stacks } = await cloudFormation
+export const checkStackJanitorStatus = async (
+  stackName: StackName
+): Promise<StackStatus> => {
+  const result = await cloudFormation
     .describeStacks({
-      StackName
+      StackName: stackName
     })
     .promise();
-  return Stacks;
-};
 
-export const checkStackJanitorStatus = async (
-  StackName: StackName
-): Promise<StackStatus> => {
-  const stacks = await describeStacks(StackName);
-  const tags = getTagsFromStacks(stacks);
+  if (!result.Stacks) {
+    throw new Error(
+      `describeStacks call for stack "${stackName}" did not return any value(s).`
+    );
+  }
+
+  const tags = getTagsFromStacks(result.Stacks);
   return getStackJanitorStatus(tags);
 };
 

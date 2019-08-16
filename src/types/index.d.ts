@@ -1,4 +1,4 @@
-import { StackStatus } from "../StackStatusTag";
+import { StackStatus } from "../tag/StackStatusTag";
 
 declare module "stackjanitor" {
   export type parameterValue = "Environment";
