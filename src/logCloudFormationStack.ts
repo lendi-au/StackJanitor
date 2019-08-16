@@ -24,9 +24,9 @@ export const getTagsFromStacks = (stacks: Stack[]): Tag[] =>
       accumulatedTags.concat(currentTag)
     );
 
-export const getStackJanitorStatus = (tags: Tag[]): string => {
-  const tag = tags.find(t => t.Key === StackTag.TAG);
-  return tag ? tag.Value : StackTag.DISABLED;
+export const getStackJanitorStatus = (tags: CustomTag[]): string => {
+  const tag = tags.find(t => t.key === StackTag.TAG);
+  return tag ? tag.value : StackTag.DISABLED;
 };
 
 export const describeStacks = async (StackName: StackName) => {
@@ -41,21 +41,16 @@ export const describeStacks = async (StackName: StackName) => {
 export const checkStackJanitorStatus = async (StackName: StackName) => {
   const Stacks = await describeStacks(StackName);
   const tags = getTagsFromStacks(Stacks);
-  return getStackJanitorStatus(tags);
+  const customTags = convertTags(tags);
+  return getStackJanitorStatus(customTags);
 };
 
-const isTag = (tag: any): tag is CustomTag => {
-  return tag.hasOwnProperty("key");
-};
-
-const convertTags = (tags: (CustomTag | Tag)[]): Tag[] => {
+const convertTags = (tags: Tag[]): CustomTag[] => {
   return tags.map(tag => {
-    if (isTag(tag)) {
-      return {
-        Key: tag.key,
-        Value: tag.value
-      };
-    }
+    return {
+      key: tag.Key,
+      value: tag.Value
+    };
   });
 };
 
@@ -68,7 +63,7 @@ export const index = async (
 
   // CreateEvent has tags in event->detail->requestParameters
   if (event.detail.eventName === RequestType.CREATE) {
-    const tags = convertTags(event.detail.requestParameters.tags);
+    const tags = event.detail.requestParameters.tags;
     return {
       event,
       results: {
@@ -83,8 +78,9 @@ export const index = async (
       event.detail.requestParameters.stackName
     );
     tags = getTagsFromStacks(Stacks);
-    event.detail.requestParameters.tags = tags;
-    status = getStackJanitorStatus(tags);
+    const customTags = convertTags(tags);
+    event.detail.requestParameters.tags = customTags;
+    status = getStackJanitorStatus(customTags);
   } catch (e) {
     logger(e);
   }

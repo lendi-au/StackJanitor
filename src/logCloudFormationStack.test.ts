@@ -108,12 +108,12 @@ describe("logCloudFormationStack:getStackJanitorStatus", () => {
   test("getStackJanitorStatus should return stackjanitor tag from Stack[]", async () => {
     const Tags = [
       {
-        Key: `stackjanitor`,
-        Value: "enabled"
+        key: `stackjanitor`,
+        value: "enabled"
       },
       {
-        Key: `test`,
-        Value: "disabled"
+        key: `test`,
+        value: "disabled"
       }
     ];
 

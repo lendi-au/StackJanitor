@@ -39,7 +39,7 @@ declare module "stackjanitor" {
       eventName: string;
       eventTime: string;
       requestParameters: {
-        tags: (CustomTag | Tag)[];
+        tags: CustomTag[];
         parameters: parameterKey[];
         stackName: string;
       };
