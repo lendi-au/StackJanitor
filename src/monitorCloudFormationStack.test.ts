@@ -137,17 +137,15 @@ describe("monitorCloudFormationStack:generateInputParams", () => {
         stackId: {
           S: event.detail.responseElements.stackId
         },
-        BRANCH: {
-          S: "feat/add-lambda-function-guardduty-trigger"
-        },
-        LENDI_TEAM: {
-          S: "platform"
-        },
-        REPOSITORY: {
-          S: "lendi-platform-team"
-        },
-        stackjanitor: {
-          S: "enabled"
+        tags: {
+          L: [
+            {
+              M: { BRANCH: { S: "feat/add-lambda-function-guardduty-trigger" } }
+            },
+            { M: { LENDI_TEAM: { S: "platform" } } },
+            { M: { REPOSITORY: { S: "lendi-platform-team" } } },
+            { M: { stackjanitor: { S: "enabled" } } }
+          ]
         },
         expirationTime: {
           N: "" + expirationTime

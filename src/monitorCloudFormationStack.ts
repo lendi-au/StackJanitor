@@ -48,11 +48,15 @@ export const generateInputParams = (dynamoDBLog: DynamoDbLog): PutItemInput => {
   };
 
   // put all tags in the DynamoDB input params
-  event.detail.requestParameters.tags.forEach(tag => {
-    putItemInput.Item[tag.key] = {
-      S: tag.value
-    };
-  });
+  putItemInput.Item["tags"] = {
+    L: event.detail.requestParameters.tags.map(tag => ({
+      M: {
+        [tag.key]: {
+          S: tag.value
+        }
+      }
+    }))
+  };
 
   return putItemInput;
 };
