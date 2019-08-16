@@ -1,5 +1,4 @@
 declare module "stackjanitor" {
-  import { Tag } from "aws-sdk/clients/cloudformation";
   export type parameterValue = "Environment";
   export type EventName = "UpdateStack" | "CreateStack" | "DeleteStack";
 
@@ -13,6 +12,11 @@ declare module "stackjanitor" {
     results: {
       stackjanitor: string;
     };
+  }
+
+  export interface CustomTag {
+    key: string;
+    value: string;
   }
 
   export interface DynamoDbLog {
@@ -34,7 +38,7 @@ declare module "stackjanitor" {
       eventName: string;
       eventTime: string;
       requestParameters: {
-        tags: Tag[];
+        tags: CustomTag[];
         parameters: parameterKey[];
         stackName: string;
       };

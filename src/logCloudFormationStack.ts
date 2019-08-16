@@ -1,6 +1,10 @@
 import { CloudFormation } from "aws-sdk";
 import { Context } from "aws-lambda";
-import { CloudFormationEvent, StackJanitorStatus } from "stackjanitor";
+import {
+  CloudFormationEvent,
+  CustomTag,
+  StackJanitorStatus
+} from "stackjanitor";
 import { logger } from "./helpers";
 import { Stack, StackName, Tag } from "aws-sdk/clients/cloudformation";
 import { deleteItem, RequestType } from "./monitorCloudFormationStack";
@@ -20,9 +24,22 @@ export const getTagsFromStacks = (stacks: Stack[]): Tag[] =>
       accumulatedTags.concat(currentTag)
     );
 
-export const getStackJanitorStatus = (tags: Tag[]): string => {
-  const tag = tags.find(tag => tag.Key === StackTag.TAG);
-  return tag ? tag.Value : StackTag.DISABLED;
+const isTag = (tag): tag is Tag => {
+  if (tag.hasOwnProperty("Key")) return true;
+};
+
+export const getStackJanitorStatus = (tags: (Tag | CustomTag)[]): string => {
+  const tag = tags.find(t =>
+    isTag(t) ? t.Key === StackTag.TAG : t.key === StackTag.TAG
+  );
+
+  let value: string = StackTag.DISABLED;
+
+  if (tag) {
+    value = isTag(tag) ? tag.Value : tag.value;
+  }
+
+  return value;
 };
 
 export const describeStacks = async (StackName: StackName) => {
@@ -40,6 +57,18 @@ export const checkStackJanitorStatus = async (StackName: StackName) => {
   return getStackJanitorStatus(tags);
 };
 
+export const getStackJanitorStatusForCreateStack = (
+  event: CloudFormationEvent
+) => {
+  const tags = event.detail.requestParameters.tags;
+  return {
+    event,
+    results: {
+      stackjanitor: getStackJanitorStatus(tags)
+    }
+  };
+};
+
 export const index = async (
   event: CloudFormationEvent,
   _context: Context
@@ -49,17 +78,10 @@ export const index = async (
 
   // CreateEvent has tags in event->detail->requestParameters
   if (event.detail.eventName === RequestType.CREATE) {
-    tags = event.detail.requestParameters.tags;
-    status = getStackJanitorStatus(tags);
-    return {
-      event,
-      results: {
-        stackjanitor: status
-      }
-    };
+    return getStackJanitorStatusForCreateStack(event);
   }
 
-  // For all other types of Stack events tags need to fetched
+  // For all other types of Stack events tags need to be fetched
   try {
     const Stacks = await describeStacks(
       event.detail.requestParameters.stackName

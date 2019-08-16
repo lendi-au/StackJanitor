@@ -1,7 +1,8 @@
 import {
   getTagsFromStacks,
   getStackJanitorStatus,
-  index
+  index,
+  getStackJanitorStatusForCreateStack
 } from "./logCloudFormationStack";
 
 describe("logCloudFormationStack:getTagsFromStacks", () => {
@@ -148,6 +149,22 @@ describe("logCloudFormationStack:getStackJanitorStatus", () => {
     const Status = await getStackJanitorStatus(Tags);
     expect(Status).toEqual("disabled");
   });
+
+  test("getStackJanitorStatus should return stackjanitor tag for CreateStack event", async () => {
+    const Tags = [
+      {
+        key: `stackjanitor`,
+        value: "enabled"
+      },
+      {
+        key: `test`,
+        value: "disabled"
+      }
+    ];
+
+    const Status = await getStackJanitorStatus(Tags);
+    expect(Status).toEqual("enabled");
+  });
 });
 
 describe("logCloudFormationStack:index", () => {
@@ -214,5 +231,56 @@ describe("logCloudFormationStack:index", () => {
       stackjanitor: "disabled"
     });
     expect(logStackOutput).toHaveProperty("event");
+  });
+});
+
+describe("logCloudFormationStack:getStackJanitorStatusForCreateStack", () => {
+  test("it should return response with stackjanitor enabled if enabled", async () => {
+    const sample_event = {
+      id: "71e8ce4c-d880-c5b9-f14d-672607e28830",
+      source: "aws.cloudformation",
+      detail: {
+        eventVersion: "1.05",
+        userIdentity: {
+          type: "AssumedRole",
+          sessionContext: {
+            sessionIssuer: {
+              userName: "development-deployer"
+            }
+          }
+        },
+        eventName: "CreateStack",
+        requestParameters: {
+          tags: [
+            {
+              value: "enabled",
+              key: "stackjanitor"
+            },
+            {
+              value: "4",
+              key: "v1"
+            },
+            {
+              value: "platform",
+              key: "LENDI_TEAM"
+            },
+            {
+              value: "lendi-platform-team",
+              key: "REPOSITORY"
+            },
+            {
+              value: "feat/add-lambda-function-guardduty-trigger",
+              key: "BRANCH"
+            }
+          ],
+          stackName: "CloudJanitorTestV1"
+        }
+      }
+    };
+
+    const status = getStackJanitorStatusForCreateStack(sample_event);
+
+    expect(status).toHaveProperty("results");
+    expect(status.results.stackjanitor).toEqual("enabled");
   });
 });
