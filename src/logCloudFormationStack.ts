@@ -24,22 +24,9 @@ export const getTagsFromStacks = (stacks: Stack[]): Tag[] =>
       accumulatedTags.concat(currentTag)
     );
 
-const isTag = (tag): tag is Tag => {
-  if (tag.hasOwnProperty("Key")) return true;
-};
-
-export const getStackJanitorStatus = (tags: (Tag | CustomTag)[]): string => {
-  const tag = tags.find(t =>
-    isTag(t) ? t.Key === StackTag.TAG : t.key === StackTag.TAG
-  );
-
-  let value: string = StackTag.DISABLED;
-
-  if (tag) {
-    value = isTag(tag) ? tag.Value : tag.value;
-  }
-
-  return value;
+export const getStackJanitorStatus = (tags: Tag[]): string => {
+  const tag = tags.find(t => t.Key === StackTag.TAG);
+  return tag ? tag.Value : StackTag.DISABLED;
 };
 
 export const describeStacks = async (StackName: StackName) => {
@@ -57,16 +44,19 @@ export const checkStackJanitorStatus = async (StackName: StackName) => {
   return getStackJanitorStatus(tags);
 };
 
-export const getStackJanitorStatusForCreateStack = (
-  event: CloudFormationEvent
-) => {
-  const tags = event.detail.requestParameters.tags;
-  return {
-    event,
-    results: {
-      stackjanitor: getStackJanitorStatus(tags)
+const isTag = (tag: any): tag is CustomTag => {
+  return tag.hasOwnProperty("key");
+};
+
+const convertTags = (tags: (CustomTag | Tag)[]): Tag[] => {
+  return tags.map(tag => {
+    if (isTag(tag)) {
+      return {
+        Key: tag.key,
+        Value: tag.value
+      };
     }
-  };
+  });
 };
 
 export const index = async (
@@ -78,7 +68,13 @@ export const index = async (
 
   // CreateEvent has tags in event->detail->requestParameters
   if (event.detail.eventName === RequestType.CREATE) {
-    return getStackJanitorStatusForCreateStack(event);
+    const tags = convertTags(event.detail.requestParameters.tags);
+    return {
+      event,
+      results: {
+        stackjanitor: getStackJanitorStatus(tags)
+      }
+    };
   }
 
   // For all other types of Stack events tags need to be fetched
@@ -87,6 +83,7 @@ export const index = async (
       event.detail.requestParameters.stackName
     );
     tags = getTagsFromStacks(Stacks);
+    event.detail.requestParameters.tags = tags;
     status = getStackJanitorStatus(tags);
   } catch (e) {
     logger(e);
@@ -102,7 +99,6 @@ export const index = async (
 
   return {
     event,
-    tags: tags,
     results: {
       stackjanitor: status
     }
