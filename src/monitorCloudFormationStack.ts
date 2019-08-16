@@ -30,23 +30,36 @@ export enum Response {
   IGNORE = "ignore"
 }
 
-export const putItem = (dynamoDBLog: DynamoDbLog): Promise<PutItemOutput> => {
+export const generateInputParams = (dynamoDBLog: DynamoDbLog): PutItemInput => {
   const { event, expirationTime } = dynamoDBLog;
-  try {
-    const inputParams: PutItemInput = {
-      TableName: tableName,
-      Item: {
-        stackName: {
-          S: event.detail.requestParameters.stackName
-        },
-        stackId: {
-          S: event.detail.responseElements.stackId
-        },
-        expirationTime: {
-          N: "" + expirationTime
-        }
+  const putItemInput = {
+    TableName: tableName,
+    Item: {
+      stackName: {
+        S: event.detail.requestParameters.stackName
+      },
+      stackId: {
+        S: event.detail.responseElements.stackId
+      },
+      expirationTime: {
+        N: "" + expirationTime
       }
+    }
+  };
+
+  // put all tags in the DynamoDB input params
+  event.detail.requestParameters.tags.forEach(tag => {
+    putItemInput.Item[tag.key] = {
+      S: tag.value
     };
+  });
+
+  return putItemInput;
+};
+
+export const putItem = (dynamoDBLog: DynamoDbLog): Promise<PutItemOutput> => {
+  try {
+    const inputParams: PutItemInput = generateInputParams(dynamoDBLog);
     return documentClient.putItem(inputParams).promise();
   } catch (e) {
     logger(e);
