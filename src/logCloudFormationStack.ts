@@ -1,6 +1,10 @@
 import { CloudFormation } from "aws-sdk";
 import { Context } from "aws-lambda";
-import { CloudFormationEvent, StackJanitorStatus } from "stackjanitor";
+import {
+  CloudFormationEvent,
+  CustomTag,
+  StackJanitorStatus
+} from "stackjanitor";
 import { logger } from "./helpers";
 import { Stack, StackName, Tag } from "aws-sdk/clients/cloudformation";
 import { deleteItem, RequestType } from "./monitorCloudFormationStack";
@@ -20,9 +24,9 @@ export const getTagsFromStacks = (stacks: Stack[]): Tag[] =>
       accumulatedTags.concat(currentTag)
     );
 
-export const getStackJanitorStatus = (tags: Tag[]): string => {
-  const tag = tags.find(tag => tag.Key === StackTag.TAG);
-  return tag ? tag.Value : StackTag.DISABLED;
+export const getStackJanitorStatus = (tags: CustomTag[]): string => {
+  const tag = tags.find(t => t.key === StackTag.TAG);
+  return tag ? tag.value : StackTag.DISABLED;
 };
 
 export const describeStacks = async (StackName: StackName) => {
@@ -37,7 +41,17 @@ export const describeStacks = async (StackName: StackName) => {
 export const checkStackJanitorStatus = async (StackName: StackName) => {
   const Stacks = await describeStacks(StackName);
   const tags = getTagsFromStacks(Stacks);
-  return getStackJanitorStatus(tags);
+  const customTags = convertTags(tags);
+  return getStackJanitorStatus(customTags);
+};
+
+const convertTags = (tags: Tag[]): CustomTag[] => {
+  return tags.map(tag => {
+    return {
+      key: tag.Key,
+      value: tag.Value
+    };
+  });
 };
 
 export const index = async (
@@ -45,15 +59,33 @@ export const index = async (
   _context: Context
 ): Promise<StackJanitorStatus> => {
   let status: string = StackTag.DISABLED;
+  let tags: Tag[];
 
+  // CreateEvent has tags in event->detail->requestParameters
+  if (event.detail.eventName === RequestType.CREATE) {
+    const tags = event.detail.requestParameters.tags;
+    return {
+      event,
+      results: {
+        stackjanitor: getStackJanitorStatus(tags)
+      }
+    };
+  }
+
+  // For all other types of Stack events tags need to be fetched
   try {
-    status = await checkStackJanitorStatus(
+    const Stacks = await describeStacks(
       event.detail.requestParameters.stackName
     );
+    tags = getTagsFromStacks(Stacks);
+    const customTags = convertTags(tags);
+    event.detail.requestParameters.tags = customTags;
+    status = getStackJanitorStatus(customTags);
   } catch (e) {
     logger(e);
   }
 
+  // if updated stack has no or disabled stackjanitor tag remove DD row
   if (
     event.detail.eventName === RequestType.UPDATE &&
     status !== StackTag.ENABLED

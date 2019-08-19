@@ -1,6 +1,7 @@
 import {
   deleteItem,
   generateDeleteParams,
+  generateInputParams,
   getExpirationTime,
   index,
   putItem,
@@ -76,6 +77,81 @@ describe("monitorCloudFormationStack:getExpirationTime", () => {
     const expectedExpirationEpoch = 1565919355;
 
     expect(getExpirationTime(eventTime)).toEqual(expectedExpirationEpoch);
+  });
+});
+
+describe("monitorCloudFormationStack:generateInputParams", () => {
+  const event = {
+    detail: {
+      userIdentity: {
+        sessionContext: {
+          sessionIssuer: {
+            userName: "development-poweruser"
+          }
+        }
+      },
+      eventTime: "2019-08-09T01:56:24Z",
+      eventName: "CreateStack",
+      requestParameters: {
+        tags: [
+          {
+            key: "BRANCH",
+            value: "feat/add-lambda-function-guardduty-trigger"
+          },
+          {
+            key: "LENDI_TEAM",
+            value: "platform"
+          },
+          {
+            key: "REPOSITORY",
+            value: "lendi-platform-team"
+          },
+          {
+            key: "stackjanitor",
+            value: "enabled"
+          }
+        ],
+        stackName: "CloudJanitorTest"
+      },
+      responseElements: {
+        stackId:
+          "arn:aws:cloudformation:ap-southeast-2:702880128631:stack/CloudJanitorTest/e46581a0-ba48-11e9-a48c-0a4631dffc70"
+      }
+    }
+  };
+
+  const expirationTime = getExpirationTime(event.detail.eventTime);
+
+  test("generateInputParams should concatenate all tags into DD input params ", () => {
+    const dynamoDbLog = {
+      event,
+      expirationTime
+    };
+
+    expect(generateInputParams(dynamoDbLog)).toStrictEqual({
+      TableName: config.DEFAULT_DYNAMODB_TABLE,
+      Item: {
+        stackName: {
+          S: event.detail.requestParameters.stackName
+        },
+        stackId: {
+          S: event.detail.responseElements.stackId
+        },
+        tags: {
+          L: [
+            {
+              M: { BRANCH: { S: "feat/add-lambda-function-guardduty-trigger" } }
+            },
+            { M: { LENDI_TEAM: { S: "platform" } } },
+            { M: { REPOSITORY: { S: "lendi-platform-team" } } },
+            { M: { stackjanitor: { S: "enabled" } } }
+          ]
+        },
+        expirationTime: {
+          N: "" + expirationTime
+        }
+      }
+    });
   });
 });
 
