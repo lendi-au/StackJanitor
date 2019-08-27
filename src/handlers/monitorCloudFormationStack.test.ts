@@ -7,7 +7,7 @@ import {
   putItem,
   updateItem
 } from "./monitorCloudFormationStack";
-import config from "./config";
+import config from "../config";
 
 describe("monitorCloudFormationStack:generateDeleteParams", () => {
   test("generateDeleteParams should return correct deleteParams for delete eventType", () => {
@@ -203,25 +203,25 @@ describe("monitorCloudFormationStack:index", () => {
 
   test("monitorCloudFormationStack should be successful for: CreateStack", async () => {
     stackJanitorStatus.event.detail.eventName = "CreateStack";
-    const indexOutput = await index(stackJanitorStatus, null);
+    const indexOutput = await index(stackJanitorStatus);
     expect(indexOutput).toEqual("success");
   });
 
   test("monitorCloudFormationStack is ignored for unknown eventName", async () => {
     stackJanitorStatus.event.detail.eventName = "BumpStack";
-    const indexOutput = await index(stackJanitorStatus, null);
+    const indexOutput = await index(stackJanitorStatus);
     expect(indexOutput).toEqual("ignore");
   });
 
   test("monitorCloudFormationStack should be successful for: UpdateStack", async () => {
     stackJanitorStatus.event.detail.eventName = "UpdateStack";
-    const indexOutput = await index(stackJanitorStatus, null);
+    const indexOutput = await index(stackJanitorStatus);
     expect(indexOutput).toEqual("success");
   });
 
   test("monitorCloudFormationStack should be successful for: DeleteStack", async () => {
     stackJanitorStatus.event.detail.eventName = "DeleteStack";
-    const indexOutput = await index(stackJanitorStatus, null);
+    const indexOutput = await index(stackJanitorStatus);
     expect(indexOutput).toEqual("success");
   });
 });

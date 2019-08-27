@@ -1,17 +1,23 @@
 declare module "stackjanitor" {
-  import { Tag } from "aws-sdk/clients/cloudformation";
   export type parameterValue = "Environment";
   export type EventName = "UpdateStack" | "CreateStack" | "DeleteStack";
+
+  export const TagName = "stackjanitor";
 
   export type parameterKey = {
     [parameterKey: string]: parameterValue;
   };
 
+  export enum StackStatus {
+    Enabled = "enabled",
+    Disabled = "disabled"
+  }
+
   export interface StackJanitorStatus {
     [Key: string]: any;
     event: CloudFormationEvent;
     results: {
-      stackjanitor: string;
+      stackjanitor: StackStatus;
     };
   }
 

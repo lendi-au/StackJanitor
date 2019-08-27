@@ -1,9 +1,11 @@
+import { StackName } from "aws-sdk/clients/cloudformation";
+
 const aws: any = jest.genMockFromModule("aws-sdk");
 
 class CloudFormation {
   constructor() {}
 
-  describeStacks(params) {
+  describeStacks(params: { StackName: StackName }) {
     return {
       promise: () => ({
         Stacks: [
@@ -20,7 +22,7 @@ class CloudFormation {
     };
   }
 
-  deleteStack(_params) {
+  deleteStack(_params: { StackName: StackName }) {
     return jest.fn(() => {});
   }
 }

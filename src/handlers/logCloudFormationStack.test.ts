@@ -177,7 +177,7 @@ describe("logCloudFormationStack:index", () => {
       }
     };
 
-    const logStackOutput = await index(sample_event, null);
+    const logStackOutput = await index(sample_event);
 
     expect(logStackOutput).toHaveProperty("results");
     expect(logStackOutput.results).toStrictEqual({
@@ -208,7 +208,7 @@ describe("logCloudFormationStack:index", () => {
       }
     };
 
-    const logStackOutput = await index(sample_event, null);
+    const logStackOutput = await index(sample_event);
     expect(logStackOutput).toHaveProperty("results");
     expect(logStackOutput.results).toStrictEqual({
       stackjanitor: "disabled"
