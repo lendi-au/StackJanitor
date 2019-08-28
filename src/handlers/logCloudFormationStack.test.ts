@@ -204,6 +204,10 @@ describe("logCloudFormationStack:index", () => {
         requestParameters: {
           parameters: null,
           stackName: null
+        },
+        responseElements: {
+          stackId:
+            "arn:aws:cloudformation:ap-southeast-2:291089888569:stack/aws-go-mod-dev/7901b8a0-ab9a-11e9-96db-0286cfea755e"
         }
       }
     };

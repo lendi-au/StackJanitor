@@ -8,7 +8,7 @@ import {
   getTagsFromStacks
 } from "./logCloudFormationStack";
 import { DeleteStackInput, StackName } from "aws-sdk/clients/cloudformation";
-import { StackStatus } from "stackjanitor";
+import { StackStatus } from "../tag/TagStatus";
 
 const cloudFormation = new CloudFormation();
 

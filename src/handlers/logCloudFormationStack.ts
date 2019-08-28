@@ -2,13 +2,12 @@ import { CloudFormation } from "aws-sdk";
 import {
   CloudFormationEvent,
   CustomTag,
-  StackJanitorStatus,
-  StackStatus,
-  TagName
+  StackJanitorStatus
 } from "stackjanitor";
 import { logger } from "../logger";
 import { Stack, StackName, Tag } from "aws-sdk/clients/cloudformation";
 import { deleteItem, RequestType } from "./monitorCloudFormationStack";
+import { StackStatus, TagName } from "../tag/TagStatus";
 
 const cloudFormation = new CloudFormation();
 
