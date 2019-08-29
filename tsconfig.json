@@ -7,8 +7,10 @@
     "sourceMap": false,
     "target": "es6",
     "outDir": "lib",
+    "strict": true,
     "allowSyntheticDefaultImports": true,
     "types": ["jest", "node"]
   },
-  "exclude": ["src/**/*.test.ts", "typings.d.ts", "src/__mocks__/**/*.ts"]
+  "include": ["src", "typings"],
+  "exclude": ["**/*.test.ts", "node_modules", "src/__mocks__/**/*.ts"]
 }

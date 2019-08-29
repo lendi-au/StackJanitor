@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.17",
-    "@types/jest": "^24.0.15",
+    "@types/jest": "^24.0.18",
     "@types/node": "^10.12.18",
     "@types/pino": "^5.8.8",
     "aws-sdk": "^2.502.0",
@@ -63,6 +63,9 @@
       "js",
       "jsx",
       "d.ts"
+    ],
+    "moduleDirectories": [
+      "node_modules"
     ]
   },
   "husky": {

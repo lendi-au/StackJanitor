@@ -1,5 +1,4 @@
 declare module "stackjanitor" {
-  import { Tag } from "aws-sdk/clients/cloudformation";
   export type parameterValue = "Environment";
   export type EventName = "UpdateStack" | "CreateStack" | "DeleteStack";
 

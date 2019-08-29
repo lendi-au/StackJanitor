@@ -172,12 +172,12 @@ describe("logCloudFormationStack:index", () => {
         },
         responseElements: {
           stackId:
-            "arn:aws:cloudformation:ap-southeast-2:702880128631:stack/test/36ad7930-b8c4-11e9-aadd-0ae3f52010f8"
+            "arn:aws:cloudformation:ap-southeast-2:12345:stack/test/36ad7930-b8c4-11e9-aadd-0ae3f52010f8"
         }
       }
     };
 
-    const logStackOutput = await index(sample_event, null);
+    const logStackOutput = await index(sample_event);
 
     expect(logStackOutput).toHaveProperty("results");
     expect(logStackOutput.results).toStrictEqual({
@@ -204,11 +204,15 @@ describe("logCloudFormationStack:index", () => {
         requestParameters: {
           parameters: null,
           stackName: null
+        },
+        responseElements: {
+          stackId:
+            "arn:aws:cloudformation:ap-southeast-2:12345:stack/aws-go-mod-dev/7901b8a0-ab9a-11e9-96db-0286cfea755e"
         }
       }
     };
 
-    const logStackOutput = await index(sample_event, null);
+    const logStackOutput = await index(sample_event);
     expect(logStackOutput).toHaveProperty("results");
     expect(logStackOutput.results).toStrictEqual({
       stackjanitor: "disabled"
