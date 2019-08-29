@@ -20,7 +20,7 @@ describe("monitorCloudFormationStack:generateDeleteParams", () => {
         eventName: "DeleteStack",
         requestParameters: {
           stackName:
-            "arn:aws:cloudformation:ap-southeast-2:291089888569:stack/lendi-datadog-log-archive-management/16921510-a9e8-11e9-a24e-02d286d7265a"
+            "arn:aws:cloudformation:ap-southeast-2:12345:stack/lendi-datadog-log-archive-management/16921510-a9e8-11e9-a24e-02d286d7265a"
         },
         responseElements: null
       }
@@ -32,7 +32,7 @@ describe("monitorCloudFormationStack:generateDeleteParams", () => {
         },
         stackId: {
           S:
-            "arn:aws:cloudformation:ap-southeast-2:291089888569:stack/lendi-datadog-log-archive-management/16921510-a9e8-11e9-a24e-02d286d7265a"
+            "arn:aws:cloudformation:ap-southeast-2:12345:stack/lendi-datadog-log-archive-management/16921510-a9e8-11e9-a24e-02d286d7265a"
         }
       },
       TableName: config.DEFAULT_DYNAMODB_TABLE
@@ -52,7 +52,7 @@ describe("monitorCloudFormationStack:generateDeleteParams", () => {
         },
         responseElements: {
           stackId:
-            "arn:aws:cloudformation:ap-southeast-2:702880128631:stack/product-api-latest-development/8c0e2370-b9a5-11e9-abf5-02afb887c468"
+            "arn:aws:cloudformation:ap-southeast-2:12345:stack/product-api-latest-development/8c0e2370-b9a5-11e9-abf5-02afb887c468"
         }
       }
     };
@@ -63,7 +63,7 @@ describe("monitorCloudFormationStack:generateDeleteParams", () => {
         },
         stackId: {
           S:
-            "arn:aws:cloudformation:ap-southeast-2:702880128631:stack/product-api-latest-development/8c0e2370-b9a5-11e9-abf5-02afb887c468"
+            "arn:aws:cloudformation:ap-southeast-2:12345:stack/product-api-latest-development/8c0e2370-b9a5-11e9-abf5-02afb887c468"
         }
       },
       TableName: config.DEFAULT_DYNAMODB_TABLE
@@ -115,7 +115,7 @@ describe("monitorCloudFormationStack:generateInputParams", () => {
       },
       responseElements: {
         stackId:
-          "arn:aws:cloudformation:ap-southeast-2:702880128631:stack/CloudJanitorTest/e46581a0-ba48-11e9-a48c-0a4631dffc70"
+          "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTest/e46581a0-ba48-11e9-a48c-0a4631dffc70"
       }
     }
   };
@@ -191,7 +191,7 @@ describe("monitorCloudFormationStack:index", () => {
         },
         responseElements: {
           stackId:
-            "arn:aws:cloudformation:ap-southeast-2:702880128631:stack/CloudJanitorTest/e46581a0-ba48-11e9-a48c-0a4631dffc70"
+            "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTest/e46581a0-ba48-11e9-a48c-0a4631dffc70"
         }
       }
     },
@@ -254,7 +254,7 @@ describe("monitorCloudFormationStack:tests", () => {
       },
       responseElements: {
         stackId:
-          "arn:aws:cloudformation:ap-southeast-2:702880128631:stack/CloudJanitorTest/e46581a0-ba48-11e9-a48c-0a4631dffc70"
+          "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTest/e46581a0-ba48-11e9-a48c-0a4631dffc70"
       }
     }
   };
