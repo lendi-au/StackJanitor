@@ -37,14 +37,11 @@ export const describeStacks = async (StackName: StackName) => {
     .promise();
 };
 
-export const convertTags = (tags: Tag[]): CustomTag[] => {
-  return tags.map(tag => {
-    return {
-      key: tag.Key,
-      value: tag.Value
-    };
-  });
-};
+export const convertTags = (tags: Tag[]): CustomTag[] =>
+  tags.map(tag => ({
+    key: tag.Key,
+    value: tag.Value
+  }));
 
 export const index = async (
   event: CloudFormationEvent
