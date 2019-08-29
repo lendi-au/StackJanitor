@@ -7,7 +7,7 @@ import {
   getStackJanitorStatus,
   getTagsFromStacks
 } from "./logCloudFormationStack";
-import { DeleteStackInput, StackName } from "aws-sdk/clients/cloudformation";
+import { StackName } from "aws-sdk/clients/cloudformation";
 import { StackStatus } from "../tag/TagStatus";
 
 const cloudFormation = new CloudFormation();
@@ -28,16 +28,6 @@ export const getStackNamesFromStreamEvent = (
       return record.dynamodb.Keys.stackName.S;
     }
   });
-};
-
-export const deleteStack = async (params: DeleteStackInput) => {
-  try {
-    await cloudFormation.deleteStack(params).promise();
-    return true;
-  } catch (e) {
-    logger.error(e);
-    return false;
-  }
 };
 
 export const checkStackJanitorStatus = async (StackName: StackName) => {
@@ -65,7 +55,7 @@ export const index = async (event: DynamoDBStreamEvent) => {
     const status = await checkStackJanitorStatus(StackName);
     if (status === StackStatus.Enabled) {
       try {
-        await deleteStack({ StackName });
+        await cloudFormation.deleteStack({ StackName }).promise();
       } catch (e) {
         logger.error(e);
       }
