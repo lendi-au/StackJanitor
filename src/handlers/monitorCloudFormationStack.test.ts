@@ -1,16 +1,13 @@
 import {
-  deleteItem,
-  generateDeleteParams,
-  generateInputParams,
+  generateDeleteItem,
+  generateItemFromEvent,
   getExpirationTime,
-  index,
-  putItem,
-  updateItem
+  index
 } from "./monitorCloudFormationStack";
-import config from "../config";
+import util from "util";
 
-describe("monitorCloudFormationStack:generateDeleteParams", () => {
-  test("generateDeleteParams should return correct deleteParams for delete eventType", () => {
+describe("monitorCloudFormationStack:generateDeleteItem", () => {
+  test("it should return correct format for deleteStack event", () => {
     const event = {
       detail: {
         userIdentity: {
@@ -25,25 +22,18 @@ describe("monitorCloudFormationStack:generateDeleteParams", () => {
         responseElements: null
       }
     };
-    expect(generateDeleteParams(event)).toStrictEqual({
-      Key: {
-        stackName: {
-          S: "lendi-datadog-log-archive-management"
-        },
-        stackId: {
-          S:
-            "arn:aws:cloudformation:ap-southeast-2:12345:stack/lendi-datadog-log-archive-management/16921510-a9e8-11e9-a24e-02d286d7265a"
-        }
-      },
-      TableName: config.DEFAULT_DYNAMODB_TABLE
+    expect(generateDeleteItem(event)).toStrictEqual({
+      stackName: "lendi-datadog-log-archive-management",
+      stackId:
+        "arn:aws:cloudformation:ap-southeast-2:12345:stack/lendi-datadog-log-archive-management/16921510-a9e8-11e9-a24e-02d286d7265a"
     });
   });
 
-  test("generateDeleteParams should return correct deleteParams for update eventType", () => {
+  test("it should return correct format for deleteStack event", () => {
     const event = {
       detail: {
         userIdentity: {
-          userName: "jordan.simonovski"
+          userName: "test_user"
         },
         eventTime: "2019-07-21T22:41:21Z",
         eventName: "UpdateStack",
@@ -56,23 +46,16 @@ describe("monitorCloudFormationStack:generateDeleteParams", () => {
         }
       }
     };
-    expect(generateDeleteParams(event)).toStrictEqual({
-      Key: {
-        stackName: {
-          S: "product-api-latest-development"
-        },
-        stackId: {
-          S:
-            "arn:aws:cloudformation:ap-southeast-2:12345:stack/product-api-latest-development/8c0e2370-b9a5-11e9-abf5-02afb887c468"
-        }
-      },
-      TableName: config.DEFAULT_DYNAMODB_TABLE
+    expect(generateDeleteItem(event)).toStrictEqual({
+      stackName: "product-api-latest-development",
+      stackId:
+        "arn:aws:cloudformation:ap-southeast-2:12345:stack/product-api-latest-development/8c0e2370-b9a5-11e9-abf5-02afb887c468"
     });
   });
 });
 
 describe("monitorCloudFormationStack:getExpirationTime", () => {
-  test("getExpirationTime should return correct expired EPOCH", () => {
+  test("it should return correct expired EPOCH", () => {
     const eventTime = "2019-08-09T01:35:55Z";
     const expectedExpirationEpoch = 1565919355;
 
@@ -80,77 +63,55 @@ describe("monitorCloudFormationStack:getExpirationTime", () => {
   });
 });
 
-describe("monitorCloudFormationStack:generateInputParams", () => {
-  const event = {
-    detail: {
-      userIdentity: {
-        sessionContext: {
-          sessionIssuer: {
-            userName: "development-poweruser"
+describe("monitorCloudFormationStack:generateItemFromEvent", () => {
+  test("it should return correct item format from CloudFormation event", () => {
+    const event = {
+      time: "2019-08-09T01:56:24Z",
+      detail: {
+        userIdentity: {
+          sessionContext: {
+            sessionIssuer: {
+              userName: "development-poweruser"
+            }
           }
-        }
-      },
-      eventTime: "2019-08-09T01:56:24Z",
-      eventName: "CreateStack",
-      requestParameters: {
-        tags: [
-          {
-            key: "BRANCH",
-            value: "feat/add-lambda-function-guardduty-trigger"
-          },
-          {
-            key: "LENDI_TEAM",
-            value: "platform"
-          },
-          {
-            key: "REPOSITORY",
-            value: "lendi-platform-team"
-          },
-          {
-            key: "stackjanitor",
-            value: "enabled"
-          }
-        ],
-        stackName: "CloudJanitorTest"
-      },
-      responseElements: {
-        stackId:
-          "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTest/e46581a0-ba48-11e9-a48c-0a4631dffc70"
-      }
-    }
-  };
-
-  const expirationTime = getExpirationTime(event.detail.eventTime);
-
-  test("generateInputParams should concatenate all tags into DD input params ", () => {
-    const dynamoDbLog = {
-      event,
-      expirationTime
-    };
-
-    expect(generateInputParams(dynamoDbLog)).toStrictEqual({
-      TableName: config.DEFAULT_DYNAMODB_TABLE,
-      Item: {
-        stackName: {
-          S: event.detail.requestParameters.stackName
         },
-        stackId: {
-          S: event.detail.responseElements.stackId
-        },
-        tags: {
-          L: [
+        eventTime: "2019-08-09T01:56:24Z",
+        eventName: "CreateStack",
+
+        requestParameters: {
+          tags: [
             {
-              M: { BRANCH: { S: "feat/add-lambda-function-guardduty-trigger" } }
+              value: "enabled",
+              key: "stackjanitor"
             },
-            { M: { LENDI_TEAM: { S: "platform" } } },
-            { M: { REPOSITORY: { S: "lendi-platform-team" } } },
-            { M: { stackjanitor: { S: "enabled" } } }
-          ]
+            {
+              value: "1",
+              key: "v1"
+            }
+          ],
+          stackName: "CloudJanitorTest"
         },
-        expirationTime: {
-          N: "" + expirationTime
+        responseElements: {
+          stackId:
+            "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTest/e46581a0-ba48-11e9-a48c-0a4631dffc70"
         }
       }
+    };
+    expect(generateItemFromEvent(event)).toEqual({
+      stackName: "CloudJanitorTest",
+      stackId:
+        "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTest/e46581a0-ba48-11e9-a48c-0a4631dffc70",
+      expirationTime: 1565920584,
+      tags: [
+        {
+          value: "enabled",
+          key: "stackjanitor"
+        },
+        {
+          value: "1",
+          key: "v1"
+        }
+      ]
     });
   });
 });
@@ -159,6 +120,10 @@ describe("monitorCloudFormationStack:index", () => {
   beforeEach(() => {
     jest.resetModules();
   });
+
+  // Mocks
+  const mkdirMock = jest.fn();
+  jest.spyOn(util, "promisify").mockImplementation(() => mkdirMock);
 
   const stackJanitorStatus = {
     level: 30,
@@ -209,7 +174,7 @@ describe("monitorCloudFormationStack:index", () => {
 
   test("monitorCloudFormationStack is ignored for unknown eventName", async () => {
     stackJanitorStatus.event.detail.eventName = "BumpStack";
-    const indexOutput = await index(stackJanitorStatus);
+    const indexOutput = index(stackJanitorStatus);
     expect(indexOutput).toEqual("ignore");
   });
 
@@ -223,64 +188,5 @@ describe("monitorCloudFormationStack:index", () => {
     stackJanitorStatus.event.detail.eventName = "DeleteStack";
     const indexOutput = await index(stackJanitorStatus);
     expect(indexOutput).toEqual("success");
-  });
-});
-
-describe("monitorCloudFormationStack:tests", () => {
-  const event = {
-    time: "2019-08-09T01:56:24Z",
-    detail: {
-      userIdentity: {
-        sessionContext: {
-          sessionIssuer: {
-            userName: "development-poweruser"
-          }
-        }
-      },
-      eventTime: "2019-08-09T01:56:24Z",
-      eventName: "CreateStack",
-      requestParameters: {
-        tags: [
-          {
-            value: "enabled",
-            key: "stackjanitor"
-          },
-          {
-            value: "1",
-            key: "v1"
-          }
-        ],
-        stackName: "CloudJanitorTest"
-      },
-      responseElements: {
-        stackId:
-          "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTest/e46581a0-ba48-11e9-a48c-0a4631dffc70"
-      }
-    }
-  };
-
-  const expirationTime = getExpirationTime(event.detail.eventTime);
-
-  test("putItem should return add stack event in DB", async () => {
-    const dynamoDbLog = {
-      event,
-      expirationTime
-    };
-
-    expect(await putItem(dynamoDbLog)).toEqual(true);
-  });
-
-  test("updateItem should return update stack row in DB", async () => {
-    event.detail.eventName = "UpdateStack";
-    const dynamoDbLog = {
-      event,
-      expirationTime
-    };
-    expect(await updateItem(dynamoDbLog)).toEqual(true);
-  });
-
-  test("deleteItem should delete stack row from DB", async () => {
-    event.detail.eventName = "DeleteStack";
-    expect(await deleteItem(event)).toEqual(true);
   });
 });

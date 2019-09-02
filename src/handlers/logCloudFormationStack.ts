@@ -66,7 +66,7 @@ export const index = async (
         stackStatus = getStackJanitorStatus(customTags);
       }
     } catch (e) {
-      logger.error(e);
+      logger.error(e); //log error
     }
 
     // if updated stack has no or disabled stackjanitor tag remove DD row

@@ -19,11 +19,6 @@ declare module "stackjanitor" {
     value: string;
   }
 
-  export interface DynamoDbLog {
-    event: CloudFormationEvent;
-    expirationTime: number;
-  }
-
   export interface CloudFormationEvent {
     id: string;
     detail: {
