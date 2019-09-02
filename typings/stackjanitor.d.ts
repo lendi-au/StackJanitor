@@ -14,6 +14,18 @@ declare module "stackjanitor" {
     };
   }
 
+  export interface DataItem {
+    expirationTime: number;
+    stackId: string;
+    stackName: string;
+    tags: CustomTag[];
+  }
+
+  export interface DeleteItem {
+    stackId: string;
+    stackName: string;
+  }
+
   export interface CustomTag {
     key: string;
     value: string;

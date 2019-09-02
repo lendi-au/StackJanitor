@@ -1,8 +1,12 @@
 import config from "../config";
-import { CloudFormationEvent, StackJanitorStatus } from "stackjanitor";
+import {
+  CloudFormationEvent,
+  DataItem,
+  DeleteItem,
+  StackJanitorStatus
+} from "stackjanitor";
 import { logger } from "../logger";
-import { stackJanitorData } from "../data/StackJanitorDataModel";
-import { promisify } from "util";
+import { DataMapper, dataMapper } from "../data/DynamoDataMapper";
 
 export enum RequestType {
   Create = "CreateStack",
@@ -19,7 +23,7 @@ export const getExpirationTime = (eventTime: string): number =>
   new Date(eventTime).getTime() / 1000 +
   Number(config.DEFAULT_EXPIRATION_PERIOD);
 
-export const generateItemFromEvent = (event: CloudFormationEvent) => {
+export const generateItemFromEvent = (event: CloudFormationEvent): DataItem => {
   const expirationTime = getExpirationTime(event.detail.eventTime);
   return {
     stackName: event.detail.requestParameters.stackName,
@@ -29,7 +33,7 @@ export const generateItemFromEvent = (event: CloudFormationEvent) => {
   };
 };
 
-export const generateDeleteItem = (event: CloudFormationEvent) => {
+export const generateDeleteItem = (event: CloudFormationEvent): DeleteItem => {
   let stackName: string;
   let stackId: string;
 
@@ -47,53 +51,35 @@ export const generateDeleteItem = (event: CloudFormationEvent) => {
   };
 };
 
-export const putItem = (event: CloudFormationEvent) => {
-  const item = generateItemFromEvent(event);
-  return promisify(stackJanitorData.create)(item);
-};
+const monitorCloudFormationStack = async (
+  event: CloudFormationEvent,
+  dataMapper: DataMapper
+) => {
+  switch (event.detail.eventName) {
+    case RequestType.Create:
+      const inputItem = generateItemFromEvent(event);
+      return dataMapper.create(inputItem);
 
-export const updateItem = (event: CloudFormationEvent) => {
-  const item = generateItemFromEvent(event);
-  return promisify(stackJanitorData.update)(item);
-};
+    case RequestType.Update:
+      const updateItem = generateItemFromEvent(event);
+      return dataMapper.update(updateItem);
 
-export const deleteItem = (event: CloudFormationEvent) => {
-  const item = generateDeleteItem(event);
-  return promisify(stackJanitorData.destroy)(item);
+    case RequestType.Delete:
+      const deleteItem = generateDeleteItem(event);
+      return dataMapper.destroy(deleteItem);
+
+    default:
+      return MonitoringResultStatus.Ignore;
+  }
 };
 
 export const index = async (stackJanitorStatus: StackJanitorStatus) => {
   const { event } = stackJanitorStatus;
-
-  switch (event.detail.eventName) {
-    case RequestType.Create:
-      try {
-        await putItem(event);
-        return MonitoringResultStatus.Success;
-      } catch (e) {
-        logger.error(e);
-      }
-      break;
-
-    case RequestType.Update:
-      try {
-        await updateItem(event);
-        return MonitoringResultStatus.Success;
-      } catch (e) {
-        logger.error(e);
-      }
-      break;
-
-    case RequestType.Delete:
-      try {
-        await deleteItem(event);
-        return MonitoringResultStatus.Success;
-      } catch (e) {
-        logger.error(e);
-      }
-      break;
-
-    default:
-      return MonitoringResultStatus.Ignore;
+  try {
+    await monitorCloudFormationStack(event, dataMapper);
+    return MonitoringResultStatus.Success;
+  } catch (e) {
+    logger.error(e);
+    return MonitoringResultStatus.Ignore;
   }
 };
