@@ -91,6 +91,10 @@ functions:
 
   gitHook:
     handler: src/handlers/gitHook.index
+    events:
+      - http:
+          path: /index
+          method: post
 
   deleteCloudFormationStack:
     handler: src/handlers/deleteCloudFormationStack.index

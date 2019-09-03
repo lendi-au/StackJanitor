@@ -1,4 +1,6 @@
 declare module "stackjanitor" {
+  import { name } from "aws-sdk/clients/importexport";
+  import { key } from "aws-sdk/clients/signer";
   export type parameterValue = "Environment";
   export type EventName = "UpdateStack" | "CreateStack" | "DeleteStack";
 
@@ -54,4 +56,30 @@ declare module "stackjanitor" {
       };
     };
   }
+
+  export interface BitbucketWebhookEvent {
+    pullrequest: {
+      destination: {
+        repository: Repository;
+        branch: {
+          name: string;
+        };
+      };
+      source: {
+        repository: Repository;
+        branch: {
+          name: string;
+        };
+      };
+      state: State;
+    };
+    repository: Repository;
+  }
+
+  export interface Repository {
+    name: string;
+    fullname: string;
+  }
+
+  export type State = "MERGED" | "DECLINED";
 }
