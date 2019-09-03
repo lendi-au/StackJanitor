@@ -5,7 +5,7 @@ import { Item } from "dynogels";
 import { Model } from "dynogels";
 import { promisify } from "util";
 
-dynogels.AWS.config.update({ region: config.DEFAULT_AWS_REGION });
+dynogels.AWS.config.update({ region: config.DEFAULT_REGION });
 
 const DynamoDataMapper: dynogels.Model = dynogels.define("DynamoDataMapper", {
   tableName: config.DEFAULT_DYNAMODB_TABLE,
