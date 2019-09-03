@@ -7,7 +7,7 @@ import { promisify } from "util";
 
 dynogels.AWS.config.update({ region: config.DEFAULT_AWS_REGION });
 
-const DynamoDataMapper: dynogels.Model = dynogels.define("stackJanitorData", {
+const DynamoDataMapper: dynogels.Model = dynogels.define("DynamoDataMapper", {
   tableName: config.DEFAULT_DYNAMODB_TABLE,
   hashKey: "stackName",
   rangeKey: "stackId",
@@ -19,12 +19,18 @@ const DynamoDataMapper: dynogels.Model = dynogels.define("stackJanitorData", {
   }
 });
 
-export interface DataMapper {
-  create(arg: any): Promise<Item>;
-  update(arg: any): Promise<Item>;
-  destroy(arg: any): Promise<Item>;
-  get(arg: any): Promise<Item>;
+export enum Actions {
+  Create = "create",
+  Update = "update",
+  Destroy = "destroy",
+  Get = "get"
 }
+
+export interface ActionHandler {
+  (arg: any): Promise<Item>;
+}
+
+export type DataMapper = { [K in Actions]: ActionHandler };
 
 const promisifyDataMapper = (dataMapper: Model): DataMapper => ({
   create: promisify(dataMapper.create),

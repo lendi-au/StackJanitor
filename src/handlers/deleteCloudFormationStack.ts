@@ -3,11 +3,9 @@ import { CloudFormation } from "aws-sdk";
 import { logger } from "../logger";
 import {
   convertTags,
-  describeStacks,
   getStackJanitorStatus,
   getTagsFromStacks
 } from "./logCloudFormationStack";
-import { StackName } from "aws-sdk/clients/cloudformation";
 import { StackStatus } from "../tag/TagStatus";
 
 const cloudFormation = new CloudFormation();
@@ -30,12 +28,10 @@ export const getStackNamesFromStreamEvent = (
   });
 };
 
-export const checkStackJanitorStatus = async (StackName: StackName) => {
+export const checkStackJanitorStatus = async (
+  Stacks: CloudFormation.Stack[]
+) => {
   try {
-    const { Stacks } = await describeStacks(StackName);
-    if (!Stacks) {
-      return StackStatus.Disabled;
-    }
     const tags = getTagsFromStacks(Stacks);
     const customTags = convertTags(tags);
     return getStackJanitorStatus(customTags);
@@ -45,14 +41,25 @@ export const checkStackJanitorStatus = async (StackName: StackName) => {
   }
 };
 
-export const index = async (event: DynamoDBStreamEvent) => {
+export const deleteCloudFormationStack = async (
+  event: DynamoDBStreamEvent,
+  cloudFormation: CloudFormation
+) => {
   const StackNames = await getStackNamesFromStreamEvent(event);
 
   for (let StackName of StackNames) {
     if (!StackName) {
       return;
     }
-    const status = await checkStackJanitorStatus(StackName);
+    const { Stacks } = await cloudFormation
+      .describeStacks({ StackName })
+      .promise();
+
+    if (!Stacks) {
+      return;
+    }
+
+    const status = await checkStackJanitorStatus(Stacks);
     if (status === StackStatus.Enabled) {
       try {
         await cloudFormation.deleteStack({ StackName }).promise();
@@ -61,4 +68,8 @@ export const index = async (event: DynamoDBStreamEvent) => {
       }
     }
   }
+};
+
+export const index = async (event: DynamoDBStreamEvent) => {
+  return await deleteCloudFormationStack(event, cloudFormation);
 };

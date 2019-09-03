@@ -1,11 +1,11 @@
 import {
   getTagsFromStacks,
   getStackJanitorStatus,
-  index
+  logCloudFormationStack
 } from "./logCloudFormationStack";
 
 describe("logCloudFormationStack:getTagsFromStacks", () => {
-  test("getTagsFromStacks should return tags from Stack[]", async () => {
+  test("it should return tags from Stack[]", async () => {
     const Stacks = [
       {
         StackName: "StackJanitor-dev",
@@ -29,7 +29,7 @@ describe("logCloudFormationStack:getTagsFromStacks", () => {
     ]);
   });
 
-  test("getTagsFromStacks should return tags from Stack[] for multiple Stack", async () => {
+  test("it should return tags from Stack[] for multiple Stack", async () => {
     const Stacks = [
       {
         StackName: "StackJanitor-dev",
@@ -63,7 +63,7 @@ describe("logCloudFormationStack:getTagsFromStacks", () => {
     ]);
   });
 
-  test("getTagsFromStacks should return tags from Stack[] for multiple Tags", async () => {
+  test("it should return tags from Stack[] for multiple Tags", async () => {
     const Stacks = [
       {
         StackName: "StackJanitor-dev",
@@ -89,7 +89,7 @@ describe("logCloudFormationStack:getTagsFromStacks", () => {
     ]);
   });
 
-  test("getTagsFromStacks should return empty tags from Stack[] for no Tags", async () => {
+  test("it should return empty tags from Stack[] for no Tags", async () => {
     const Stacks = [
       {
         StackName: "StackJanitor-dev",
@@ -105,7 +105,7 @@ describe("logCloudFormationStack:getTagsFromStacks", () => {
 });
 
 describe("logCloudFormationStack:getStackJanitorStatus", () => {
-  test("getStackJanitorStatus should return stackjanitor tag from Stack[]", async () => {
+  test("it should return stackjanitor tag from Stack[]", async () => {
     const Tags = [
       {
         key: `stackjanitor`,
@@ -121,7 +121,7 @@ describe("logCloudFormationStack:getStackJanitorStatus", () => {
     expect(Status).toEqual("enabled");
   });
 
-  test("getStackJanitorStatus should return stackjanitor tag from Stack[]", async () => {
+  test("it should return stackjanitor tag from Stack[]", async () => {
     const Tags = [
       {
         Key: `stackjanitor`,
@@ -137,7 +137,7 @@ describe("logCloudFormationStack:getStackJanitorStatus", () => {
     expect(Status).toEqual("disabled");
   });
 
-  test("getStackJanitorStatus should return stackjanitor tag from Stack[]", async () => {
+  test("it should return stackjanitor tag from Stack[]", async () => {
     const Tags = [
       {
         Key: `v1`,
@@ -150,8 +150,8 @@ describe("logCloudFormationStack:getStackJanitorStatus", () => {
   });
 });
 
-describe("logCloudFormationStack:index", () => {
-  test("index should return stackjanitor tag value", async () => {
+describe("logCloudFormationStack", () => {
+  test("it should return stackjanitor tag value", async () => {
     const sample_event = {
       id: "71e8ce4c-d880-c5b9-f14d-672607e28830",
       source: "aws.cloudformation",
@@ -177,45 +177,40 @@ describe("logCloudFormationStack:index", () => {
       }
     };
 
-    const logStackOutput = await index(sample_event);
+    const cloudFormation = {
+      describeStacks: () => ({
+        promise: () =>
+          Promise.resolve({
+            Stacks: [
+              {
+                StackName: "StackJanitor-dev",
+                CreationTime: new Date(),
+                StackStatus: "CREATE_COMPLETE",
+                Tags: [
+                  {
+                    Key: `stackjanitor`,
+                    Value: "enabled"
+                  },
+                  {
+                    Key: `v1`,
+                    Value: "1.0.5"
+                  }
+                ]
+              }
+            ]
+          })
+      })
+    };
+
+    const logStackOutput = await logCloudFormationStack(
+      sample_event,
+      // @ts-ignore
+      cloudFormation
+    );
 
     expect(logStackOutput).toHaveProperty("results");
     expect(logStackOutput.results).toStrictEqual({
       stackjanitor: "enabled"
-    });
-    expect(logStackOutput).toHaveProperty("event");
-  });
-
-  test("index should return array of Tag", async () => {
-    const sample_event = {
-      id: "71e8ce4c-d880-c5b9-f14d-672607e28830",
-      source: "aws.cloudformation",
-      detail: {
-        eventVersion: "1.05",
-        userIdentity: {
-          type: "AssumedRole",
-          sessionContext: {
-            sessionIssuer: {
-              userName: "development-deployer"
-            }
-          }
-        },
-        eventName: "UpdateStack",
-        requestParameters: {
-          parameters: null,
-          stackName: null
-        },
-        responseElements: {
-          stackId:
-            "arn:aws:cloudformation:ap-southeast-2:12345:stack/aws-go-mod-dev/7901b8a0-ab9a-11e9-96db-0286cfea755e"
-        }
-      }
-    };
-
-    const logStackOutput = await index(sample_event);
-    expect(logStackOutput).toHaveProperty("results");
-    expect(logStackOutput.results).toStrictEqual({
-      stackjanitor: "disabled"
     });
     expect(logStackOutput).toHaveProperty("event");
   });

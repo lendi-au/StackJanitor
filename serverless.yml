@@ -89,6 +89,9 @@ functions:
       DEFAULT_EXPIRATION_PERIOD: ${self:custom.DEFAULT_EXPIRATION_PERIOD}
       DEFAULT_REGION: ${self:custom.DEFAULT_REGION}
 
+  gitHook:
+    handler: src/handlers/gitHook.index
+
   deleteCloudFormationStack:
     handler: src/handlers/deleteCloudFormationStack.index
     events:

@@ -6,7 +6,11 @@ import {
   StackJanitorStatus
 } from "stackjanitor";
 import { logger } from "../logger";
-import { DataMapper, dataMapper } from "../data/DynamoDataMapper";
+import {
+  ActionHandler,
+  DataMapper,
+  dataMapper
+} from "../data/DynamoDataMapper";
 
 export enum RequestType {
   Create = "CreateStack",
@@ -51,22 +55,35 @@ export const generateDeleteItem = (event: CloudFormationEvent): DeleteItem => {
   };
 };
 
-const monitorCloudFormationStack = async (
+export const handleDataItem = async (
+  item: DataItem | DeleteItem,
+  handler: ActionHandler
+) => {
+  try {
+    await handler(item);
+    return MonitoringResultStatus.Success;
+  } catch (e) {
+    logger.error(e);
+    return MonitoringResultStatus.Ignore;
+  }
+};
+
+export const monitorCloudFormationStack = (
   event: CloudFormationEvent,
   dataMapper: DataMapper
 ) => {
   switch (event.detail.eventName) {
     case RequestType.Create:
       const inputItem = generateItemFromEvent(event);
-      return dataMapper.create(inputItem);
+      return handleDataItem(inputItem, dataMapper.create);
 
     case RequestType.Update:
       const updateItem = generateItemFromEvent(event);
-      return dataMapper.update(updateItem);
+      return handleDataItem(updateItem, dataMapper.update);
 
     case RequestType.Delete:
       const deleteItem = generateDeleteItem(event);
-      return dataMapper.destroy(deleteItem);
+      return handleDataItem(deleteItem, dataMapper.destroy);
 
     default:
       return MonitoringResultStatus.Ignore;
@@ -75,11 +92,5 @@ const monitorCloudFormationStack = async (
 
 export const index = async (stackJanitorStatus: StackJanitorStatus) => {
   const { event } = stackJanitorStatus;
-  try {
-    await monitorCloudFormationStack(event, dataMapper);
-    return MonitoringResultStatus.Success;
-  } catch (e) {
-    logger.error(e);
-    return MonitoringResultStatus.Ignore;
-  }
+  return await monitorCloudFormationStack(event, dataMapper);
 };

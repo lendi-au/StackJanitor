@@ -1,14 +1,19 @@
 import { CloudFormation } from "aws-sdk";
+
 import {
   CloudFormationEvent,
   CustomTag,
   StackJanitorStatus
 } from "stackjanitor";
 import { logger } from "../logger";
-import { Stack, StackName, Tag } from "aws-sdk/clients/cloudformation";
-import { deleteItem, RequestType } from "./monitorCloudFormationStack";
+import { Stack, Tag } from "aws-sdk/clients/cloudformation";
+import {
+  generateDeleteItem,
+  handleDataItem,
+  RequestType
+} from "./monitorCloudFormationStack";
 import { StackStatus, TagName } from "../tag/TagStatus";
-
+import { dataMapper } from "../data/DynamoDataMapper";
 const cloudFormation = new CloudFormation();
 
 export const getTagsFromStacks = (stacks: Stack[]): Tag[] =>
@@ -29,35 +34,31 @@ export const getStackJanitorStatus = (tags: CustomTag[]): StackStatus => {
   return StackStatus.Disabled;
 };
 
-export const describeStacks = async (StackName: StackName) => {
-  return cloudFormation
-    .describeStacks({
-      StackName
-    })
-    .promise();
-};
-
 export const convertTags = (tags: Tag[]): CustomTag[] =>
   tags.map(tag => ({
     key: tag.Key,
     value: tag.Value
   }));
 
-export const index = async (
-  event: CloudFormationEvent
-): Promise<StackJanitorStatus> => {
+export const logCloudFormationStack = async (
+  event: CloudFormationEvent,
+  cloudFormation: CloudFormation
+) => {
   let stackStatus: StackStatus = StackStatus.Disabled;
+  const eventName = event.detail.eventName;
 
   // only CreateEvent has tags in event->detail->requestParameters
-  if (event.detail.eventName === RequestType.Create) {
+  if (eventName === RequestType.Create) {
     const tags = event.detail.requestParameters.tags;
     stackStatus = getStackJanitorStatus(tags);
   } else {
     // For all other types of Stack events tags need to be fetched
     try {
-      const { Stacks } = await describeStacks(
-        event.detail.requestParameters.stackName
-      );
+      const { Stacks } = await cloudFormation
+        .describeStacks({
+          StackName: event.detail.requestParameters.stackName
+        })
+        .promise();
 
       if (Stacks) {
         const tags = getTagsFromStacks(Stacks);
@@ -66,15 +67,16 @@ export const index = async (
         stackStatus = getStackJanitorStatus(customTags);
       }
     } catch (e) {
-      logger.error(e); //log error
+      logger.error(e);
     }
 
-    // if updated stack has no or disabled stackjanitor tag remove DD row
+    // if updated stack has no or disabled stackjanitor tag remove Dynamo row
     if (
-      event.detail.eventName === RequestType.Update &&
+      eventName === RequestType.Update &&
       stackStatus !== StackStatus.Enabled
     ) {
-      await deleteItem(event);
+      const item = generateDeleteItem(event);
+      await handleDataItem(item, dataMapper.destroy);
     }
   }
 
@@ -84,4 +86,10 @@ export const index = async (
       stackjanitor: stackStatus
     }
   };
+};
+
+export const index = async (
+  event: CloudFormationEvent
+): Promise<StackJanitorStatus> => {
+  return await logCloudFormationStack(event, cloudFormation);
 };

@@ -2,9 +2,9 @@ import {
   generateDeleteItem,
   generateItemFromEvent,
   getExpirationTime,
-  index
+  monitorCloudFormationStack,
+  MonitoringResultStatus
 } from "./monitorCloudFormationStack";
-import util from "util";
 
 describe("monitorCloudFormationStack:generateDeleteItem", () => {
   test("it should return correct format for deleteStack event", () => {
@@ -116,77 +116,72 @@ describe("monitorCloudFormationStack:generateItemFromEvent", () => {
   });
 });
 
-describe("monitorCloudFormationStack:index", () => {
+describe("monitorCloudFormationStack", () => {
   beforeEach(() => {
     jest.resetModules();
   });
 
-  // Mocks
-  const mkdirMock = jest.fn();
-  jest.spyOn(util, "promisify").mockImplementation(() => mkdirMock);
-
-  const stackJanitorStatus = {
-    level: 30,
-    time: 1565315802430,
-    event: {
-      time: "2019-08-09T01:56:24Z",
-      detail: {
-        userIdentity: {
-          sessionContext: {
-            sessionIssuer: {
-              userName: "development-poweruser"
-            }
+  const event = {
+    time: "2019-08-09T01:56:24Z",
+    detail: {
+      userIdentity: {
+        sessionContext: {
+          sessionIssuer: {
+            userName: "development-poweruser"
           }
-        },
-        eventTime: "2019-08-09T01:56:24Z",
-        eventName: "CreateStack",
-
-        requestParameters: {
-          tags: [
-            {
-              value: "enabled",
-              key: "stackjanitor"
-            },
-            {
-              value: "1",
-              key: "v1"
-            }
-          ],
-          stackName: "CloudJanitorTest"
-        },
-        responseElements: {
-          stackId:
-            "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTest/e46581a0-ba48-11e9-a48c-0a4631dffc70"
         }
+      },
+      eventTime: "2019-08-09T01:56:24Z",
+      eventName: "CreateStack",
+
+      requestParameters: {
+        tags: [
+          {
+            value: "enabled",
+            key: "stackjanitor"
+          },
+          {
+            value: "1",
+            key: "v1"
+          }
+        ],
+        stackName: "CloudJanitorTest"
+      },
+      responseElements: {
+        stackId:
+          "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTest/e46581a0-ba48-11e9-a48c-0a4631dffc70"
       }
-    },
-    results: {
-      stackjanitor: "enabled"
-    },
-    v: 1
+    }
+  };
+
+  const mockDataMapper = {
+    create: (arg: any) => Promise.resolve(arg),
+    update: (arg: any) => Promise.resolve(arg),
+    destroy: (arg: any) => Promise.resolve(arg),
+    get: (arg: any) => Promise.resolve(arg)
   };
 
   test("monitorCloudFormationStack should be successful for: CreateStack", async () => {
-    stackJanitorStatus.event.detail.eventName = "CreateStack";
-    const indexOutput = await index(stackJanitorStatus);
-    expect(indexOutput).toEqual("success");
-  });
-
-  test("monitorCloudFormationStack is ignored for unknown eventName", async () => {
-    stackJanitorStatus.event.detail.eventName = "BumpStack";
-    const indexOutput = index(stackJanitorStatus);
-    expect(indexOutput).toEqual("ignore");
+    event.detail.eventName = "CreateStack";
+    const status = await monitorCloudFormationStack(event, mockDataMapper);
+    expect(status).toEqual(MonitoringResultStatus.Success);
   });
 
   test("monitorCloudFormationStack should be successful for: UpdateStack", async () => {
-    stackJanitorStatus.event.detail.eventName = "UpdateStack";
-    const indexOutput = await index(stackJanitorStatus);
-    expect(indexOutput).toEqual("success");
+    event.detail.eventName = "UpdateStack";
+    const status = await monitorCloudFormationStack(event, mockDataMapper);
+    expect(status).toEqual(MonitoringResultStatus.Success);
   });
 
   test("monitorCloudFormationStack should be successful for: DeleteStack", async () => {
-    stackJanitorStatus.event.detail.eventName = "DeleteStack";
-    const indexOutput = await index(stackJanitorStatus);
-    expect(indexOutput).toEqual("success");
+    event.detail.eventName = "DeleteStack";
+    const status = await monitorCloudFormationStack(event, mockDataMapper);
+    expect(status).toEqual(MonitoringResultStatus.Success);
+  });
+
+  test("monitorCloudFormationStack should be ignored for other eventName", async () => {
+    event.detail.eventName = "BumpStack";
+    const status = await monitorCloudFormationStack(event, mockDataMapper);
+    expect(status).toEqual(MonitoringResultStatus.Ignore);
   });
 });
