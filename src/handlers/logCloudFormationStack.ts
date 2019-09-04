@@ -13,7 +13,7 @@ import {
   RequestType
 } from "./monitorCloudFormationStack";
 import { StackStatus, TagName } from "../tag/TagStatus";
-import { dataMapper } from "../data/DynamoDataMapper";
+import { dataModel } from "../data/DynamoDataModel";
 const cloudFormation = new CloudFormation();
 
 export const getTagsFromStacks = (stacks: Stack[]): Tag[] =>
@@ -76,7 +76,7 @@ export const logCloudFormationStack = async (
       stackStatus !== StackStatus.Enabled
     ) {
       const item = generateDeleteItem(event);
-      await handleDataItem(item, dataMapper.destroy);
+      await handleDataItem(item, dataModel.destroy);
     }
   }
 

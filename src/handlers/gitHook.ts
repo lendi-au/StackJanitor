@@ -1,19 +1,43 @@
 import { APIGatewayEvent } from "aws-lambda";
-import { logger } from "../logger";
+import { BitbucketWebhookEvent, GitTag, State } from "stackjanitor";
+import { dynamoDataModel } from "../data/DynamoDataModel";
 
-// interface BitBucketMergeEvent {
-//   repository: {
-//     name: string;
-//   };
-// }
+const bitbucketEventParser = (eventData: BitbucketWebhookEvent): GitTag => ({
+  repository: eventData.pullrequest.source.repository.name,
+  branch: eventData.pullrequest.source.branch.name
+});
 
-// const eventParser = (json: JSON) => {};
+const isBitbucketEvent = (event: any): event is BitbucketWebhookEvent =>
+  event.pullrequest && event.repository;
+
+const findStackFromTag = (gitTag: GitTag, keyName: string) => {
+  return new Promise((resolve, reject) => {
+    dynamoDataModel
+      .scan()
+      .where(keyName)
+      .contains(gitTag.repository)
+      .where(keyName)
+      .contains(gitTag.branch)
+      .exec((err, data) => {
+        if (err) reject(err);
+        resolve(data);
+      });
+  });
+};
+
+const isInDesiredState = (state: State) =>
+  state !== State.Merged && state !== State.Declined;
 
 export const index = async (event: APIGatewayEvent) => {
-  const body = event.body;
-  logger.info(event);
+  const eventData = event.body;
+  if (isBitbucketEvent(eventData)) {
+    const state = eventData.pullrequest.state;
+    const inDesiredState = isInDesiredState(state);
+    const gitTag = bitbucketEventParser(eventData);
+  }
+
   return {
     statusCode: 200,
-    body: JSON.stringify(body)
+    body: JSON.stringify(eventData)
   };
 };

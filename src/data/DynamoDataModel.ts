@@ -7,17 +7,20 @@ import { promisify } from "util";
 
 dynogels.AWS.config.update({ region: config.DEFAULT_REGION });
 
-const DynamoDataMapper: dynogels.Model = dynogels.define("DynamoDataMapper", {
-  tableName: config.DEFAULT_DYNAMODB_TABLE,
-  hashKey: "stackName",
-  rangeKey: "stackId",
-  schema: {
-    stackName: joi.string(),
-    stackId: joi.string(),
-    expirationTime: joi.number(),
-    tags: joi.array().items(joi.object())
+export const dynamoDataModel: dynogels.Model = dynogels.define(
+  "DynamoDataMapper",
+  {
+    tableName: config.DEFAULT_DYNAMODB_TABLE,
+    hashKey: "stackName",
+    rangeKey: "stackId",
+    schema: {
+      stackName: joi.string(),
+      stackId: joi.string(),
+      expirationTime: joi.number(),
+      tags: joi.string()
+    }
   }
-});
+);
 
 export enum Actions {
   Create = "create",
@@ -30,13 +33,13 @@ export interface ActionHandler {
   (arg: any): Promise<Item>;
 }
 
-export type DataMapper = { [K in Actions]: ActionHandler };
+export type DataModel = { [K in Actions]: ActionHandler };
 
-const promisifyDataMapper = (dataMapper: Model): DataMapper => ({
+const promisifyDataMapper = (dataMapper: Model): DataModel => ({
   create: promisify(dataMapper.create),
   update: promisify(dataMapper.update),
   destroy: promisify(dataMapper.destroy),
   get: promisify(dataMapper.get)
 });
 
-export const dataMapper = promisifyDataMapper(DynamoDataMapper);
+export const dataModel = promisifyDataMapper(dynamoDataModel);

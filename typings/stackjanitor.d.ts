@@ -1,8 +1,5 @@
 declare module "stackjanitor" {
-  import { name } from "aws-sdk/clients/importexport";
-  import { key } from "aws-sdk/clients/signer";
   export type parameterValue = "Environment";
-  export type EventName = "UpdateStack" | "CreateStack" | "DeleteStack";
 
   export type parameterKey = {
     [parameterKey: string]: parameterValue;
@@ -20,7 +17,7 @@ declare module "stackjanitor" {
     expirationTime: number;
     stackId: string;
     stackName: string;
-    tags: CustomTag[];
+    tags: string;
   }
 
   export interface DeleteItem {
@@ -59,21 +56,16 @@ declare module "stackjanitor" {
 
   export interface BitbucketWebhookEvent {
     pullrequest: {
-      destination: {
-        repository: Repository;
-        branch: {
-          name: string;
-        };
-      };
-      source: {
-        repository: Repository;
-        branch: {
-          name: string;
-        };
-      };
+      destination: RepositoryAndBranch;
+      source: RepositoryAndBranch;
       state: State;
     };
     repository: Repository;
+  }
+
+  export const enum State {
+    Merged = "MERGED",
+    Declined = "DECLINED"
   }
 
   export interface Repository {
@@ -81,5 +73,15 @@ declare module "stackjanitor" {
     fullname: string;
   }
 
-  export type State = "MERGED" | "DECLINED";
+  export interface RepositoryAndBranch {
+    repository: Repository;
+    branch: {
+      name: string;
+    };
+  }
+
+  export interface GitTag {
+    repository: string;
+    branch: string;
+  }
 }

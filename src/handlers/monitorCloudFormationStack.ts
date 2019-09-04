@@ -6,11 +6,7 @@ import {
   StackJanitorStatus
 } from "stackjanitor";
 import { logger } from "../logger";
-import {
-  ActionHandler,
-  DataMapper,
-  dataMapper
-} from "../data/DynamoDataMapper";
+import { ActionHandler, DataModel, dataModel } from "../data/DynamoDataModel";
 
 export enum RequestType {
   Create = "CreateStack",
@@ -33,7 +29,7 @@ export const generateItemFromEvent = (event: CloudFormationEvent): DataItem => {
     stackName: event.detail.requestParameters.stackName,
     stackId: event.detail.responseElements.stackId,
     expirationTime: expirationTime,
-    tags: event.detail.requestParameters.tags
+    tags: JSON.stringify(event.detail.requestParameters.tags)
   };
 };
 
@@ -70,7 +66,7 @@ export const handleDataItem = async (
 
 export const monitorCloudFormationStack = (
   event: CloudFormationEvent,
-  dataMapper: DataMapper
+  dataMapper: DataModel
 ) => {
   switch (event.detail.eventName) {
     case RequestType.Create:
@@ -92,5 +88,5 @@ export const monitorCloudFormationStack = (
 
 export const index = async (stackJanitorStatus: StackJanitorStatus) => {
   const { event } = stackJanitorStatus;
-  return await monitorCloudFormationStack(event, dataMapper);
+  return await monitorCloudFormationStack(event, dataModel);
 };
