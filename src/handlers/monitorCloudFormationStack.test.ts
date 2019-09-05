@@ -102,16 +102,8 @@ describe("monitorCloudFormationStack:generateItemFromEvent", () => {
       stackId:
         "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTest/e46581a0-ba48-11e9-a48c-0a4631dffc70",
       expirationTime: 1565920584,
-      tags: [
-        {
-          value: "enabled",
-          key: "stackjanitor"
-        },
-        {
-          value: "1",
-          key: "v1"
-        }
-      ]
+      tags:
+        '[{"value":"enabled","key":"stackjanitor"},{"value":"1","key":"v1"}]'
     });
   });
 });
