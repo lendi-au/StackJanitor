@@ -8,8 +8,8 @@ import { findStacksFromTag } from "../helpers";
 export const SEARCH_KEY = "tags";
 
 export enum Response {
-  IGNORE = "Ignored as PR is not in Merged or Declined state",
-  SUCCESS = "Request processed"
+  Ignore = "Ignored as PR is not in Merged or Declined state",
+  Success = "Request processed"
 }
 
 export const bitbucketEventParser = (
@@ -40,7 +40,7 @@ export const bitBucketEventHandler = async (
   if (!inDesiredState)
     return {
       statusCode: 200,
-      body: Response.IGNORE
+      body: Response.Ignore
     };
   const gitTag = bitbucketEventParser(eventData);
   const stacksFromTag = await findStacksFromTag(gitTag, SEARCH_KEY);
@@ -53,7 +53,7 @@ export const bitBucketEventHandler = async (
   }
   return {
     statusCode: 200,
-    body: Response.SUCCESS
+    body: Response.Success
   };
 };
 
@@ -64,7 +64,7 @@ export const index = async (event: APIGatewayEvent) => {
   if (!event.body) {
     return {
       statusCode: 200,
-      body: Response.IGNORE
+      body: Response.Ignore
     };
   }
 
@@ -75,6 +75,6 @@ export const index = async (event: APIGatewayEvent) => {
 
   return {
     statusCode: 200,
-    body: Response.IGNORE
+    body: Response.Ignore
   };
 };

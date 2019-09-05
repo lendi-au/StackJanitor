@@ -17,15 +17,15 @@ describe("monitorCloudFormationStack:generateDeleteItem", () => {
         eventName: "DeleteStack",
         requestParameters: {
           stackName:
-            "arn:aws:cloudformation:ap-southeast-2:12345:stack/lendi-datadog-log-archive-management/16921510-a9e8-11e9-a24e-02d286d7265a"
+            "arn:aws:cloudformation:ap-southeast-2:12345:stack/log-archive-management/16921510-a9e8-11e9-a24e-02d286d7265a"
         },
         responseElements: null
       }
     };
     expect(generateDeleteItem(event)).toStrictEqual({
-      stackName: "lendi-datadog-log-archive-management",
+      stackName: "log-archive-management",
       stackId:
-        "arn:aws:cloudformation:ap-southeast-2:12345:stack/lendi-datadog-log-archive-management/16921510-a9e8-11e9-a24e-02d286d7265a"
+        "arn:aws:cloudformation:ap-southeast-2:12345:stack/log-archive-management/16921510-a9e8-11e9-a24e-02d286d7265a"
     });
   });
 
