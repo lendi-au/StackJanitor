@@ -84,4 +84,12 @@ declare module "stackjanitor" {
     repository: string;
     branch: string;
   }
+
+  export interface DynamoSearchResult {
+    Items: DynamoDataModel[];
+  }
+
+  export interface DynamoDataModel {
+    attrs: DataItem;
+  }
 }
