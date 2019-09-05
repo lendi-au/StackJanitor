@@ -1,4 +1,3 @@
-jest.mock("aws-sdk");
 import { getStackNamesFromStreamEvent } from "./deleteCloudFormationStack";
 import { DynamoDBStreamEvent } from "aws-lambda";
 

@@ -1,22 +1,12 @@
 import config from "../config";
-import { DynamoDB } from "aws-sdk";
 import {
   CloudFormationEvent,
-  DynamoDbLog,
+  DataItem,
+  DeleteItem,
   StackJanitorStatus
 } from "stackjanitor";
 import { logger } from "../logger";
-import {
-  DeleteItemInput,
-  DeleteItemOutput,
-  PutItemInput,
-  PutItemOutput,
-  UpdateItemInput,
-  UpdateItemOutput
-} from "aws-sdk/clients/dynamodb";
-
-const documentClient = new DynamoDB();
-const tableName = config.DEFAULT_DYNAMODB_TABLE;
+import { ActionHandler, DataModel, dataModel } from "../data/DynamoDataModel";
 
 export enum RequestType {
   Create = "CreateStack",
@@ -29,72 +19,21 @@ export enum MonitoringResultStatus {
   Ignore = "ignore"
 }
 
-export const generateInputParams = (dynamoDBLog: DynamoDbLog): PutItemInput => {
-  const { event, expirationTime } = dynamoDBLog;
-  const putItemInput: PutItemInput = {
-    TableName: tableName,
-    Item: {
-      stackName: {
-        S: event.detail.requestParameters.stackName
-      },
-      stackId: {
-        S: event.detail.responseElements.stackId
-      },
-      expirationTime: {
-        N: "" + expirationTime
-      }
-    }
-  };
+export const getExpirationTime = (eventTime: string): number =>
+  new Date(eventTime).getTime() / 1000 +
+  Number(config.DEFAULT_EXPIRATION_PERIOD);
 
-  // put all tags in the DynamoDB input params
-  putItemInput.Item["tags"] = {
-    L: event.detail.requestParameters.tags.map(tag => ({
-      M: {
-        [tag.key]: {
-          S: tag.value
-        }
-      }
-    }))
+export const generateItemFromEvent = (event: CloudFormationEvent): DataItem => {
+  const expirationTime = getExpirationTime(event.detail.eventTime);
+  return {
+    stackName: event.detail.requestParameters.stackName,
+    stackId: event.detail.responseElements.stackId,
+    expirationTime: expirationTime,
+    tags: JSON.stringify(event.detail.requestParameters.tags)
   };
-
-  return putItemInput;
 };
 
-export const putItem = (dynamoDBLog: DynamoDbLog): Promise<PutItemOutput> => {
-  const inputParams: PutItemInput = generateInputParams(dynamoDBLog);
-  return documentClient.putItem(inputParams).promise();
-};
-
-export const updateItem = (
-  dynamoDBLog: DynamoDbLog
-): Promise<UpdateItemOutput> => {
-  const { event, expirationTime } = dynamoDBLog;
-
-  const updateParams: UpdateItemInput = {
-    ExpressionAttributeNames: {
-      "#ET": "expirationTime"
-    },
-    ExpressionAttributeValues: {
-      ":e": {
-        N: "" + expirationTime
-      }
-    },
-    Key: {
-      stackName: {
-        S: event.detail.requestParameters.stackName
-      },
-      stackId: {
-        S: event.detail.responseElements.stackId
-      }
-    },
-    ReturnValues: "ALL_NEW",
-    TableName: tableName,
-    UpdateExpression: "SET #ET = :e"
-  };
-  return documentClient.updateItem(updateParams).promise();
-};
-
-export const generateDeleteParams = (event: CloudFormationEvent) => {
+export const generateDeleteItem = (event: CloudFormationEvent): DeleteItem => {
   let stackName: string;
   let stackId: string;
 
@@ -107,58 +46,47 @@ export const generateDeleteParams = (event: CloudFormationEvent) => {
   }
 
   return {
-    Key: {
-      stackName: {
-        S: stackName
-      },
-      stackId: {
-        S: stackId
-      }
-    },
-    TableName: tableName
+    stackName,
+    stackId
   };
 };
 
-export const deleteItem = (
-  event: CloudFormationEvent
-): Promise<DeleteItemOutput> => {
-  const deleteParams: DeleteItemInput = generateDeleteParams(event);
-  return documentClient.deleteItem(deleteParams).promise();
+export const handleDataItem = async (
+  item: DataItem | DeleteItem,
+  handler: ActionHandler
+) => {
+  try {
+    await handler(item);
+    return MonitoringResultStatus.Success;
+  } catch (e) {
+    logger.error(e);
+    return MonitoringResultStatus.Ignore;
+  }
 };
 
-export const getExpirationTime = (eventTime: string): number =>
-  new Date(eventTime).getTime() / 1000 +
-  Number(config.DEFAULT_EXPIRATION_PERIOD);
+export const monitorCloudFormationStack = (
+  event: CloudFormationEvent,
+  dataMapper: DataModel
+) => {
+  switch (event.detail.eventName) {
+    case RequestType.Create:
+      const inputItem = generateItemFromEvent(event);
+      return handleDataItem(inputItem, dataMapper.create);
+
+    case RequestType.Update:
+      const updateItem = generateItemFromEvent(event);
+      return handleDataItem(updateItem, dataMapper.update);
+
+    case RequestType.Delete:
+      const deleteItem = generateDeleteItem(event);
+      return handleDataItem(deleteItem, dataMapper.destroy);
+
+    default:
+      return MonitoringResultStatus.Ignore;
+  }
+};
 
 export const index = async (stackJanitorStatus: StackJanitorStatus) => {
   const { event } = stackJanitorStatus;
-  const expirationTime = getExpirationTime(event.detail.eventTime);
-
-  if (event.detail.eventName === RequestType.Create) {
-    try {
-      await putItem({ event, expirationTime });
-      return MonitoringResultStatus.Success;
-    } catch (e) {
-      logger.error(e);
-    }
-  }
-  if (event.detail.eventName === RequestType.Update) {
-    try {
-      await updateItem({ event, expirationTime });
-      return MonitoringResultStatus.Success;
-    } catch (e) {
-      logger.error(e);
-    }
-  }
-
-  if (event.detail.eventName === RequestType.Delete) {
-    try {
-      await deleteItem(event);
-    } catch (e) {
-      logger.error(e);
-    }
-    return MonitoringResultStatus.Success;
-  }
-
-  return MonitoringResultStatus.Ignore;
+  return await monitorCloudFormationStack(event, dataModel);
 };

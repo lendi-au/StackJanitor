@@ -15,13 +15,16 @@
     "release": "standard-version"
   },
   "dependencies": {
+    "dynogels": "^9.1.0",
     "pino": "^5.13.2",
     "source-map-support": "^0.5.10"
   },
   "devDependencies": {
+    "@hapi/joi": "^15.1.1",
     "@types/aws-lambda": "^8.10.17",
+    "@types/dynogels": "^9.0.2",
     "@types/jest": "^24.0.18",
-    "@types/node": "^10.12.18",
+    "@types/node": "^12.7.3",
     "@types/pino": "^5.8.8",
     "aws-sdk": "^2.502.0",
     "husky": "^1.3.1",

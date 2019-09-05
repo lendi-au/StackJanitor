@@ -1,6 +1,5 @@
 declare module "stackjanitor" {
   export type parameterValue = "Environment";
-  export type EventName = "UpdateStack" | "CreateStack" | "DeleteStack";
 
   export type parameterKey = {
     [parameterKey: string]: parameterValue;
@@ -14,14 +13,21 @@ declare module "stackjanitor" {
     };
   }
 
+  export interface DataItem {
+    expirationTime: number;
+    stackId: string;
+    stackName: string;
+    tags: string;
+  }
+
+  export interface DeleteItem {
+    stackId: string;
+    stackName: string;
+  }
+
   export interface CustomTag {
     key: string;
     value: string;
-  }
-
-  export interface DynamoDbLog {
-    event: CloudFormationEvent;
-    expirationTime: number;
   }
 
   export interface CloudFormationEvent {
@@ -46,5 +52,44 @@ declare module "stackjanitor" {
         stackId: string;
       };
     };
+  }
+
+  export interface BitbucketWebhookEvent {
+    pullrequest: {
+      destination: RepositoryAndBranch;
+      source: RepositoryAndBranch;
+      state: State;
+    };
+    repository: Repository;
+  }
+
+  export const enum State {
+    Merged = "MERGED",
+    Declined = "DECLINED"
+  }
+
+  export interface Repository {
+    name: string;
+    fullname: string;
+  }
+
+  export interface RepositoryAndBranch {
+    repository: Repository;
+    branch: {
+      name: string;
+    };
+  }
+
+  export interface GitTag {
+    repository: string;
+    branch: string;
+  }
+
+  export interface DynamoSearchResult {
+    Items: DynamoDataModel[];
+  }
+
+  export interface DynamoDataModel {
+    attrs: DataItem;
   }
 }
