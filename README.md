@@ -5,15 +5,15 @@
 StackJanitor is an event-driven serverless application that cleans up AWS CloudFormation Stacks in development environments based on TTL (expiration time) and git pull request events. It cleans up unused development CFN stacks to help you save AWS cloud development costs.
 
 ## Use Case
+
 We initially came up with the idea for StackJanitor when we needed to start cleaning up a lot of our ephemeral stacks on a regular basis. There are some that currently do this using polling mechanisms, but we figured we could use this as an opportunity to come up with an event-driven serverless app that can do this without having to continually poll resources
 
 ## How it works
 
-StackJanitor automatically adds all  of the CloudFormation stacks that you create in your AWS account to a DynamoDB Table. 
+StackJanitor automatically adds all of the CloudFormation stacks that you create in your AWS account to a DynamoDB Table.
 If you have specified a stacktag `stackjanitor` to `enabled`, StackJanitor will add your CloudFormation Stack to DynamoDB, setting a TTL field on it to 7 days (this is default, but can be changed).
 
 When the DynamoDB row expires and deletes the row, a lambda function is then triggered that deletes your stack.
-
 
 ![StackJanitor Architecture](./StackJanitor.png "StackJanitor Architecture")
 
