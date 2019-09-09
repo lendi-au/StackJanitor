@@ -4,6 +4,9 @@
 
 StackJanitor is an event-driven serverless application that cleans up AWS CloudFormation Stacks in development environments based on TTL (expiration time) and git pull request events. It cleans up unused development CFN stacks to help you save AWS cloud development costs.
 
+## Use Case
+We initially came up with the idea for StackJanitor when we needed to start cleaning up a lot of our ephemeral stacks on a regular basis. There are some that currently do this using polling mechanisms, but we figured we could use this as an opportunity to come up with an event-driven serverless app that can do this without having to continually poll resources
+
 ## How it works
 
 StackJanitor automatically monitors all the CloudFormation stacks that you create in the AWS account. If stackjanitor tag is enabled, StackJanitor will put a default TTL (based on your configurations) for the Stack. It will clean up the CFN Stack when TTL is expired.
