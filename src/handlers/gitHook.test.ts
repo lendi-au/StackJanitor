@@ -95,12 +95,6 @@ describe("bitBucketEventHandler", () => {
       }
     };
 
-    const mockDataMapper = {
-      create: (arg: any) => Promise.resolve(arg),
-      update: (arg: any) => Promise.resolve(arg),
-      destroy: (arg: any) => Promise.resolve(arg),
-      get: (arg: any) => Promise.resolve(arg)
-    };
     const spy = jest.spyOn(helpers, "findStacksFromTag");
     spy.mockResolvedValue([
       {
@@ -110,7 +104,7 @@ describe("bitBucketEventHandler", () => {
       }
     ]);
 
-    expect(bitBucketEventHandler(bitBucketEventData, mockDataMapper)).toEqual(
+    expect(bitBucketEventHandler(bitBucketEventData)).toEqual(
       Promise.resolve({})
     );
   });

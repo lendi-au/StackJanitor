@@ -92,4 +92,20 @@ declare module "stackjanitor" {
   export interface DynamoDataModel {
     attrs: DataItem;
   }
+
+  export interface GithubWebhookEvent {
+    action: string;
+    pull_request: {
+      state: string;
+      head: {
+        ref: string;
+        repo: Repository;
+      };
+      base: {
+        repo: Repository;
+      };
+      merged: boolean;
+    };
+    repository: Repository;
+  }
 }

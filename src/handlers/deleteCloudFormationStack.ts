@@ -51,6 +51,7 @@ export const deleteCloudFormationStack = async (
     if (!StackName) {
       return;
     }
+
     const { Stacks } = await cloudFormation
       .describeStacks({ StackName })
       .promise();

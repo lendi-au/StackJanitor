@@ -1,9 +1,13 @@
 import { APIGatewayEvent } from "aws-lambda";
-import { BitbucketWebhookEvent, DataItem, GitTag, State } from "stackjanitor";
-import { DataModel, dataModel } from "../data/DynamoDataModel";
+import {
+  BitbucketWebhookEvent,
+  DataItem,
+  GithubWebhookEvent,
+  GitTag,
+  State
+} from "stackjanitor";
 import { logger } from "../logger";
-import { handleDataItem } from "./monitorCloudFormationStack";
-import { findStacksFromTag } from "../helpers";
+import { deleteDynamoRow, findStacksFromTag } from "../helpers";
 
 export const SEARCH_KEY = "tags";
 
@@ -19,21 +23,19 @@ export const bitbucketEventParser = (
   branch: eventData.pullrequest.source.branch.name
 });
 
+export const gitHubEventParser = (eventData: GithubWebhookEvent): GitTag => ({
+  repository: eventData.repository.name,
+  branch: eventData.pull_request.head.ref
+});
+
 export const isBitbucketEvent = (event: any): event is BitbucketWebhookEvent =>
   event.hasOwnProperty("pullrequest") && event.hasOwnProperty("repository");
 
-const deleteDynamoRow = async (dataItem: DataItem, dataModel: DataModel) =>
-  handleDataItem(
-    {
-      stackName: dataItem.stackName,
-      stackId: dataItem.stackId
-    },
-    dataModel.destroy
-  );
+export const isGithubEvent = (event: any): event is GithubWebhookEvent =>
+  event.hasOwnProperty("pull_request") && event.hasOwnProperty("repository");
 
 export const bitBucketEventHandler = async (
-  eventData: BitbucketWebhookEvent,
-  dataModel: DataModel
+  eventData: BitbucketWebhookEvent
 ) => {
   const state = eventData.pullrequest.state;
   const inDesiredState = isInDesiredState(state);
@@ -43,10 +45,29 @@ export const bitBucketEventHandler = async (
       body: Response.Ignore
     };
   const gitTag = bitbucketEventParser(eventData);
+  return findAndDeleteStacksFromTag(gitTag);
+};
+
+export const gitHubEventHandler = async (eventData: GithubWebhookEvent) => {
+  const mergedState = eventData.pull_request.merged;
+  if (!mergedState)
+    return {
+      statusCode: 200,
+      body: Response.Ignore
+    };
+  const gitTag = gitHubEventParser(eventData);
+  return findAndDeleteStacksFromTag(gitTag);
+};
+
+export const findAndDeleteStacksFromTag = async (gitTag: GitTag) => {
   const stacksFromTag = await findStacksFromTag(gitTag, SEARCH_KEY);
-  for (let stack of stacksFromTag) {
+  return deleteStacks(stacksFromTag);
+};
+
+export const deleteStacks = async (stacks: DataItem[]) => {
+  for (let stack of stacks) {
     try {
-      await deleteDynamoRow(stack, dataModel);
+      await deleteDynamoRow(stack);
     } catch (e) {
       logger.error(e);
     }
@@ -70,7 +91,10 @@ export const index = async (event: APIGatewayEvent) => {
 
   const eventData = JSON.parse(event.body);
   if (isBitbucketEvent(eventData)) {
-    return await bitBucketEventHandler(eventData, dataModel);
+    return await bitBucketEventHandler(eventData);
+  }
+  if (isGithubEvent(eventData)) {
+    return await gitHubEventHandler(eventData);
   }
 
   return {

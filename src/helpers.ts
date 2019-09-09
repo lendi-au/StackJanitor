@@ -4,7 +4,8 @@ import {
   DynamoSearchResult,
   GitTag
 } from "stackjanitor";
-import { dynamoDataModel } from "./data/DynamoDataModel";
+import { dataModel, dynamoDataModel } from "./data/DynamoDataModel";
+import { handleDataItem } from "./handlers/monitorCloudFormationStack";
 
 export const findStacksFromTag = (
   gitTag: GitTag,
@@ -22,4 +23,13 @@ export const findStacksFromTag = (
           ? reject(err)
           : resolve(data.Items.map((item: DynamoDataModel) => item.attrs))
       )
+  );
+
+export const deleteDynamoRow = async (dataItem: DataItem) =>
+  handleDataItem(
+    {
+      stackName: dataItem.stackName,
+      stackId: dataItem.stackId
+    },
+    dataModel.destroy
   );
