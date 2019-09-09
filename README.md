@@ -51,7 +51,7 @@ Tag your CloudFormation Stack,
 REPOSITORY = `Git repo name` and
 BRANCH = `Git branch`.
 
-When you deploy the StackJanitor by running `sls deploy` command, you should receive a webhook endpoint output url in your terminal.
+When you deploy StackJanitor by running the `sls deploy` command, you should receive a webhook endpoint output url in your terminal.
 
 Now, browse the webhook settings in your git repository and add the webhook enpoint.
 
