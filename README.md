@@ -17,7 +17,9 @@ When the DynamoDB row expires and deletes the row, a lambda function is then tri
 
 ![StackJanitor Architecture](./StackJanitor.png "StackJanitor Architecture")
 
-StackJanitor also works with Github and Bitbucket Pull request events. If your CloudFormation Stack has tag for specific git branch and repo, StackJanitor can clean up the Stack when pull request is merged or declined for the branch.
+StackJanitor can also delete stacks using either a Github or Bitbucket webhook. Our current workflow uses merged pull request events to trigger the webhook so that we can quickly delete stacks as part of our development workflow.
+
+To use this feature, your CloudFormation Stack must also be tagged with `BRANCH` and `REPOSITORY` in order for StackJanitor to find the stack associated with your branch/repository combination and delete it.
 
 ![StackJanitor Architecture](./StackJanitor-git.jpg "StackJanitor Architecture")
 
