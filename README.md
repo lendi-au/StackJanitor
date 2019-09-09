@@ -55,7 +55,7 @@ When you deploy StackJanitor by running the `sls deploy` command, you should rec
 
 Now, browse the webhook settings in your git repository and add the webhook enpoint.
 
-If you are using **BitBucket,**
+### Bitbucket
 
 1. Go to `Settings > Webhooks` and click `Add Webhook`.
 2. Put the webhook endpoint in `URL` field.
