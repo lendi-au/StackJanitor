@@ -63,7 +63,7 @@ Now, browse the webhook settings in your git repository and add the webhook enpo
 4. Set `Triggers` to `Choose from a full list of triggers` and select Pull request `Merged` and `Declined`.
 5. Save the settings.
 
-If you are using **GitHub,**
+### GitHub
 
 1. Go to `Settings > Webhooks` and click `Add Webhook`.
 2. Put the webhook endpoint in `Payload URL` field.
