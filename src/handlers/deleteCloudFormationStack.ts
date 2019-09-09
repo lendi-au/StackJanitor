@@ -45,12 +45,15 @@ export const deleteCloudFormationStack = async (
   event: DynamoDBStreamEvent,
   cloudFormation: CloudFormation
 ) => {
+  logger.info(event);
   const StackNames = await getStackNamesFromStreamEvent(event);
 
   for (let StackName of StackNames) {
     if (!StackName) {
       return;
     }
+    logger.info("describe", StackName);
+
     const { Stacks } = await cloudFormation
       .describeStacks({ StackName })
       .promise();
@@ -62,6 +65,7 @@ export const deleteCloudFormationStack = async (
     const status = await checkStackJanitorStatus(Stacks);
     if (status === StackStatus.Enabled) {
       try {
+        logger.info("delete", StackName);
         await cloudFormation.deleteStack({ StackName }).promise();
       } catch (e) {
         logger.error(e);
