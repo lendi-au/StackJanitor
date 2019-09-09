@@ -9,7 +9,10 @@ We initially came up with the idea for StackJanitor when we needed to start clea
 
 ## How it works
 
-StackJanitor automatically monitors all the CloudFormation stacks that you create in the AWS account. If stackjanitor tag is enabled, StackJanitor will put a default TTL (based on your configurations) for the Stack. It will clean up the CFN Stack when TTL is expired.
+StackJanitor automatically adds all  of the CloudFormation stacks that you create in your AWS account to a DynamoDB Table. 
+If you have specified a stacktag `stackjanitor` to `enabled`, StackJanitor will add your CloudFormation Stack to DynamoDB, setting a TTL field on it to 7 days (this is default, but can be changed).
+
+When the DynamoDB row expires and deletes the row, a lambda function is then triggered that deletes your stack.
 
 **Example:** You have deployed a development CFN Stack with a tag `stackjanitor = "enabled"`. if the default TTL is set as 7 days (604800 seconds) in the `serverless.yml`, the CFN stack will be cleaned up automatically after 7 days. Any `UpdateStack` will refresh the TTL.
 
