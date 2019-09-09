@@ -2,7 +2,7 @@
 
 ![StackJanitor](https://i.imgur.com/KMkUEo6.jpg)
 
-StackJanitor is a tool to clean up AWS CloudFormation Stacks in development environment based on TTL (expiration time) and git pull request events. It cleans up unused development CFN stacks to help you save AWS cloud development costs.
+StackJanitor is an event-driven serverless application that cleans up AWS CloudFormation Stacks in development environments based on TTL (expiration time) and git pull request events. It cleans up unused development CFN stacks to help you save AWS cloud development costs.
 
 ## How it works
 
