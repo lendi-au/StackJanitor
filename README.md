@@ -14,7 +14,6 @@ If you have specified a stacktag `stackjanitor` to `enabled`, StackJanitor will 
 
 When the DynamoDB row expires and deletes the row, a lambda function is then triggered that deletes your stack.
 
-**Example:** You have deployed a development CFN Stack with a tag `stackjanitor = "enabled"`. if the default TTL is set as 7 days (604800 seconds) in the `serverless.yml`, the CFN stack will be cleaned up automatically after 7 days. Any `UpdateStack` will refresh the TTL.
 
 ![StackJanitor Architecture](./StackJanitor.png "StackJanitor Architecture")
 
