@@ -16,7 +16,8 @@ jobs:
     - name: Setup Git
       run: |
         git init
-        cat ${GITHUB_ACTOR}
+        echo ${GITHUB_ACTOR}
+        echo ${GITHUB_REPOSITORY}
         git config user.name ${GITHUB_ACTOR}
         git config user.email "jordan.simonovski@gmail.com"
     - run: yarn
