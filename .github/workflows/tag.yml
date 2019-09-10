@@ -1,0 +1,16 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Tag Release
+      uses: butlerlogic/action-autotag@1.0.0
+      with:
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
