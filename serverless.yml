@@ -39,6 +39,7 @@ provider:
         - "ec2:*"
         - "s3:*"
         - "ecs:*"
+        - "sqs:*"
         - "elasticloadbalancing:*"
         - "elasticloadbalancing:*"
         - "elasticloadbalancingv2:*"
@@ -49,6 +50,12 @@ provider:
         - "application-autoscaling:*"
         - "autoscaling:*"
         - "apigateway:*"
+        - "iam:DetachRolePolicy"
+        - "iam:DeleteRolePolicy"
+        - "iam:DeleteRole"
+        - "iam:DeletePolicy"
+        - "iam:DeleteGroupPolicy"
+        - "iam:DeletePolicyVersion"
       Resource: "*"
 
 resources:
