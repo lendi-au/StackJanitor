@@ -14,14 +14,9 @@ jobs:
       uses: butlerlogic/action-autotag@1.0.0
       with:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-    - uses: actions/setup-node@v1
-      with:
-        node-version: '10.x'
-    - run: node -p "require('./package.json').version" > version.txt
-    - run: echo "Releasing $(cat version.txt) of StackJanitor"
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: '**/**'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # - name: Release
+    #   uses: softprops/action-gh-release@v1
+    #   with:
+    #     files: '**/**'
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
