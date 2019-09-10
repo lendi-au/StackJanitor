@@ -10,9 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+    - run: export RELEASE_VERSION=$(node -p "require('./package.json').version")
     - name: Create a Release
-      uses: elgohr/Github-Release-Action@master
+      uses: frankjuniorr/github-create-release-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        args: MyReleaseMessage
+        VERSION: ${{ RELEASE_VERSION }}
