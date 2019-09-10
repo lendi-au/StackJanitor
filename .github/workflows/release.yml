@@ -13,9 +13,11 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: '10.x'
-    - run: git init
-    - run: git config user.name "jordan-simonovski"
-    - run: git config user.email "jordan.simonovski@gmail.com"
+    - name: Setup Git
+      run: |
+        git init
+        git config user.name "${GITHUB_ACTOR}"
+        git config user.email "jordan.simonovski@gmail.com"
     - run: yarn
     - run: yarn release
       env:
