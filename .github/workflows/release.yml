@@ -16,7 +16,7 @@ jobs:
     - name: Setup Git
       run: |
         git init
-        git config user.name "${GITHUB_ACTOR}"
+        git config user.name ${{ GITHUB_ACTOR }}
         git config user.email "jordan.simonovski@gmail.com"
     - run: yarn
     - run: yarn release
