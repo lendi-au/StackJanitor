@@ -13,13 +13,12 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: '10.x'
-    - run: export RELEASE_VERSION=$(node -p "require('./package.json').version")
+    - run: node -p "require('./package.json').version" > version.txt
     - uses: actions/github-script@0.2.0
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
-          env
-          return ${RELEASE_VERSION};
+          return $(cat version.txt);
     - name: Create a Release
       uses: frankjuniorr/github-create-release-action@master
       env:
