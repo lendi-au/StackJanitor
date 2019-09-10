@@ -2,14 +2,20 @@ name: Release
 
 on:
   push:
-    branches:
-      - '*'
+    tags:
+      - 'v*.*.*'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Create a Release
-      uses: elgohr/Github-Release-Action@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+    - run: node -p "require('./package.json').version" > version.txt
+    - name: Release
+      uses: ncipollo/release-action@v1
+      with:
+        artifact: "*"
+        bodyFile: "body.md"
+        token: ${{ secrets.GITHUB_TOKEN }}
