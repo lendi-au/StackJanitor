@@ -14,8 +14,14 @@ jobs:
       with:
         node-version: '10.x'
     - run: export RELEASE_VERSION=$(node -p "require('./package.json').version")
+    - uses: actions/github-script@0.2.0
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          env
+          return ${RELEASE_VERSION};
     - name: Create a Release
       uses: frankjuniorr/github-create-release-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        VERSION: ${{ RELEASE_VERSION }}
+        VERSION: ${{ steps.output.result }}
