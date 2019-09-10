@@ -16,10 +16,10 @@ jobs:
     - name: Setup Git
       run: |
         git init
-        echo ${GITHUB_ACTOR}
-        echo ${GITHUB_REPOSITORY}
         git config user.name ${GITHUB_ACTOR}
         git config user.email "jordan.simonovski@gmail.com"
+        git config user.password ${{ secrets.GITHUB_TOKEN }}
+        git remote add origin git@github.com:${GITHUB_REPOSITORY}.git 
     - run: yarn
     - run: yarn release
       env:
