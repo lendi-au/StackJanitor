@@ -15,7 +15,7 @@ jobs:
         node-version: '10.x'
     - run: git init
     - run: git config user.name "jordan-simonovski"
-    - run: git config user.email "ci@lendi.com.au"
+    - run: git config user.email "jordan.simonovski@gmail.com"
     - run: yarn
     - run: yarn release
       env:
