@@ -13,7 +13,7 @@
     "test": "jest",
     "package": "serverless package",
     "deploy": "serverless deploy",
-    "release": "release-it --cli --no-git.requireUpstream"
+    "release": "release-it --ci --no-git.requireUpstream"
   },
   "dependencies": {
     "dynogels": "^9.1.0",
