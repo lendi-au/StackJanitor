@@ -7,10 +7,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Install
-      uses: actions/setup-node@v1
+    - uses: actions/setup-node@v1
       with:
         node-version: '10.x'
-      run: yarn
-      run: yarn lint:format
-      run: yarn test --collectCoverage=true
+    - run: yarn
+    - run: yarn lint:format
+    - run: yarn test --collectCoverage=true
