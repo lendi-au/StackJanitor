@@ -6,11 +6,11 @@ on:
       - '*'
 
 jobs:
-  build:
+  tag:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - uses: actions/debug@master
+    - uses: actions/bin/debug@master
     - uses: butlerlogic/action-autotag@1.0.2
       with:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
