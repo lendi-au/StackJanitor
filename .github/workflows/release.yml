@@ -15,8 +15,12 @@ jobs:
         node-version: '10.x'
     - name: Setup Git
       run: |
+        mkdir -p ~/.ssh
+        echo "$DEPLOY_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+        chmod 700 ~/.ssh/id_rsa
         eval `ssh-agent -s`
-        echo "$DEPLOY_KEY" | tr -d '\r' | ssh-add -
+        ssh-add ~/.ssh/id_rsa
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
         git remote rm origin
         git remote add origin git@github.com:$GITHUB_REPOSITORY.git
         git fetch
