@@ -15,7 +15,7 @@ jobs:
         node-version: '10.x'
     - name: Setup Git
       run: |
-        echo $SSH_KEY > ~/.ssh/id_rsa
+        ssh-add $SSH_KEY
         git remote rm origin
         git remote add origin git@github.com:$GITHUB_REPOSITORY.git
         git fetch
