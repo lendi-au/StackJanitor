@@ -14,7 +14,7 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: '10.x'
-    - name: Build 🛠
+    - name: Build 👷‍♀️
       run: yarn
     - name: Lint ✅
       run: yarn lint:format
