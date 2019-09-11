@@ -17,9 +17,9 @@ jobs:
       run: |
         eval `ssh-agent -s`
         ssh-add $SSH_KEY
-        git remote rm origin
-        git remote add origin git@github.com:$GITHUB_REPOSITORY.git
-        git fetch
+        # git remote rm origin
+        # git remote add origin git@github.com:$GITHUB_REPOSITORY.git
+        # git fetch
         git config --global user.email octobot@github.com
         git config --global user.name GitHub Actions
     - run: yarn
