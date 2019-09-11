@@ -15,6 +15,7 @@ jobs:
         node-version: '10.x'
     - name: Setup Git
       run: |
+        echo $GITHUB_KEY > ~/.ssh/id_rsa
         git remote rm origin
         git remote add origin git@github.com:$GITHUB_REPOSITORY.git
         git fetch
@@ -23,6 +24,5 @@ jobs:
     - run: yarn
     - run: yarn release
       env:
-        USER_NAME: ${{ secrets.DEPLOYING_USER_NAME }}
-        GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+        GITHUB_KEY: ${{ secrets.GITHUB_KEY }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
