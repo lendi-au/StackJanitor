@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - '*'
+      - 'master'
 
 jobs:
   Release:
@@ -14,8 +14,9 @@ jobs:
       with:
         node-version: '10.x'
     - run: yarn
-    - name: Release the thing 🎉
+    - name: Release 🎉
       run:  |
+        git checkout master
         git remote rm origin
         git remote add origin https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git
         git fetch

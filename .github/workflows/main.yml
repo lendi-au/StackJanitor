@@ -6,7 +6,6 @@ on:
       - '*'
       - '!master'
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,6 +14,9 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: '10.x'
-    - run: yarn
-    - run: yarn lint:format
-    - run: yarn test --collectCoverage=true
+    - name: Build 🛠
+      run: yarn
+    - name: Lint ✅
+      run: yarn lint:format
+    - name: Test 🙏
+      run: yarn test --collectCoverage=true

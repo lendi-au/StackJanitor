@@ -2,11 +2,13 @@
 
 ![StackJanitor](https://i.imgur.com/9KI0RVe.png)
 
+[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Flendi-au%2FStackJanitor%2Fbadge%3Fref%3Dmaster&style=for-the-badge)](https://actions-badge.atrox.dev/lendi-au/StackJanitor/goto?ref=master)
+
 StackJanitor is an event-driven serverless application that cleans up AWS CloudFormation Stacks in development environments based on TTL (expiration time) and git pull request events. It cleans up unused development CFN stacks to help you save AWS cloud development costs.
 
 ## Use Case
 
-We initially came up with the idea for StackJanitor when we needed to start cleaning up a lot of our ephemeral stacks on a regular basis. There are some that currently do this using polling mechanisms, but we figured we could use this as an opportunity to come up with an event-driven serverless app that can do this without having to continually poll resources
+We initially came up with the idea for StackJanitor when we needed to start cleaning up a lot of our ephemeral stacks on a regular basis. There are some that currently do this using polling mechanisms, but we figured we could use this as an opportunity to come up with an event-driven serverless app that can do this without having to continually poll resources.
 
 ## How it works
 
@@ -15,18 +17,20 @@ If you have specified a stacktag `stackjanitor` to `enabled`, StackJanitor will 
 
 When the DynamoDB row expires and deletes the row, a lambda function is then triggered that deletes your stack.
 
-![StackJanitor Architecture](./StackJanitor.png "StackJanitor Architecture")
-
 StackJanitor can also delete stacks using either a Github or Bitbucket webhook. Our current workflow uses merged pull request events to trigger the webhook so that we can quickly delete stacks as part of our development workflow.
 
 To use this feature, your CloudFormation Stack must also be tagged with `BRANCH` and `REPOSITORY` in order for StackJanitor to find the stack associated with your branch/repository combination and delete it.
-
-![StackJanitor Architecture](./StackJanitor-git.jpg "StackJanitor Architecture")
 
 CloudFormation stack creation event will produce a CloudTrail log which will trigger a step function/lambda to set a TTL for fresh stacks in a DynamoDB table.
 CloudTrail logs from any update stack events concerning that development stack will re-invoke the Lambda function to refresh the TTL.
 
 However, If stack resources remain unused for certain period of time, TTL expiration in the DynamoDB table will invoke the Lambda (responsible for cleaning up the stack) to perform a safe cleaning up process of the CFN stack.
+
+## Architecture
+
+![StackJanitor Architecture](./img/StackJanitor.png "StackJanitor Architecture")
+
+![StackJanitor Architecture](./img/StackJanitor-git.jpg "StackJanitor Architecture")
 
 ## Installation
 
