@@ -1,0 +1,27 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  Release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+    - run: yarn
+    - name: Release 🎉
+      run:  |
+        git checkout master
+        git remote rm origin
+        git remote add origin https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git
+        git fetch
+        git config --global user.email octobot@github.com
+        git config --global user.name GitHub Actions
+        yarn release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
