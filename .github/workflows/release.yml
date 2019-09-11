@@ -25,5 +25,5 @@ jobs:
     - run: yarn
     - run: yarn release
       env:
-        DEPLOY_KEY: ${{ secrets.SSH_KEY }}
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
