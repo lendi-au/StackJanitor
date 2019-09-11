@@ -16,14 +16,14 @@ jobs:
     - name: Setup Git
       run: |
         eval `ssh-agent -s`
-        ssh-add $SSH_KEY
-        # git remote rm origin
-        # git remote add origin git@github.com:$GITHUB_REPOSITORY.git
-        # git fetch
+        ssh-add - <<< "${DEPLOY_KEY}"
+        git remote rm origin
+        git remote add origin git@github.com:$GITHUB_REPOSITORY.git
+        git fetch
         git config --global user.email octobot@github.com
         git config --global user.name GitHub Actions
     - run: yarn
     - run: yarn release
       env:
-        SSH_KEY: ${{ secrets.SSH_KEY }}
+        DEPLOY_KEY: ${{ secrets.SSH_KEY }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
