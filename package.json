@@ -18,6 +18,7 @@
   "dependencies": {
     "dynogels": "^9.1.0",
     "pino": "^5.13.2",
+    "pino-pretty": "^3.2.1",
     "source-map-support": "^0.5.10"
   },
   "devDependencies": {
