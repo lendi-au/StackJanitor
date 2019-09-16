@@ -2,7 +2,7 @@
 
 ![StackJanitor](https://i.imgur.com/XXdfuf9.png)
 
-[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Flendi-au%2FStackJanitor%2Fbadge%3Fref%3Dmaster&style=for-the-badge)](https://actions-badge.atrox.dev/lendi-au/StackJanitor/goto?ref=master)
+![](https://github.com/lendi-au/StackJanitor/workflows/Release/badge.svg)
 
 StackJanitor is an event-driven serverless application that cleans up AWS CloudFormation Stacks in development environments based on TTL (expiration time) and git pull request events. It cleans up unused development CFN stacks to help you save AWS cloud development costs.
 
