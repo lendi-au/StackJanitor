@@ -1,9 +1,10 @@
-name: Build
+name: Feature Build
 
 on:
   push:
     branches:
-      - 'master'
+      - '*'
+      - '!master'
 
 jobs:
   build:
