@@ -32,5 +32,5 @@ jobs:
       env:
         DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
         EVENT_TITLE: "StackJanitor Release Succeeded! 🎉"
-        EVENT_TEXT: Release can be found here: https://github.com/lendi-au/StackJanitor/releases
+        EVENT_TEXT: "Release can be found here: https://github.com/lendi-au/StackJanitor/releases"
         EVENT_TAGS: "['app:StackJanitor']"
