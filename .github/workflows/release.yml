@@ -26,7 +26,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: DataDog Event Trigger
-      uses: jordan-simonovski/datadog-event-action@1.0.0
+      uses: jordan-simonovski/datadog-event-action@1.0.1
       env:
         DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
         EVENT_TITLE: "StackJanitor Release Succeeded! 🎉"
