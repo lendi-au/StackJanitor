@@ -2,8 +2,6 @@ name: Release
 
 on:
   push:
-    paths:
-      - '!.md'
     branches:
       - 'master'
 
