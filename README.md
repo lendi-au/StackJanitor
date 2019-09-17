@@ -43,22 +43,29 @@ However, If stack resources remain unused for certain period of time, TTL expira
 
    Follow [this guide](https://serverless.com/framework/docs/providers/aws/guide/credentials/) to setup AWS credentials for serverless.
 
-5. Deploy StackJanitor by running `sls deploy`
+5. Deploy StackJanitor by running `serverless deploy`
 6. Put a tag in CloudFormation stack `stackjanitor = "enabled"` to enable monitoring.
 
 ## Configuration
 
-Set up default expiration period (TTL) in `serverless.yml` custom vars.
+### Pre-Requisites
 
-## Setting up the Git Webhook
+You will need to have CloudTrail running in your account as CloudTrail events trigger Lambda functions.
 
-Tag your CloudFormation Stack,
-REPOSITORY = `Git repo name` and
-BRANCH = `Git branch`.
+### Options
 
-When you deploy StackJanitor by running the `sls deploy` command, you should receive a webhook endpoint output url in your terminal.
+The app comes pre-configured with most things it needs. By default it sets the expiry time on a stack to 7 days.
+You can override this using the `DEFAULT_EXPIRATION_PERIOD` custom variable found in the `serverless.yml`
 
-Now, browse the webhook settings in your git repository and add the webhook enpoint.
+## Webhook Support
+
+If you don't want to wait 7 days for your stack to be deleted, you can trigger a deletion event using a GitHub or Bitbucket webhook.
+
+As part of your CloudFormation build, make sure you tag your CloudFormation Stack with:
+REPOSITORY = `Repository Name`
+BRANCH = `Git Branch`
+
+Your webhook endpoint will be available when you first set up your serverless app with `serverless deploy`
 
 ### Bitbucket
 
@@ -79,7 +86,5 @@ Now, browse the webhook settings in your git repository and add the webhook enpo
 
 ## Upcoming features
 
-- Scheduled lambda to send notification of potential stack clean up process.
-- Slack notification
-- Email notification
-- Refresh TTL by clicking link (hook) from Email/Slack message.
+- [ ] Slack Notifications when stack has been deleted
+- [ ] Interactive Slack Messages to extend expiry time

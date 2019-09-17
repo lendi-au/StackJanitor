@@ -3,6 +3,7 @@
     "tagName": "${version}"
   },
   "github": {
-    "release": true
+    "release": true,
+    "releaseName": "${version}"
   }
 }
