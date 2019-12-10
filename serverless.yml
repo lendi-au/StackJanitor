@@ -30,6 +30,12 @@ provider:
         - "dynamodb:DeleteItem"
       Resource: "arn:aws:dynamodb:*:*:table/${self:custom.DYNAMO_DB_TABLE}"
     - Effect: "Allow"
+      Action: 
+        - "dynamodb:List*"
+        - "dynamodb:Delete*"
+        - "dynamodb:Describe*"
+      Resource: "*"
+    - Effect: "Allow"
       Action:
         - "cloudformation:DescribeStack*"
         - "cloudformation:DeleteStack*"
