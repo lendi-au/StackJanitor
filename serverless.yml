@@ -44,8 +44,6 @@ provider:
         - "dynamodb:BatchGetItem"
         - "dynamodb:ConditionCheckItem"
         - "dynamodb:ListBackups"
-        - "dynamodb:Scan"
-        - "dynamodb:Query"
         - "dynamodb:DescribeStream"
         - "dynamodb:DeleteTableReplica"
         - "dynamodb:DescribeTimeToLive"
