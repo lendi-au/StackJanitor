@@ -30,7 +30,7 @@ provider:
         - "dynamodb:DeleteItem"
       Resource: "arn:aws:dynamodb:*:*:table/${self:custom.DYNAMO_DB_TABLE}"
     - Effect: "Allow"
-      Action: 
+      Action:
         - "dynamodb:List*"
         - "dynamodb:Delete*"
         - "dynamodb:Describe*"
@@ -56,6 +56,7 @@ provider:
         - "application-autoscaling:*"
         - "autoscaling:*"
         - "apigateway:*"
+        - "lambda:Delete*"
         - "iam:DetachRolePolicy"
         - "iam:DeleteRolePolicy"
         - "iam:DeleteRole"
