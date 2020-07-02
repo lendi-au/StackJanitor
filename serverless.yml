@@ -14,10 +14,13 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs10.x
+  runtime: nodejs12.x
   memorySize: 128
   stage: ${opt:stage, 'development'}
   region: ${self:custom.DEFAULT_REGION}
+  deploymentBucket:
+    name: ${env:SLS_DEPLOY_BUCKET, 'stackjanitor-serverless-deployment-bucket'}
+  deploymentPrefix: ${env:SLS_DEPLOY_PREFIX, 'StackJanitor'}
   iamRoleStatements:
     - Effect: "Allow"
       Action:
