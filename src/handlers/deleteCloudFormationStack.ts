@@ -7,6 +7,7 @@ import {
   getTagsFromStacks
 } from "./logCloudFormationStack";
 import { StackStatus } from "../tag/TagStatus";
+import { parseEventRecords } from "./dynamoParser";
 
 const cloudFormation = new CloudFormation();
 
@@ -72,5 +73,16 @@ export const deleteCloudFormationStack = async (
 };
 
 export const index = async (event: DynamoDBStreamEvent) => {
+  const records = parseEventRecords(event);
+
+  for (const record of records) {
+    const { eventID, data, oldData, eventName } = record;
+    logger.info(
+      `Started processing Dynamo stream. Event ID: ${eventID}, Event Name: ${eventName}`
+    );
+    logger.info(JSON.stringify(data));
+    logger.info(JSON.stringify(oldData));
+  }
+
   return await deleteCloudFormationStack(event, cloudFormation);
 };
