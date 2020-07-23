@@ -23,7 +23,7 @@ export enum DynamoDBEventType {
   Remove = "REMOVE"
 }
 
-interface ParsedRecord<T> {
+export interface ParsedRecord<T> {
   data: T | null;
   oldData: T | null;
   eventName: DynamoDBEventType;

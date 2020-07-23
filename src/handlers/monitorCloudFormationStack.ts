@@ -88,5 +88,5 @@ export const monitorCloudFormationStack = (
 
 export const index = async (stackJanitorStatus: StackJanitorStatus) => {
   const { event } = stackJanitorStatus;
-  return await monitorCloudFormationStack(event, dataModel);
+  return monitorCloudFormationStack(event, dataModel);
 };
