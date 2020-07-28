@@ -70,7 +70,7 @@ async function processRecords(records: ParsedRecord<DataItem>[]) {
         err instanceof ValidationError &&
         err.message.includes("does not exist")
       )
-        logger.error(err);
+        logger.error(`${err.message} - ${eventDetails}`);
       throw err;
     }
   }
