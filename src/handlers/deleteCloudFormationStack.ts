@@ -62,15 +62,16 @@ async function processRecords(records: ParsedRecord<DataItem>[]) {
     try {
       await deleteCloudFormationStack(oldData);
     } catch (err) {
-      if (err instanceof StackJanitorNotEnabledError) {
+      if (
+        err instanceof StackJanitorNotEnabledError ||
+        (err instanceof ValidationError &&
+          err.message.includes("does not exist"))
+      ) {
         logger.error(`${err.message} - ${eventDetails}`);
         return;
       }
-      if (
-        err instanceof ValidationError &&
-        err.message.includes("does not exist")
-      )
-        logger.error(`${err.message} - ${eventDetails}`);
+
+      logger.error(`${err.message} - ${eventDetails}`);
       throw err;
     }
   }

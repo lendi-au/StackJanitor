@@ -7,6 +7,7 @@ let dynamoDBStreamEvent: any;
 describe("deleteCloudFormationStack", () => {
   beforeEach(() => {
     (<any>deleteStack) = jest.fn();
+    logger.error = jest.fn();
     dynamoDBStreamEvent = {
       Records: [
         {
@@ -60,13 +61,13 @@ describe("deleteCloudFormationStack", () => {
       throw new ValidationError("Stack with id stackname does not exist");
     });
 
-    expect.assertions(2);
+    await index(dynamoDBStreamEvent);
 
-    try {
-      await index(dynamoDBStreamEvent);
-    } catch (e) {
-      expect(e.message).toEqual("Stack with id stackname does not exist");
-    }
     expect(deleteStack).toHaveBeenNthCalledWith(1, "stackname");
+
+    expect(logger.error).toHaveBeenNthCalledWith(
+      1,
+      "Stack with id stackname does not exist - Event ID: 89a6db8b5fa9b0df5b67e2a6fd24cb76, Event Name: REMOVE"
+    );
   });
 });
