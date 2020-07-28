@@ -72,7 +72,7 @@ async function processRecords(records: ParsedRecord<DataItem>[]) {
       }
 
       logger.error(`${err.message} - ${eventDetails}`);
-      throw err;
+      // throw err;
     }
   }
 }
