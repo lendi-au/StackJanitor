@@ -1,18 +1,13 @@
-import { index } from "./deleteCloudFormationStack";
+import { index, ValidationError } from "./deleteCloudFormationStack";
 import { logger } from "../logger";
 import { deleteStack } from "../cloudformation";
+
+let dynamoDBStreamEvent: any;
 
 describe("deleteCloudFormationStack", () => {
   beforeEach(() => {
     (<any>deleteStack) = jest.fn();
-  });
-
-  afterEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
-  });
-  test("it should invoke cloudformation delete for remove event", async () => {
-    const dynamoDBStreamEvent: any = {
+    dynamoDBStreamEvent = {
       Records: [
         {
           eventID: "89a6db8b5fa9b0df5b67e2a6fd24cb76",
@@ -49,8 +44,29 @@ describe("deleteCloudFormationStack", () => {
       ],
       v: 1
     };
+  });
 
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.resetModules();
+  });
+  test("it should invoke cloudformation delete for remove event", async () => {
     await index(dynamoDBStreamEvent);
+    expect(deleteStack).toHaveBeenNthCalledWith(1, "stackname");
+  });
+
+  test("Validation error should be logged safely", async () => {
+    (<any>deleteStack) = jest.fn().mockImplementation(() => {
+      throw new ValidationError("Stack with id stackname does not exist");
+    });
+
+    expect.assertions(2);
+
+    try {
+      await index(dynamoDBStreamEvent);
+    } catch (e) {
+      expect(e.message).toEqual("Stack with id stackname does not exist");
+    }
     expect(deleteStack).toHaveBeenNthCalledWith(1, "stackname");
   });
 });

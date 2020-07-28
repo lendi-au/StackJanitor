@@ -15,6 +15,12 @@ class StackJanitorNotEnabledError extends Error {
   }
 }
 
+export class ValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
 function isStackJanitorEnabled(tags: CustomTag[]) {
   const status = tags.find(tag => tag.key === "stackjanitor")?.value;
   return status === StackStatus.Enabled;
@@ -60,7 +66,11 @@ async function processRecords(records: ParsedRecord<DataItem>[]) {
         logger.error(`${err.message} - ${eventDetails}`);
         return;
       }
-      logger.error(err);
+      if (
+        err instanceof ValidationError &&
+        err.message.includes("does not exist")
+      )
+        logger.error(err);
       throw err;
     }
   }
