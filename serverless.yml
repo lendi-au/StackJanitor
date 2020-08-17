@@ -62,6 +62,7 @@ provider:
         - "application-autoscaling:*"
         - "autoscaling:*"
         - "apigateway:*"
+        - "lambda:Get*"
         - "lambda:Delete*"
         - "glue:Delete*"
         - "iam:DetachRolePolicy"
