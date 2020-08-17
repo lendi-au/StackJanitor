@@ -18,6 +18,9 @@ provider:
   memorySize: 128
   stage: ${opt:stage, 'development'}
   region: ${self:custom.DEFAULT_REGION}
+  tracing:
+    lambda: true
+    apiGateway: true
   deploymentBucket:
     name: ${env:SLS_DEPLOY_BUCKET, 'stackjanitor-serverless-deployment-bucket'}
   deploymentPrefix: ${env:SLS_DEPLOY_PREFIX, 'StackJanitor'}
@@ -74,6 +77,8 @@ resources:
   Resources:
     stackJanitorTable:
       Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
       Properties:
         TableName: ${self:custom.DYNAMO_DB_TABLE}
         AttributeDefinitions:
@@ -93,9 +98,11 @@ resources:
           Enabled: true
 
         BillingMode: PAY_PER_REQUEST
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
 
         StreamSpecification:
-          StreamViewType: NEW_IMAGE
+          StreamViewType: NEW_AND_OLD_IMAGES
 
 functions:
   logCloudFormationStack:

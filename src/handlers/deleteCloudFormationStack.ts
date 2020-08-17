@@ -1,76 +1,83 @@
-import { DynamoDBRecord, DynamoDBStreamEvent } from "aws-lambda";
-import { CloudFormation } from "aws-sdk";
+import { DynamoDBStreamEvent } from "aws-lambda";
 import { logger } from "../logger";
-import {
-  convertTags,
-  getStackJanitorStatus,
-  getTagsFromStacks
-} from "./logCloudFormationStack";
 import { StackStatus } from "../tag/TagStatus";
+import {
+  DynamoDBEventType,
+  ParsedRecord,
+  parseEventRecords
+} from "./dynamoParser";
+import { CustomTag, DataItem } from "stackjanitor";
+import { deleteStack } from "../cloudformation";
 
-const cloudFormation = new CloudFormation();
-
-export enum Action {
-  REMOVE = "REMOVE"
+class StackJanitorNotEnabledError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
 }
 
-export const getStackNamesFromStreamEvent = (
-  event: DynamoDBStreamEvent
-): (string | undefined)[] => {
-  const removeRecords = event.Records.filter(
-    record => record.eventName === Action.REMOVE
-  );
-
-  return removeRecords.map((record: DynamoDBRecord) => {
-    if (record.dynamodb && record.dynamodb.Keys) {
-      return record.dynamodb.Keys.stackName.S;
-    }
-  });
-};
-
-export const checkStackJanitorStatus = async (
-  Stacks: CloudFormation.Stack[]
-) => {
-  try {
-    const tags = getTagsFromStacks(Stacks);
-    const customTags = convertTags(tags);
-    return getStackJanitorStatus(customTags);
-  } catch (e) {
-    logger.error(e);
-    return StackStatus.Disabled;
+export class ValidationError extends Error {
+  constructor(message: string) {
+    super(message);
   }
+}
+
+function isStackJanitorEnabled(tags: CustomTag[]) {
+  const status = tags.find(tag => tag.key === "stackjanitor")?.value;
+  return status === StackStatus.Enabled;
+}
+
+export const deleteCloudFormationStack = async (item: DataItem) => {
+  const { stackName, tags } = item;
+
+  const isEnabled = isStackJanitorEnabled(JSON.parse(tags));
+
+  if (!isEnabled) {
+    throw new StackJanitorNotEnabledError(
+      `StackJanitor is not enabled for ${stackName}`
+    );
+  }
+
+  logger.info(`Deleting CFN stack: ${stackName}`);
+  await deleteStack(stackName);
+  logger.info(`CFN Stack: ${stackName} deleted successfully`);
 };
 
-export const deleteCloudFormationStack = async (
-  event: DynamoDBStreamEvent,
-  cloudFormation: CloudFormation
-) => {
-  const StackNames = await getStackNamesFromStreamEvent(event);
+async function processRecords(records: ParsedRecord<DataItem>[]) {
+  for (const record of records) {
+    const { eventID, oldData, eventName } = record;
+    const eventDetails = `Event ID: ${eventID}, Event Name: ${eventName}`;
 
-  for (let StackName of StackNames) {
-    if (!StackName) {
+    logger.info(`Started processing Dynamo stream. ${eventDetails}`);
+
+    if (!(eventName === DynamoDBEventType.Remove) || !oldData) {
+      logger.info(`Ignoring event ${eventName}. ${eventDetails}`);
       return;
     }
 
-    const { Stacks } = await cloudFormation
-      .describeStacks({ StackName })
-      .promise();
-
-    if (!Stacks) {
+    if (!oldData) {
+      logger.info(`Data is null ${eventName}. Cannot proceed. ${eventDetails}`);
       return;
     }
 
-    const status = await checkStackJanitorStatus(Stacks);
-    if (status === StackStatus.Enabled) {
-      try {
-        await cloudFormation.deleteStack({ StackName }).promise();
-      } catch (e) {
-        logger.error(e);
+    try {
+      await deleteCloudFormationStack(oldData);
+    } catch (err) {
+      if (
+        err instanceof StackJanitorNotEnabledError ||
+        (err instanceof ValidationError &&
+          err.message.includes("does not exist"))
+      ) {
+        logger.error(`${err.message} - ${eventDetails}`);
+        return;
       }
+
+      logger.error(`${err.message} - ${eventDetails}`);
+      // throw err;
     }
   }
-};
+}
 
 export const index = async (event: DynamoDBStreamEvent) => {
-  return await deleteCloudFormationStack(event, cloudFormation);
+  const records = parseEventRecords<DataItem>(event);
+  await processRecords(records);
 };

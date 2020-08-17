@@ -6,6 +6,29 @@ import {
 } from "./gitHook";
 import * as helpers from "../helpers";
 
+const bitbucketEvent = {
+  pullrequest: {
+    type: "pullrequest",
+    source: {
+      repository: {
+        type: "repository",
+        name: "test-repo",
+        full_name: "lendi-dev/test-repo"
+      },
+      branch: {
+        name: "feature/FUNNEL-1525-1"
+      }
+    },
+    state: "DECLINED",
+    reason: "TEST"
+  },
+  repository: {
+    full_name: "lendi-dev/test-repo",
+    type: "repository",
+    name: "test-repo"
+  }
+};
+
 describe("isInDesiredState", () => {
   test("it should return true for Merged State", () => {
     const state = "MERGED";
@@ -107,5 +130,25 @@ describe("bitBucketEventHandler", () => {
     expect(bitBucketEventHandler(bitBucketEventData)).toEqual(
       Promise.resolve({})
     );
+  });
+
+  test("should delte stack for bitbucket webhook call", async () => {
+    const deleteDynamoRow = jest.spyOn(helpers, "deleteDynamoRow");
+
+    jest.spyOn(helpers, "findStacksFromTag").mockResolvedValue([
+      {
+        stackName: "stackname",
+        stackId:
+          "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTestV1/f79269a0"
+      }
+    ]);
+
+    await bitBucketEventHandler(bitbucketEvent);
+
+    expect(deleteDynamoRow).toHaveBeenNthCalledWith(1, {
+      stackId:
+        "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTestV1/f79269a0",
+      stackName: "stackname"
+    });
   });
 });

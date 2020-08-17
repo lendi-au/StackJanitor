@@ -1,74 +1,73 @@
-import { getStackNamesFromStreamEvent } from "./deleteCloudFormationStack";
-import { DynamoDBStreamEvent } from "aws-lambda";
+import { index, ValidationError } from "./deleteCloudFormationStack";
+import { logger } from "../logger";
+import { deleteStack } from "../cloudformation";
 
-describe("deleteCloudFormationStack:getStackNamesFromStreamEvent", () => {
-  test("deleteCloudFormationStack should return stackName for single Key", () => {
-    const dynamoDBStreamEvent: DynamoDBStreamEvent = {
+let dynamoDBStreamEvent: any;
+
+describe("deleteCloudFormationStack", () => {
+  beforeEach(() => {
+    (<any>deleteStack) = jest.fn();
+    logger.error = jest.fn();
+    dynamoDBStreamEvent = {
       Records: [
         {
+          eventID: "89a6db8b5fa9b0df5b67e2a6fd24cb76",
           eventName: "REMOVE",
           dynamodb: {
             Keys: {
+              stackId: {
+                S:
+                  "arn:aws:cloudformation:ap-southeast-2:account-id:stack/stack-name/id"
+              },
               stackName: {
-                S: "test"
+                S: "stackname"
               }
-            }
+            },
+            OldImage: {
+              expirationTime: {
+                N: "1596090125"
+              },
+              stackId: {
+                S:
+                  "arn:aws:cloudformation:ap-southeast-2:account-id:stack/stack-name/id"
+              },
+              stackName: {
+                S: "stackname"
+              },
+              tags: {
+                S:
+                  '[{"value":"your-app-name","key":"APP_NAME"},{"value":"4018","key":"BUILD_NUMBER"},{"value":"enabled","key":"stackjanitor"}]'
+              }
+            },
+            StreamViewType: "NEW_AND_OLD_IMAGES"
           }
         }
-      ]
+      ],
+      v: 1
     };
-
-    expect(getStackNamesFromStreamEvent(dynamoDBStreamEvent)).toEqual(["test"]);
   });
 
-  test("deleteCloudFormationStack should return stackName for multiple Keys", () => {
-    const dynamoDBStreamEvent: DynamoDBStreamEvent = {
-      Records: [
-        {
-          eventName: "REMOVE",
-          dynamodb: {
-            Keys: {
-              stackName: {
-                S: "test1"
-              }
-            }
-          }
-        },
-        {
-          eventName: "REMOVE",
-          dynamodb: {
-            Keys: {
-              stackName: {
-                S: "test2"
-              }
-            }
-          }
-        }
-      ]
-    };
-
-    expect(getStackNamesFromStreamEvent(dynamoDBStreamEvent)).toEqual([
-      "test1",
-      "test2"
-    ]);
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.resetModules();
+  });
+  test("it should invoke cloudformation delete for remove event", async () => {
+    await index(dynamoDBStreamEvent);
+    expect(deleteStack).toHaveBeenNthCalledWith(1, "stackname");
   });
 
-  test("deleteCloudFormationStack should return [] for non-REMOVE events", () => {
-    const dynamoDBStreamEvent: DynamoDBStreamEvent = {
-      Records: [
-        {
-          eventName: "INSERT",
-          dynamodb: {
-            Keys: {
-              stackName: {
-                S: "test"
-              }
-            }
-          }
-        }
-      ]
-    };
+  test("Validation error should be logged safely", async () => {
+    (<any>deleteStack) = jest.fn().mockImplementation(() => {
+      throw new ValidationError("Stack with id stackname does not exist");
+    });
 
-    expect(getStackNamesFromStreamEvent(dynamoDBStreamEvent)).toEqual([]);
+    await index(dynamoDBStreamEvent);
+
+    expect(deleteStack).toHaveBeenNthCalledWith(1, "stackname");
+
+    expect(logger.error).toHaveBeenNthCalledWith(
+      1,
+      "Stack with id stackname does not exist - Event ID: 89a6db8b5fa9b0df5b67e2a6fd24cb76, Event Name: REMOVE"
+    );
   });
 });
