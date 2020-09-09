@@ -50,7 +50,8 @@
   "resolutions": {
     "serverless-step-functions/serverless": "^1.82.0",
     "**/tar-stream": "^2.0.0",
-    "serverless/download": "^8.0.0"
+    "serverless/download": "^8.0.0",
+    "**/bl": "^4.0.3"
   },
   "release-it": {
     "github": {
