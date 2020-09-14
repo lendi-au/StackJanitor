@@ -65,6 +65,7 @@ provider:
         - "lambda:Get*"
         - "lambda:Delete*"
         - "glue:Delete*"
+        - "glue:Stop*"
         - "iam:DetachRolePolicy"
         - "iam:DeleteRolePolicy"
         - "iam:DeleteRole"
