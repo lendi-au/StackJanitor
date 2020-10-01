@@ -3,7 +3,7 @@
     "before:init": "git fetch --prune --prune-tags origin"
   },
   "git": {
-    "tagName": "${version}"
+    "tagName": "v${version}"
   },
   "github": {
     "release": true,
