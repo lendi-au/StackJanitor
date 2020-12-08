@@ -65,6 +65,7 @@ provider:
         - "apigateway:*"
         - "lambda:Get*"
         - "lambda:Delete*"
+        - "lambda:Remove*"
         - "glue:Delete*"
         - "glue:Stop*"
         - "iam:DetachRolePolicy"
