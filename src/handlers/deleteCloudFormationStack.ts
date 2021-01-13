@@ -8,6 +8,12 @@ import {
 } from "./dynamoParser";
 import { CustomTag, DataItem } from "stackjanitor";
 import { deleteStack } from "../cloudformation";
+import config from "../config";
+import {
+  generateRepeatedDeleteItem,
+  handleDataItem
+} from "./monitorCloudFormationStack";
+import { dataModel } from "../data/DynamoDataModel";
 
 class StackJanitorNotEnabledError extends Error {
   constructor(message: string) {
@@ -73,6 +79,22 @@ async function processRecords(records: ParsedRecord<DataItem>[]) {
 
       logger.error(`${err.message} - ${eventDetails}`);
       // throw err;
+
+      // Handles when there is a dependency between some stack deletes
+      // and a successive attempt at deleting will succeed.
+      // So here we recreate the dynamodb record with a shorter TTL
+      // based on the deleteCount
+      if (
+        record.oldData?.deleteCount &&
+        record.oldData.deleteCount > config.MAX_CLEANUP_RETRY
+      ) {
+        // TODO: Post a message / alert somewhere something placeholder
+      } else {
+        // Recreate record
+        const deleteItem = generateRepeatedDeleteItem(oldData);
+        await handleDataItem(deleteItem, dataModel.create);
+        return;
+      }
     }
   }
 }

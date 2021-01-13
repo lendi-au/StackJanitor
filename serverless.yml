@@ -9,8 +9,9 @@ plugins:
 
 custom:
   DYNAMO_DB_TABLE: stackJanitorTable
-  DEFAULT_EXPIRATION_PERIOD: 604800 #seconds
+  DEFAULT_EXPIRATION_PERIOD: 604800 # 604800 seconds === 7 days
   DEFAULT_REGION: "ap-southeast-2"
+  MAX_CLEANUP_RETRY: 10 # maximum number of retries before abandoning deletion
 
 provider:
   name: aws
@@ -48,6 +49,7 @@ provider:
       Resource: "*"
     - Effect: "Allow"
       Action:
+        - "elasticache:Delete*"
         - "ec2:*"
         - "s3:*"
         - "ecs:*"
@@ -116,6 +118,7 @@ functions:
       DEFAULT_DYNAMODB_TABLE: ${self:custom.DYNAMO_DB_TABLE}
       DEFAULT_EXPIRATION_PERIOD: ${self:custom.DEFAULT_EXPIRATION_PERIOD}
       DEFAULT_REGION: ${self:custom.DEFAULT_REGION}
+      MAX_CLEANUP_RETRY: ${self:custom.MAX_CLEANUP_RETRY}
 
   gitHook:
     handler: src/handlers/gitHook.index

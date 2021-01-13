@@ -18,6 +18,7 @@ declare module "stackjanitor" {
     stackId: string;
     stackName: string;
     tags: string;
+    deleteCount?: number;
   }
 
   export interface DeleteItem {

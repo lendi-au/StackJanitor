@@ -17,7 +17,8 @@ export const dynamoDataModel: dynogels.Model = dynogels.define(
       stackName: joi.string(),
       stackId: joi.string(),
       expirationTime: joi.number(),
-      tags: joi.string()
+      tags: joi.string(),
+      deleteCount: joi.number()
     }
   }
 );
