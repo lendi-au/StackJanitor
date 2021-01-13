@@ -54,6 +54,7 @@ provider:
         - "s3:*"
         - "ecs:*"
         - "sqs:*"
+        - "elasticache:Delete*"
         - "elasticloadbalancing:*"
         - "elasticloadbalancing:*"
         - "elasticloadbalancingv2:*"
