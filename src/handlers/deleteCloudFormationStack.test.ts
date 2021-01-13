@@ -37,7 +37,8 @@ describe("deleteCloudFormationStack", () => {
               tags: {
                 S:
                   '[{"value":"your-app-name","key":"APP_NAME"},{"value":"4018","key":"BUILD_NUMBER"},{"value":"enabled","key":"stackjanitor"}]'
-              }
+              },
+              deleteCount: 0
             },
             StreamViewType: "NEW_AND_OLD_IMAGES"
           }
