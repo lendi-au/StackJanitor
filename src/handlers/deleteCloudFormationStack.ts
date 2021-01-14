@@ -88,7 +88,10 @@ async function processRecords(records: ParsedRecord<DataItem>[]) {
         record.oldData?.deleteCount &&
         record.oldData.deleteCount > config.MAX_CLEANUP_RETRY
       ) {
-        // TODO: Post a message / alert somewhere something placeholder
+        // Log message to cloudwatch
+        logger.error(
+          `Failed to delete stack after ${config.MAX_CLEANUP_RETRY} additional attempts: ${oldData.stackName}`
+        );
       } else {
         // Recreate record
         const deleteItem = generateRepeatedDeleteItem(oldData);

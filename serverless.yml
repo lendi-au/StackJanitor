@@ -11,7 +11,7 @@ custom:
   DYNAMO_DB_TABLE: stackJanitorTable
   DEFAULT_EXPIRATION_PERIOD: 604800 # 604800 seconds === 7 days
   DEFAULT_REGION: "ap-southeast-2"
-  MAX_CLEANUP_RETRY: 5 # maximum number of retries before abandoning deletion
+  MAX_CLEANUP_RETRY: 2 # maximum number of retries before abandoning deletion
   NAME_SUFFIX: ${env:NAME_SUFFIX}
 
 provider:
