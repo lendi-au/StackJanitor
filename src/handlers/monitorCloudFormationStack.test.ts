@@ -98,6 +98,7 @@ describe("monitorCloudFormationStack:generateItemFromEvent", () => {
       }
     };
     expect(generateItemFromEvent(event)).toEqual({
+      deleteCount: 0,
       stackName: "CloudJanitorTest",
       stackId:
         "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTest/e46581a0-ba48-11e9-a48c-0a4631dffc70",

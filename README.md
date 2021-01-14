@@ -33,6 +33,14 @@ However, If stack resources remain unused for certain period of time, TTL expira
 
 ![StackJanitor Architecture](./img/StackJanitor-git.jpg "StackJanitor Architecture")
 
+It's good to note that the actual CloudFormation delete is always done by the
+`./src/handlers/deleteCloudFormationStack.ts` function AFTER the DynamoDB
+stream for expired/deleted records.
+
+As the data flow will create another cloudtrail event with the 'DeleteStack'
+operation, the lambda function will be invoked a second time but nothing
+will happen.
+
 ## Installation
 
 1. Clone the repo.

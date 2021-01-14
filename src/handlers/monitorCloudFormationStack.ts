@@ -29,7 +29,23 @@ export const generateItemFromEvent = (event: CloudFormationEvent): DataItem => {
     stackName: event.detail.requestParameters.stackName,
     stackId: event.detail.responseElements.stackId,
     expirationTime: expirationTime,
-    tags: JSON.stringify(event.detail.requestParameters.tags)
+    tags: JSON.stringify(event.detail.requestParameters.tags),
+    deleteCount: 0
+  };
+};
+
+// Takes the old DataItem and creates a new one as a retry
+export const generateRepeatedDeleteItem = (oldItem: DataItem): DataItem => {
+  const deleteCount = oldItem.deleteCount ? oldItem.deleteCount + 1 : 1;
+  const newExpiration =
+    Math.floor(new Date().getTime() / 1000) +
+    config.DELETE_INTERVAL * deleteCount;
+  return {
+    stackName: oldItem.stackName,
+    stackId: oldItem.stackId,
+    expirationTime: newExpiration,
+    tags: oldItem.tags,
+    deleteCount
   };
 };
 
