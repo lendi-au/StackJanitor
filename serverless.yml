@@ -1,5 +1,5 @@
 service:
-  name: StackJanitor
+  name: StackJanitor${self:custom.NAME_SUFFIX}
 
 # Add the serverless-webpack plugin
 plugins:
@@ -11,7 +11,8 @@ custom:
   DYNAMO_DB_TABLE: stackJanitorTable
   DEFAULT_EXPIRATION_PERIOD: 604800 # 604800 seconds === 7 days
   DEFAULT_REGION: "ap-southeast-2"
-  MAX_CLEANUP_RETRY: 10 # maximum number of retries before abandoning deletion
+  MAX_CLEANUP_RETRY: 5 # maximum number of retries before abandoning deletion
+  NAME_SUFFIX: ${env:NAME_SUFFIX}
 
 provider:
   name: aws
@@ -35,7 +36,7 @@ provider:
         - "dynamodb:PutItem"
         - "dynamodb:UpdateItem"
         - "dynamodb:DeleteItem"
-      Resource: "arn:aws:dynamodb:*:*:table/${self:custom.DYNAMO_DB_TABLE}"
+      Resource: "arn:aws:dynamodb:*:*:table/${self:custom.DYNAMO_DB_TABLE}${self:custom.NAME_SUFFIX}"
     - Effect: "Allow"
       Action:
         - "dynamodb:List*"
@@ -85,7 +86,7 @@ resources:
       DeletionPolicy: Retain
       UpdateReplacePolicy: Retain
       Properties:
-        TableName: ${self:custom.DYNAMO_DB_TABLE}
+        TableName: ${self:custom.DYNAMO_DB_TABLE}${self:custom.NAME_SUFFIX}
         AttributeDefinitions:
           - AttributeName: stackName
             AttributeType: S
@@ -116,7 +117,7 @@ functions:
   monitorCloudFormationStack:
     handler: src/handlers/monitorCloudFormationStack.index
     environment:
-      DEFAULT_DYNAMODB_TABLE: ${self:custom.DYNAMO_DB_TABLE}
+      DEFAULT_DYNAMODB_TABLE: ${self:custom.DYNAMO_DB_TABLE}${self:custom.NAME_SUFFIX}
       DEFAULT_EXPIRATION_PERIOD: ${self:custom.DEFAULT_EXPIRATION_PERIOD}
       DEFAULT_REGION: ${self:custom.DEFAULT_REGION}
       MAX_CLEANUP_RETRY: ${self:custom.MAX_CLEANUP_RETRY}
@@ -130,6 +131,11 @@ functions:
 
   deleteCloudFormationStack:
     handler: src/handlers/deleteCloudFormationStack.index
+    environment:
+      DEFAULT_DYNAMODB_TABLE: ${self:custom.DYNAMO_DB_TABLE}${self:custom.NAME_SUFFIX}
+      DEFAULT_EXPIRATION_PERIOD: ${self:custom.DEFAULT_EXPIRATION_PERIOD}
+      DEFAULT_REGION: ${self:custom.DEFAULT_REGION}
+      MAX_CLEANUP_RETRY: ${self:custom.MAX_CLEANUP_RETRY}
     events:
       - stream:
           type: dynamodb
@@ -139,7 +145,7 @@ functions:
 stepFunctions:
   stateMachines:
     StackJanitor:
-      name: StackJanitorStateMachine
+      name: StackJanitorStateMachine${self:custom.NAME_SUFFIX}
       definition:
         Comment: "StackJanitor State Machine"
         StartAt: logCloudFormationStack
