@@ -51,11 +51,11 @@ provider:
     - Effect: "Allow"
       Action:
         - "elasticache:Delete*"
+        - "elasticache:Describe*"
         - "ec2:*"
         - "s3:*"
         - "ecs:*"
         - "sqs:*"
-        - "elasticache:Delete*"
         - "elasticloadbalancing:*"
         - "elasticloadbalancing:*"
         - "elasticloadbalancingv2:*"
