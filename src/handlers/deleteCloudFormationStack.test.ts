@@ -38,7 +38,9 @@ describe("deleteCloudFormationStack", () => {
                 S:
                   '[{"value":"your-app-name","key":"APP_NAME"},{"value":"4018","key":"BUILD_NUMBER"},{"value":"enabled","key":"stackjanitor"}]'
               },
-              deleteCount: 0
+              deleteCount: {
+                N: "0"
+              }
             },
             StreamViewType: "NEW_AND_OLD_IMAGES"
           }
@@ -68,6 +70,17 @@ describe("deleteCloudFormationStack", () => {
 
     expect(logger.error).toHaveBeenNthCalledWith(
       1,
+      {
+        stackInfo: {
+          expirationTime: 1596090125,
+          stackId:
+            "arn:aws:cloudformation:ap-southeast-2:account-id:stack/stack-name/id",
+          stackName: "stackname",
+          tags:
+            '[{"value":"your-app-name","key":"APP_NAME"},{"value":"4018","key":"BUILD_NUMBER"},{"value":"enabled","key":"stackjanitor"}]',
+          deleteCount: 0
+        }
+      },
       "Stack with id stackname does not exist - Event ID: 89a6db8b5fa9b0df5b67e2a6fd24cb76, Event Name: REMOVE"
     );
   });

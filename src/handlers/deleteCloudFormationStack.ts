@@ -43,9 +43,12 @@ export const deleteCloudFormationStack = async (item: DataItem) => {
     );
   }
 
-  logger.info(`Deleting CFN stack: ${stackName}`);
+  logger.info({ stackInfo: item }, `Deleting CFN stack: ${stackName}`);
   await deleteStack(stackName);
-  logger.info(`CFN Stack: ${stackName} deleted successfully`);
+  logger.info(
+    { stackInfo: item },
+    `CFN Stack: ${stackName} deleted successfully`
+  );
 };
 
 async function processRecords(records: ParsedRecord<DataItem>[]) {
@@ -73,11 +76,14 @@ async function processRecords(records: ParsedRecord<DataItem>[]) {
         (err instanceof ValidationError &&
           err.message.includes("does not exist"))
       ) {
-        logger.error(`${err.message} - ${eventDetails}`);
+        logger.error(
+          { stackInfo: oldData },
+          `${err.message} - ${eventDetails}`
+        );
         return;
       }
 
-      logger.error(`${err.message} - ${eventDetails}`);
+      logger.error({ stackInfo: oldData }, `${err.message} - ${eventDetails}`);
       // throw err;
 
       // Handles when there is a dependency between some stack deletes
@@ -90,6 +96,7 @@ async function processRecords(records: ParsedRecord<DataItem>[]) {
       ) {
         // Log message to cloudwatch
         logger.error(
+          { stackInfo: oldData },
           `Failed to delete stack after ${config.MAX_CLEANUP_RETRY} additional attempts: ${oldData.stackName}`
         );
       } else {
