@@ -96,9 +96,8 @@ async function processRecords(records: ParsedRecord<DataItem>[]) {
       ) {
         // Log message to cloudwatch
         logger.error(
-          {
-            stackInfo: oldData
-          }`Failed to delete stack after ${config.MAX_CLEANUP_RETRY} additional attempts: ${oldData.stackName}`
+          { stackInfo: oldData },
+          `Failed to delete stack after ${config.MAX_CLEANUP_RETRY} additional attempts: ${oldData.stackName}`
         );
       } else {
         // Recreate record
