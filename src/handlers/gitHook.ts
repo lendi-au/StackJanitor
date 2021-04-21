@@ -45,6 +45,11 @@ export const bitBucketEventHandler = async (
       body: Response.Ignore
     };
   const gitTag = bitbucketEventParser(eventData);
+  logger.info(
+    { gitTag },
+    `Processing BitBucket webhook for branch ${gitTag.branch} \
+              in repository ${gitTag.repository}`
+  );
   return findAndDeleteStacksFromTag(gitTag);
 };
 
@@ -56,6 +61,11 @@ export const gitHubEventHandler = async (eventData: GithubWebhookEvent) => {
       body: Response.Ignore
     };
   const gitTag = gitHubEventParser(eventData);
+  logger.info(
+    { gitTag },
+    `Processing GitHub webhook for branch ${gitTag.branch} \
+              in repository ${gitTag.repository}`
+  );
   return findAndDeleteStacksFromTag(gitTag);
 };
 
