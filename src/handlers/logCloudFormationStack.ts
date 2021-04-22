@@ -67,7 +67,13 @@ export const logCloudFormationStack = async (
         stackStatus = getStackJanitorStatus(customTags);
       }
     } catch (e) {
-      logger.error(e);
+      logger.error(
+        {
+          event,
+          stack: e.stack
+        },
+        e.message
+      );
     }
 
     // if updated stack has no or disabled stackjanitor tag remove Dynamo row

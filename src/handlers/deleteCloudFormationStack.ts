@@ -44,7 +44,9 @@ export const deleteCloudFormationStack = async (item: DataItem) => {
   }
 
   logger.info({ stackInfo: item }, `Deleting CFN stack: ${stackName}`);
+
   await deleteStack(stackName);
+
   logger.info(
     { stackInfo: item },
     `CFN Stack: ${stackName} deleted successfully`
@@ -54,17 +56,23 @@ export const deleteCloudFormationStack = async (item: DataItem) => {
 async function processRecords(records: ParsedRecord<DataItem>[]) {
   for (const record of records) {
     const { eventID, oldData, eventName } = record;
-    const eventDetails = `Event ID: ${eventID}, Event Name: ${eventName}`;
+    const eventDetails = {
+      eventID,
+      eventName
+    };
 
-    logger.info(`Started processing Dynamo stream. ${eventDetails}`);
+    logger.info(eventDetails, `Started processing Dynamo stream.`);
 
     if (!(eventName === DynamoDBEventType.Remove) || !oldData) {
-      logger.info(`Ignoring event ${eventName}. ${eventDetails}`);
+      logger.info(eventDetails, `Ignoring event ${eventName}.`);
       return;
     }
 
     if (!oldData) {
-      logger.info(`Data is null ${eventName}. Cannot proceed. ${eventDetails}`);
+      logger.info(
+        eventDetails,
+        `Data is null for ${eventName}. Cannot proceed.`
+      );
       return;
     }
 
@@ -77,13 +85,22 @@ async function processRecords(records: ParsedRecord<DataItem>[]) {
           err.message.includes("does not exist"))
       ) {
         logger.error(
-          { stackInfo: oldData },
-          `${err.message} - ${eventDetails}`
+          {
+            stackInfo: oldData,
+            ...eventDetails
+          },
+          `${err.message}`
         );
         return;
       }
 
-      logger.error({ stackInfo: oldData }, `${err.message} - ${eventDetails}`);
+      logger.error(
+        {
+          stackInfo: oldData,
+          ...eventDetails
+        },
+        `${err.message}`
+      );
       // throw err;
 
       // Handles when there is a dependency between some stack deletes
@@ -96,7 +113,10 @@ async function processRecords(records: ParsedRecord<DataItem>[]) {
       ) {
         // Log message to cloudwatch
         logger.error(
-          { stackInfo: oldData },
+          {
+            stackInfo: oldData,
+            ...eventDetails
+          },
           `Failed to delete stack after ${config.MAX_CLEANUP_RETRY} additional attempts: ${oldData.stackName}`
         );
       } else {

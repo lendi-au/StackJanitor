@@ -75,7 +75,13 @@ export const handleDataItem = async (
     await handler(item);
     return MonitoringResultStatus.Success;
   } catch (e) {
-    logger.error(e);
+    logger.error(
+      {
+        stackInfo: item,
+        stack: e.stack
+      },
+      e.message
+    );
     return MonitoringResultStatus.Ignore;
   }
 };

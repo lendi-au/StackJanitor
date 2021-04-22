@@ -71,6 +71,8 @@ describe("deleteCloudFormationStack", () => {
     expect(logger.error).toHaveBeenNthCalledWith(
       1,
       {
+        eventID: "89a6db8b5fa9b0df5b67e2a6fd24cb76",
+        eventName: "REMOVE",
         stackInfo: {
           expirationTime: 1596090125,
           stackId:
@@ -81,7 +83,7 @@ describe("deleteCloudFormationStack", () => {
           deleteCount: 0
         }
       },
-      "Stack with id stackname does not exist - Event ID: 89a6db8b5fa9b0df5b67e2a6fd24cb76, Event Name: REMOVE"
+      "Stack with id stackname does not exist"
     );
   });
 });

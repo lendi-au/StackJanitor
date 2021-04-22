@@ -79,7 +79,13 @@ export const deleteStacks = async (stacks: DataItem[]) => {
     try {
       await deleteDynamoRow(stack);
     } catch (e) {
-      logger.error(e);
+      logger.error(
+        {
+          stackInfo: stack,
+          stack: e.stack
+        },
+        e.message
+      );
     }
   }
   return {
