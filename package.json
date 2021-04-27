@@ -8,6 +8,7 @@
   "license": "MIT",
   "repository": "git@github.com:lendi-au/StackJanitor.git",
   "scripts": {
+    "build": "tsc",
     "format": "prettier --write '**/*.{md,json,js,jsx,ts,tsx}'",
     "lint:format": "prettier-check '**/*.{md,json,js,jsx,ts,tsx}'",
     "test": "jest",

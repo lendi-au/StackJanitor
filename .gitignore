@@ -10,4 +10,7 @@ node_modules
 # IntellijIDEA cofig files
 .idea
 
+# build files
+lib
+
 package-lock.json

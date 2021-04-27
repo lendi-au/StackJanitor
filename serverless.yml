@@ -78,6 +78,10 @@ provider:
         - "iam:DeleteGroupPolicy"
         - "iam:DeletePolicyVersion"
       Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "lambda:Invoke*"
+      Resource: "*"
 
 resources:
   Resources:
@@ -124,6 +128,8 @@ functions:
 
   gitHook:
     handler: src/handlers/gitHook.index
+    environment:
+      EXTERNAL_LAMBDA: ${env:EXTERNAL_LAMBDA}
     events:
       - http:
           path: /deleteStack
