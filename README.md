@@ -67,13 +67,16 @@ You can override this using the `DEFAULT_EXPIRATION_PERIOD` custom variable foun
 
 ## Webhook Support
 
-If you don't want to wait 7 days for your stack to be deleted, you can trigger a deletion event using a GitHub or Bitbucket webhook.
+If you don't want to wait 7 days for your stack to be deleted, you can trigger
+a deletion event using a GitHub or Bitbucket webhook.
 
-As part of your CloudFormation build, make sure you tag your CloudFormation Stack with:
+As part of your CloudFormation build, make sure you tag your CloudFormation
+Stack with:
 REPOSITORY = `Repository Name`
 BRANCH = `Git Branch`
 
-Your webhook endpoint will be available when you first set up your serverless app with `serverless deploy`
+Your webhook endpoint will be available when you first set up your serverless
+app with `serverless deploy`
 
 ### Bitbucket
 
@@ -91,6 +94,18 @@ Your webhook endpoint will be available when you first set up your serverless ap
 4. Select `Let me select individual events` and choose `Pull requests`.
 5. Choose `Active` to activate the webhook trigger.
 6. Save the settings.
+
+### Additional Lambda invocation
+
+There was a need for us to extend the gitHook functionality but this wasn't
+directly related to the overall functionality of Stackjanitor.
+
+Hence, we've extended the gitHook lambda handler to be able to invoke another
+lambda function by setting the `EXTERNAL_LAMBDA` environment variable with the
+ARN of the lambda function to invoke.
+
+The default permission of the `serverless.yml` has also been updated to allow
+for lambda invocations.
 
 ## Upcoming features
 

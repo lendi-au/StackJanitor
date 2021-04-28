@@ -8,6 +8,7 @@
   "license": "MIT",
   "repository": "git@github.com:lendi-au/StackJanitor.git",
   "scripts": {
+    "build": "tsc",
     "format": "prettier --write '**/*.{md,json,js,jsx,ts,tsx}'",
     "lint:format": "prettier-check '**/*.{md,json,js,jsx,ts,tsx}'",
     "test": "jest",
@@ -36,7 +37,7 @@
     "prettier": "1.19.1",
     "prettier-check": "^2.0.0",
     "release-it": "^13.6.7",
-    "serverless": "^1.82.0",
+    "serverless": "^2.38.0",
     "serverless-pseudo-parameters": "^2.5.0",
     "serverless-step-functions": "^2.23.0",
     "serverless-webpack": "^5.3.2",

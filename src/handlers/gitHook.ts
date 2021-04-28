@@ -8,6 +8,7 @@ import {
 } from "stackjanitor";
 import { logger } from "../logger";
 import { deleteDynamoRow, findStacksFromTag } from "../helpers";
+import AWS from "aws-sdk";
 
 export const SEARCH_KEY = "tags";
 
@@ -106,6 +107,25 @@ export const index = async (event: APIGatewayEvent) => {
   }
 
   const eventData = JSON.parse(event.body);
+  if (process.env.EXTERNAL_LAMBDA) {
+    const externalLambda = process.env.EXTERNAL_LAMBDA;
+    logger.info({
+      externalLambda
+    });
+    const lambda = new AWS.Lambda();
+    const params = {
+      FunctionName: externalLambda,
+      InvocationType: "Event",
+      Payload: event.body
+    };
+    try {
+      await lambda.invoke(params).promise();
+    } catch (e) {
+      // log only and continue the invocation
+      logger.error(e);
+    }
+  }
+
   if (isBitbucketEvent(eventData)) {
     return await bitBucketEventHandler(eventData);
   }
