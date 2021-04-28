@@ -81,7 +81,7 @@ provider:
     - Effect: "Allow"
       Action:
         - "lambda:Invoke*"
-      Resource: "*"
+      Resource: "${env:EXTERNAL_LAMBDA}"
 
 resources:
   Resources:
