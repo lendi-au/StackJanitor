@@ -12,7 +12,7 @@ custom:
   DEFAULT_EXPIRATION_PERIOD: 604800 # 604800 seconds === 7 days
   DEFAULT_REGION: "ap-southeast-2"
   MAX_CLEANUP_RETRY: 2 # maximum number of retries before abandoning deletion
-  NAME_SUFFIX: ${env:NAME_SUFFIX}
+  exter: ${env:exter}
 
 provider:
   name: aws
@@ -23,8 +23,8 @@ provider:
   tracing:
     lambda: true
     apiGateway: true
-  deploymentBucket:
-    name: ${env:SLS_DEPLOY_BUCKET, 'stackjanitor-serverless-deployment-bucket'}
+  # deploymentBucket:
+  #   name: ${env:SLS_DEPLOY_BUCKET, 'stackjanitor-serverless-deployment-bucket'}
   deploymentPrefix: ${env:SLS_DEPLOY_PREFIX, 'StackJanitor'}
   iamRoleStatements:
     - Effect: "Allow"
@@ -36,7 +36,7 @@ provider:
         - "dynamodb:PutItem"
         - "dynamodb:UpdateItem"
         - "dynamodb:DeleteItem"
-      Resource: "arn:aws:dynamodb:*:*:table/${self:custom.DYNAMO_DB_TABLE}${self:custom.NAME_SUFFIX}"
+      Resource: "arn:aws:dynamodb:*:*:table/${self:custom.DYNAMO_DB_TABLE}${self:custom.exter}"
     - Effect: "Allow"
       Action:
         - "dynamodb:List*"
@@ -78,10 +78,10 @@ provider:
         - "iam:DeleteGroupPolicy"
         - "iam:DeletePolicyVersion"
       Resource: "*"
-    - Effect: "Allow"
-      Action:
-        - "lambda:Invoke*"
-      Resource: "${env:EXTERNAL_LAMBDA}"
+    # - Effect: "Allow"
+    #   Action:
+    #     - "lambda:Invoke*"
+    #   Resource: "${env:EXTERNAL_LAMBDA}"
 
 resources:
   Resources:
@@ -126,14 +126,14 @@ functions:
       DEFAULT_REGION: ${self:custom.DEFAULT_REGION}
       MAX_CLEANUP_RETRY: ${self:custom.MAX_CLEANUP_RETRY}
 
-  gitHook:
-    handler: src/handlers/gitHook.index
-    environment:
-      EXTERNAL_LAMBDA: ${env:EXTERNAL_LAMBDA}
-    events:
-      - http:
-          path: /deleteStack
-          method: post
+  # gitHook:
+  #   handler: src/handlers/gitHook.index
+  #   environment:
+  #     EXTERNAL_LAMBDA: ${env:EXTERNAL_LAMBDA}
+  #   events:
+  #     - http:
+  #         path: /deleteStack
+  #         method: post
 
   deleteCloudFormationStack:
     handler: src/handlers/deleteCloudFormationStack.index
