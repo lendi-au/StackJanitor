@@ -12,8 +12,7 @@ custom:
   DEFAULT_EXPIRATION_PERIOD: 604800 # 604800 seconds === 7 days
   DEFAULT_REGION: "ap-southeast-2"
   MAX_CLEANUP_RETRY: 2 # maximum number of retries before abandoning deletion
-  exter: ${env:exter, ''}
-  NAME_SUFFIX: ""
+  NAME_SUFFIX: ${env:NAME_SUFFIX, ''}
   SCHEDULE_ENABLE: "false"
 
 provider:
@@ -38,7 +37,7 @@ provider:
         - "dynamodb:PutItem"
         - "dynamodb:UpdateItem"
         - "dynamodb:DeleteItem"
-      Resource: "arn:aws:dynamodb:*:*:table/${self:custom.DYNAMO_DB_TABLE}${self:custom.exter}"
+      Resource: "arn:aws:dynamodb:*:*:table/${self:custom.DYNAMO_DB_TABLE}${self:custom.NAME_SUFFIX}"
     - Effect: "Allow"
       Action:
         - "dynamodb:List*"
@@ -80,10 +79,10 @@ provider:
         - "iam:DeleteGroupPolicy"
         - "iam:DeletePolicyVersion"
       Resource: "*"
-    # - Effect: "Allow"
-    #   Action:
-    #     - "lambda:Invoke*"
-    #   Resource: "${env:EXTERNAL_LAMBDA}"
+    - Effect: "Allow"
+      Action:
+        - "lambda:Invoke*"
+      Resource: "${env:EXTERNAL_LAMBDA}"
 
 resources:
   Resources:
@@ -128,14 +127,14 @@ functions:
       DEFAULT_REGION: ${self:custom.DEFAULT_REGION}
       MAX_CLEANUP_RETRY: ${self:custom.MAX_CLEANUP_RETRY}
 
-  # gitHook:
-  #   handler: src/handlers/gitHook.index
-  #   environment:
-  #     EXTERNAL_LAMBDA: ${env:EXTERNAL_LAMBDA}
-  #   events:
-  #     - http:
-  #         path: /deleteStack
-  #         method: post
+  gitHook:
+    handler: src/handlers/gitHook.index
+    environment:
+      EXTERNAL_LAMBDA: ${env:EXTERNAL_LAMBDA}
+    events:
+      - http:
+          path: /deleteStack
+          method: post
 
   deleteCloudFormationStack:
     handler: src/handlers/deleteCloudFormationStack.index
@@ -151,14 +150,14 @@ functions:
             Fn::GetAtt: [stackJanitorTable, StreamArn]
 
   searchDeleteCloudformationStack:
-    handler: src/optional-handlers/searchDeleteCloudformationStack.index
+    handler: src/optional-handlers/searchDeleteCloudformationStack.handler
     environment:
       DEFAULT_EXPIRATION_PERIOD: ${self:custom.DEFAULT_EXPIRATION_PERIOD}
       DEFAULT_REGION: ${self:custom.DEFAULT_REGION}
     events:
       - schedule: 
-          rate: cron(0 14 * * ? *)
-          enabled: ${self:custome.SCHEDULE_ENABLE}
+          rate: cron(0 10 * * ? *)
+          enabled: ${self:custom.SCHEDULE_ENABLE}
 
 
 

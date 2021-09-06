@@ -1,7 +1,0 @@
-{
-  "Resources": {
-    "HelloBucket1": {
-      "Type": "AWS::S3::Bucket"
-    }
-  }
-}

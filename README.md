@@ -109,9 +109,12 @@ for lambda invocations.
 
 ## Optional scheduled Lambda function for scanning and deleting old stacks
 
-This is a fallback mechanism which can remove stacks older than `DEFAULT_EXPIRATION_PERIOD` with the stackjanitor: enabled tag on the stack.
+This is a fallback mechanism which can remove stacks older than
+`DEFAULT_EXPIRATION_PERIOD` with the `stackjanitor: enabled` tag on the stack.
 
-This optional scheduled Lambda function is handled by `./src/optional-handlers/searchDeleteCloudformationStacks.ts` which can help scan and delete old stacks when the stacks are not cleaning up properly.
+This optional scheduled Lambda function is handled by
+`./src/optional-handlers/searchDeleteCloudformationStacks.ts` which can help
+scan and delete old stacks when the stacks are not cleaned up properly.
 
 This optional function is not enabled by default. You can update `serverless.yml` to enable this function.
 
