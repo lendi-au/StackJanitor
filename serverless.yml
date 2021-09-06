@@ -12,7 +12,9 @@ custom:
   DEFAULT_EXPIRATION_PERIOD: 604800 # 604800 seconds === 7 days
   DEFAULT_REGION: "ap-southeast-2"
   MAX_CLEANUP_RETRY: 2 # maximum number of retries before abandoning deletion
-  exter: ${env:exter}
+  exter: ${env:exter, ''}
+  NAME_SUFFIX: ""
+  SCHEDULE_ENABLE: "false"
 
 provider:
   name: aws
@@ -23,8 +25,8 @@ provider:
   tracing:
     lambda: true
     apiGateway: true
-  # deploymentBucket:
-  #   name: ${env:SLS_DEPLOY_BUCKET, 'stackjanitor-serverless-deployment-bucket'}
+  deploymentBucket:
+    name: ${env:SLS_DEPLOY_BUCKET, 'stackjanitor-serverless-deployment-bucket'}
   deploymentPrefix: ${env:SLS_DEPLOY_PREFIX, 'StackJanitor'}
   iamRoleStatements:
     - Effect: "Allow"
@@ -147,6 +149,18 @@ functions:
           type: dynamodb
           arn:
             Fn::GetAtt: [stackJanitorTable, StreamArn]
+
+  searchDeleteCloudformationStack:
+    handler: src/optional-handlers/searchDeleteCloudformationStack.index
+    environment:
+      DEFAULT_EXPIRATION_PERIOD: ${self:custom.DEFAULT_EXPIRATION_PERIOD}
+      DEFAULT_REGION: ${self:custom.DEFAULT_REGION}
+    events:
+      - schedule: 
+          rate: cron(0 14 * * ? *)
+          enabled: ${self:custome.SCHEDULE_ENABLE}
+
+
 
 stepFunctions:
   stateMachines:

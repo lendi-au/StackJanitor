@@ -17,4 +17,9 @@ package-lock.json
 
 .DS_Store
 
+# unit test files
 coverage
+
+# unit test snapshots
+__snapshots__
+
