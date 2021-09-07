@@ -116,7 +116,8 @@ This optional scheduled Lambda function is handled by
 `./src/optional-handlers/searchDeleteCloudformationStacks.ts` which can help
 scan and delete old stacks when the stacks are not cleaned up properly.
 
-This optional function is not enabled by default. You can update `serverless.yml` to enable this function.
+This optional function is not enabled by default. You can update
+`serverless.yml` to enable this function.
 
 ## Upcoming features
 
