@@ -74,7 +74,7 @@ export function getStackName(stack: Stacks) {
 
 export function deleteStack(stackName: string) {
   console.log(`Deleting stack ${stackName}`);
-  return;
+  return cloudFormation.deleteStack({ StackName: stackName }).promise();
 }
 
 export const handler = async () => {
