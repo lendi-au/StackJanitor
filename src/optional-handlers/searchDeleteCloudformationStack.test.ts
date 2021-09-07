@@ -8,6 +8,9 @@ import {
 
 import * as AWSMock from "aws-sdk-mock";
 import * as sinon from "sinon";
+import * as AWS from "aws-sdk";
+
+AWSMock.setSDKInstance(AWS);
 
 describe("returnStackStatus", () => {
   test("it should return a correct stack list with desired stack status", async () => {
@@ -240,14 +243,16 @@ describe("getStackName", () => {
 
 describe("deleteStack", () => {
   test("it should mock deleteStack from Cloudformation", async () => {
-    const stub = sinon.spy();
+    const stub = sinon.stub();
     AWSMock.mock("CloudFormation", "deleteStack", stub);
+    stub.resolves();
     const stackNames = ["test1", "test3"];
 
     stackNames.forEach(async (stackname: string) => {
       await deleteStack(stackname);
-      expect(stub.calledOnce).toBeTruthy;
-      expect(stub.calledWith(stackname)).toBeTruthy;
     });
+    expect(stub.calledTwice).toBeTruthy();
+    expect(stub.calledWith({ StackName: stackNames[0] })).toBeTruthy();
+    expect(stub.calledWith({ StackName: stackNames[1] })).toBeTruthy();
   });
 });

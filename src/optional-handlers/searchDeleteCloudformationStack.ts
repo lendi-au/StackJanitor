@@ -4,10 +4,6 @@ import * as AWS from "aws-sdk";
 
 import { Stacks } from "aws-sdk/clients/cloudformation";
 
-AWS.config.update({ region: config.DEFAULT_REGION });
-
-const cloudFormation = new AWS.CloudFormation();
-
 export function returnStackStatus(stacks: Stacks) {
   const stackStatus = [
     "CREATE_COMPLETE",
@@ -73,11 +69,14 @@ export function getStackName(stack: Stacks) {
 }
 
 export function deleteStack(stackName: string) {
+  const cloudFormation = new AWS.CloudFormation();
   console.log(`Deleting stack ${stackName}`);
   return cloudFormation.deleteStack({ StackName: stackName }).promise();
 }
 
 export const handler = async () => {
+  const cloudFormation = new AWS.CloudFormation();
+  AWS.config.update({ region: config.DEFAULT_REGION });
   const allStacks = await cloudFormation.describeStacks().promise();
   if (allStacks.Stacks) {
     const stacks1 = returnStackStatus(allStacks.Stacks);
