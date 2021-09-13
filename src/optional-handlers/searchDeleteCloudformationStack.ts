@@ -17,16 +17,16 @@ export function returnStackStatus(stacks: Stacks) {
     "IMPORT_ROLLBACK_FAILED",
     "IMPORT_ROLLBACK_COMPLETE"
   ];
-  const newStacks1 = stacks.filter(stack => {
+  const desiredStacks = stacks.filter(stack => {
     if (stackStatus.includes(stack.StackStatus)) {
       return stack;
     }
   });
-  return newStacks1;
+  return desiredStacks;
 }
 
 export function returnStackTags(stacks: Stacks) {
-  const newStacks2 = stacks.filter(stack => {
+  const stackjanitorEnabledStacks = stacks.filter(stack => {
     if (stack.Tags) {
       if (
         stack.Tags.find(tag => tag.Key === "stackjanitor")?.Value === "enabled"
@@ -35,29 +35,31 @@ export function returnStackTags(stacks: Stacks) {
       }
     }
   });
-  return newStacks2;
+  return stackjanitorEnabledStacks;
 }
 
 export function isStackExpired(stack: Stacks) {
-  const newStacks3 = stack.filter(stack => {
+  const DefaultSearchDeletePeriod =
+    Number(config.DEFAULT_EXPIRATION_PERIOD) + 259200; // 259200 seconds === 3 days
+  const expiredStacks = stack.filter(stack => {
     let dateTime = new Date().getTime() / 1000;
     if (stack.LastUpdatedTime) {
       const UpdateExpirationTime =
         new Date(stack.LastUpdatedTime).getTime() / 1000 +
-        Number(config.DEFAULT_EXPIRATION_PERIOD);
+        DefaultSearchDeletePeriod;
       if (UpdateExpirationTime < dateTime) {
         return stack;
       }
     } else {
       const CreateExpirationTime =
         new Date(stack.CreationTime).getTime() / 1000 +
-        Number(config.DEFAULT_EXPIRATION_PERIOD);
+        DefaultSearchDeletePeriod;
       if (CreateExpirationTime < dateTime) {
         return stack;
       }
     }
   });
-  return newStacks3;
+  return expiredStacks;
 }
 
 export function getStackName(stack: Stacks) {
@@ -79,15 +81,18 @@ export const handler = async () => {
   AWS.config.update({ region: config.DEFAULT_REGION });
   const allStacks = await cloudFormation.describeStacks().promise();
   if (allStacks.Stacks) {
-    const stacks1 = returnStackStatus(allStacks.Stacks);
-    const stacks2 = returnStackTags(stacks1);
-    const stacks3 = isStackExpired(stacks2);
-    const stackNames = getStackName(stacks3);
-    stackNames.forEach(async (stackname: string) => {
-      await deleteStack(stackname);
-    });
+    const desiredStacks = returnStackStatus(allStacks.Stacks);
+    const stackjanitorEnabledStacks = returnStackTags(desiredStacks);
+    const expiredStacks = isStackExpired(stackjanitorEnabledStacks);
+    const stackNames = getStackName(expiredStacks);
+    if (stackNames.length === 0) {
+      return "No expired stacks found";
+    } else {
+      stackNames.forEach(async (stackname: string) => {
+        await deleteStack(stackname);
+      });
+    }
   }
-  return "No expired stacks found";
 };
 
 // testing only...

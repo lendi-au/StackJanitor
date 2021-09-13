@@ -128,9 +128,12 @@ describe("returnStackTags", () => {
 });
 
 describe("isStackExpired", () => {
-  test("it should return a correct stack list with creation/update time is older than 7 days", async () => {
-    const lastupdatedtime = new Date("2021-08-25T07:12:55");
-    const creationtime = new Date("2021-08-25T04:12:55");
+  test("it should return a correct stack list with creation/update time is older than 10 days", async () => {
+    let lastupdatedtime_num = new Date().getTime() / 1000 - 5 * 24 * 60 * 60;
+    let creationtime_num = new Date().getTime() / 1000 - 11 * 24 * 60 * 60;
+    let creationtime = new Date(creationtime_num * 1000);
+    let lastupdatedtime = new Date(lastupdatedtime_num * 1000);
+
     const stacks = [
       {
         StackId:
@@ -173,22 +176,8 @@ describe("isStackExpired", () => {
         ]
       }
     ];
-    const myStacks = await isStackExpired(stacks);
+    const myStacks = isStackExpired(stacks);
     expect(myStacks).toStrictEqual([
-      {
-        StackId:
-          "arn:aws:cloudformation:ap-southeast-2:019550661163:stack/test1/2b549de0-0bb3-11ec-9a21-0aa93ce2a038",
-        StackName: "test1",
-        CreationTime: creationtime,
-        LastUpdatedTime: lastupdatedtime,
-        StackStatus: "CREATE_COMPLETE",
-        Tags: [
-          {
-            Key: "stackjanitor",
-            Value: "enabled"
-          }
-        ]
-      },
       {
         StackId:
           "arn:aws:cloudformation:ap-southeast-2:019550661163:stack/test3/b26fc5b0-0961-11ec-9a95-06c05975dd5c",
