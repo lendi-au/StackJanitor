@@ -20,6 +20,4 @@ package-lock.json
 # unit test files
 coverage
 
-# unit test snapshots
-__snapshots__
 
