@@ -1,4 +1,5 @@
 import {
+  describeAllStacks,
   returnStackStatus,
   returnStackTags,
   isStackExpired,
@@ -9,8 +10,137 @@ import {
 import * as AWSMock from "aws-sdk-mock";
 import * as sinon from "sinon";
 import * as AWS from "aws-sdk";
+import { CloudFormation } from "aws-sdk";
+import { DescribeStacksOutput, Stacks } from "aws-sdk/clients/cloudformation";
+import { AwsAccount } from "aws-sdk/clients/workspaces";
 
 AWSMock.setSDKInstance(AWS);
+
+describe("describeAllStacks", () => {
+  afterEach(() => {
+    sinon.restore();
+    AWSMock.restore("CloudFormation");
+  });
+
+  test("should test stub is working", async () => {
+    const result: Stacks = [];
+    const cfnMock = sinon.stub();
+    const mockResolves: DescribeStacksOutput = {};
+    AWSMock.mock("CloudFormation", "describeStacks", cfnMock);
+    cfnMock.resolves(mockResolves);
+    const mystacks = await describeAllStacks();
+    console.log(cfnMock.called);
+    expect(mystacks).toEqual(result);
+  });
+
+  test("should run the mocks with sinon", async () => {
+    const cfnMock = sinon.stub();
+    AWSMock.mock("CloudFormation", "describeStacks", cfnMock);
+    cfnMock.resolves([]);
+
+    const now = new Date();
+    const first_output: CloudFormation.DescribeStacksOutput = {
+      Stacks: [
+        {
+          StackName: "test1",
+          CreationTime: now,
+          StackStatus: "CREATE_COMPLETE"
+        }
+      ],
+      NextToken: "str1"
+    };
+    const second_output: CloudFormation.DescribeStacksOutput = {
+      Stacks: [
+        {
+          StackName: "test2",
+          CreationTime: now,
+          StackStatus: "UPDATE_COMPLETE"
+        }
+      ],
+      NextToken: "str2"
+    };
+    const thrid_output: CloudFormation.DescribeStacksOutput = {
+      Stacks: [
+        {
+          StackName: "test3",
+          CreationTime: now,
+          StackStatus: "ROLLBACK_COMPLETE"
+        }
+      ]
+    };
+
+    let expected: AWS.CloudFormation.Stacks = [];
+    expected = expected.concat(first_output.Stacks);
+    expected = expected.concat(second_output.Stacks);
+    expected = expected.concat(thrid_output.Stacks);
+
+    cfnMock.onCall(0).resolves(first_output);
+    cfnMock.onCall(1).resolves(second_output);
+    cfnMock.onCall(2).resolves(thrid_output);
+    const result = await describeAllStacks();
+    console.log(cfnMock.called);
+    console.log(result);
+    expect(result).toEqual(expected);
+  });
+
+  test("it should run the mocks with matching params", async () => {
+    const cfnMock = sinon.stub();
+    AWSMock.mock("CloudFormation", "describeStacks", cfnMock);
+    cfnMock.resolves();
+
+    const creationtime = new Date();
+    const first_output: CloudFormation.DescribeStacksOutput = {
+      Stacks: [
+        {
+          StackName: "test1",
+          CreationTime: creationtime,
+          StackStatus: "CREATE_COMPLETE"
+        }
+      ],
+      NextToken: "str1"
+    };
+    const second_output: CloudFormation.DescribeStacksOutput = {
+      Stacks: [
+        {
+          StackName: "test2",
+          CreationTime: creationtime,
+          StackStatus: "UPDATE_COMPLETE"
+        }
+      ],
+      NextToken: "str2"
+    };
+    const thrid_output: CloudFormation.DescribeStacksOutput = {
+      Stacks: [
+        {
+          StackName: "test3",
+          CreationTime: creationtime,
+          StackStatus: "ROLLBACK_COMPLETE"
+        }
+      ]
+    };
+    const first_Args: AWS.CloudFormation.DescribeStacksInput = {
+      NextToken: undefined
+    };
+    const second_Args: AWS.CloudFormation.DescribeStacksInput = {
+      NextToken: first_output.NextToken
+    };
+    const third_Args: AWS.CloudFormation.DescribeStacksInput = {
+      NextToken: second_output.NextToken
+    };
+
+    cfnMock.withArgs(first_Args).resolves(first_output);
+    cfnMock.withArgs(second_Args).resolves(second_output);
+    cfnMock.withArgs(third_Args).resolves(thrid_output);
+
+    let expected: AWS.CloudFormation.Stacks = [];
+    expected = expected.concat(first_output.Stacks);
+    expected = expected.concat(second_output.Stacks);
+    expected = expected.concat(thrid_output.Stacks);
+
+    const allStacks = await describeAllStacks();
+    expect(allStacks).toEqual(expected);
+  });
+});
 
 describe("returnStackStatus", () => {
   test("it should return a correct stack list with desired stack status", async () => {

@@ -4,6 +4,26 @@ import * as AWS from "aws-sdk";
 
 import { Stacks } from "aws-sdk/clients/cloudformation";
 
+AWS.config.update({ region: config.DEFAULT_REGION });
+
+export const describeAllStacks = async (nextToken?: string) => {
+  const cloudFormation = new AWS.CloudFormation();
+  let returnValue: Stacks = [];
+  const allStacks = await cloudFormation
+    .describeStacks({ NextToken: nextToken })
+    .promise();
+  if (!allStacks.Stacks) {
+    return returnValue;
+  }
+  returnValue = returnValue.concat(allStacks.Stacks);
+  if (allStacks.NextToken) {
+    returnValue = returnValue.concat(
+      await describeAllStacks(allStacks.NextToken)
+    );
+  }
+  return returnValue;
+};
+
 export function returnStackStatus(stacks: Stacks) {
   const stackStatus = [
     "CREATE_COMPLETE",
@@ -77,11 +97,9 @@ export function deleteStack(stackName: string) {
 }
 
 export const handler = async () => {
-  const cloudFormation = new AWS.CloudFormation();
-  AWS.config.update({ region: config.DEFAULT_REGION });
-  const allStacks = await cloudFormation.describeStacks().promise();
-  if (allStacks.Stacks) {
-    const desiredStacks = returnStackStatus(allStacks.Stacks);
+  const allStacks = await describeAllStacks();
+  if (allStacks) {
+    const desiredStacks = returnStackStatus(allStacks);
     const stackjanitorEnabledStacks = returnStackTags(desiredStacks);
     const expiredStacks = isStackExpired(stackjanitorEnabledStacks);
     const stackNames = getStackName(expiredStacks);
