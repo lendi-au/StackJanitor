@@ -92,7 +92,6 @@ export function getStackName(stack: Stacks) {
 
 export function deleteStack(stackName: string) {
   const cloudFormation = new AWS.CloudFormation();
-  console.log(`Deleting stack ${stackName}`);
   return cloudFormation.deleteStack({ StackName: stackName }).promise();
 }
 
@@ -103,15 +102,8 @@ export const handler = async () => {
     const stackjanitorEnabledStacks = returnStackTags(desiredStacks);
     const expiredStacks = isStackExpired(stackjanitorEnabledStacks);
     const stackNames = getStackName(expiredStacks);
-    if (stackNames.length === 0) {
-      return "No expired stacks found";
-    } else {
-      stackNames.forEach(async (stackname: string) => {
-        await deleteStack(stackname);
-      });
-    }
+    stackNames.forEach(async (stackname: string) => {
+      await deleteStack(stackname);
+    });
   }
 };
-
-// testing only...
-// handler();

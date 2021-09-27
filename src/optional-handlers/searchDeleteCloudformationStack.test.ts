@@ -29,7 +29,6 @@ describe("describeAllStacks", () => {
     AWSMock.mock("CloudFormation", "describeStacks", cfnMock);
     cfnMock.resolves(mockResolves);
     const mystacks = await describeAllStacks();
-    console.log(cfnMock.called);
     expect(mystacks).toEqual(result);
   });
 
@@ -78,8 +77,6 @@ describe("describeAllStacks", () => {
     cfnMock.onCall(1).resolves(second_output);
     cfnMock.onCall(2).resolves(thrid_output);
     const result = await describeAllStacks();
-    console.log(cfnMock.called);
-    console.log(result);
     expect(result).toEqual(expected);
   });
 
