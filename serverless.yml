@@ -12,7 +12,8 @@ custom:
   DEFAULT_EXPIRATION_PERIOD: 604800 # 604800 seconds === 7 days
   DEFAULT_REGION: "ap-southeast-2"
   MAX_CLEANUP_RETRY: 2 # maximum number of retries before abandoning deletion
-  NAME_SUFFIX: ${env:NAME_SUFFIX}
+  NAME_SUFFIX: ${env:NAME_SUFFIX, ''}
+  SCHEDULE_ENABLE: "false"
 
 provider:
   name: aws
@@ -147,6 +148,18 @@ functions:
           type: dynamodb
           arn:
             Fn::GetAtt: [stackJanitorTable, StreamArn]
+
+  searchDeleteCloudformationStack:
+    handler: src/optional-handlers/searchDeleteCloudformationStack.handler
+    environment:
+      DEFAULT_EXPIRATION_PERIOD: ${self:custom.DEFAULT_EXPIRATION_PERIOD}
+      DEFAULT_REGION: ${self:custom.DEFAULT_REGION}
+    events:
+      - schedule: 
+          rate: cron(0 10 * * ? *)
+          enabled: ${self:custom.SCHEDULE_ENABLE}
+
+
 
 stepFunctions:
   stateMachines:

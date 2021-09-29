@@ -14,3 +14,10 @@ node_modules
 lib
 
 package-lock.json
+
+.DS_Store
+
+# unit test files
+coverage
+
+

@@ -17,6 +17,7 @@
     "release": "release-it minor --ci --no-git.requireUpstream"
   },
   "dependencies": {
+    "aws-sdk": "^2.978.0",
     "dynogels": "^9.1.0",
     "pino": "^5.14.0",
     "pino-pretty": "^3.5.0",
@@ -29,7 +30,8 @@
     "@types/jest": "^24.0.23",
     "@types/node": "^12.12.16",
     "@types/pino": "^5.14.0",
-    "aws-sdk": "^2.502.0",
+    "@types/sinon": "^10.0.2",
+    "aws-sdk-mock": "^5.2.2",
     "graceful-fs": "^4.2.3",
     "husky": "^1.3.1",
     "jest": "^24.8.0",
