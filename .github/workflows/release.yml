@@ -22,7 +22,7 @@ jobs:
         git config user.email github-actions@github.com
         yarn release
       env:
-        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
     - name: DataDog Event Trigger
       uses: jordan-simonovski/datadog-event-action@1.0.3
       env:

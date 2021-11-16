@@ -38,7 +38,7 @@
     "lint-staged": "^8.1.4",
     "prettier": "1.19.1",
     "prettier-check": "^2.0.0",
-    "release-it": "^13.6.7",
+    "release-it": "^14.11.7",
     "serverless": "^2.38.0",
     "serverless-pseudo-parameters": "^2.5.0",
     "serverless-step-functions": "^2.23.0",
