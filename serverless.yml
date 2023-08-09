@@ -1,11 +1,9 @@
 service:
   name: StackJanitor${self:custom.NAME_SUFFIX}
 
-# Add the serverless-webpack plugin
 plugins:
-  - serverless-webpack
+  - serverless-plugin-typescript
   - serverless-step-functions
-  - serverless-pseudo-parameters
 
 custom:
   DYNAMO_DB_TABLE: stackJanitorTable
@@ -17,7 +15,7 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs18.x
   memorySize: 128
   stage: ${opt:stage, 'development'}
   region: ${self:custom.DEFAULT_REGION}
@@ -159,8 +157,6 @@ functions:
           rate: cron(0 10 * * ? *)
           enabled: ${self:custom.SCHEDULE_ENABLE}
 
-
-
 stepFunctions:
   stateMachines:
     StackJanitor:
@@ -172,7 +168,7 @@ stepFunctions:
           logCloudFormationStack:
             Type: Task
             Next: checkStackJanitorTag
-            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-logCloudFormationStack
+            Resource: arn:aws:lambda:${aws:region}:${aws:accountid}:function:${self:service}-${opt:stage}-logCloudFormationStack
             Catch:
               - ErrorEquals:
                   - States.ALL
@@ -193,7 +189,7 @@ stepFunctions:
           MonitorStack:
             Type: Task
             Next: EndStackMonitoring
-            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-monitorCloudFormationStack
+            Resource: arn:aws:lambda:${aws:region}:${aws:accountid}:function:${self:service}-${opt:stage}-monitorCloudFormationStack
             Catch:
               - ErrorEquals:
                   - States.ALL

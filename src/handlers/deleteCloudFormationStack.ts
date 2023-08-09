@@ -109,7 +109,7 @@ async function processRecords(records: ParsedRecord<DataItem>[]) {
       // based on the deleteCount
       if (
         record.oldData?.deleteCount &&
-        record.oldData.deleteCount > config.MAX_CLEANUP_RETRY
+        record.oldData.deleteCount > Number(config.MAX_CLEANUP_RETRY)
       ) {
         // Log message to cloudwatch
         logger.error(

@@ -1,4 +1,4 @@
-import { CloudFormation } from "aws-sdk";
+import { CloudFormation, Stack, Tag } from "@aws-sdk/client-cloudformation";
 
 import {
   CloudFormationEvent,
@@ -6,7 +6,6 @@ import {
   StackJanitorStatus
 } from "stackjanitor";
 import { logger } from "../logger";
-import { Stack, Tag } from "aws-sdk/clients/cloudformation";
 import {
   generateDeleteItem,
   handleDataItem,
@@ -34,11 +33,20 @@ export const getStackJanitorStatus = (tags: CustomTag[]): StackStatus => {
   return StackStatus.Disabled;
 };
 
-export const convertTags = (tags: Tag[]): CustomTag[] =>
-  tags.map(tag => ({
+interface TagsWithValues {
+  Key: string;
+  Value: string;
+}
+
+export const convertTags = (tags: Tag[]): CustomTag[] => {
+  const filtered = tags.filter(tag => {
+    typeof tag.Key === "string" && typeof tag.Value === "string";
+  }) as TagsWithValues[];
+  return filtered.map(tag => ({
     key: tag.Key,
     value: tag.Value
   }));
+};
 
 export const logCloudFormationStack = async (
   event: CloudFormationEvent,
@@ -54,11 +62,9 @@ export const logCloudFormationStack = async (
   } else {
     // For all other types of Stack events tags need to be fetched
     try {
-      const { Stacks } = await cloudFormation
-        .describeStacks({
-          StackName: event.detail.requestParameters.stackName
-        })
-        .promise();
+      const { Stacks } = await cloudFormation.describeStacks({
+        StackName: event.detail.requestParameters.stackName
+      });
 
       if (Stacks) {
         const tags = getTagsFromStacks(Stacks);

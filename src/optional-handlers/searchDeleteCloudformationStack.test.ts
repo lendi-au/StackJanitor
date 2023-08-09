@@ -7,38 +7,38 @@ import {
   deleteStack
 } from "./searchDeleteCloudformationStack";
 
-import * as AWSMock from "aws-sdk-mock";
 import * as sinon from "sinon";
-import * as AWS from "aws-sdk";
-import { CloudFormation } from "aws-sdk";
-import { DescribeStacksOutput, Stacks } from "aws-sdk/clients/cloudformation";
-import { AwsAccount } from "aws-sdk/clients/workspaces";
+import {
+  CloudFormation,
+  DescribeStacksOutput,
+  Stack
+} from "@aws-sdk/client-cloudformation";
+import { mockClient } from "aws-sdk-client-mock";
 
-AWSMock.setSDKInstance(AWS);
+const cfMock = mockClient(CloudFormation);
+beforeEach(() => {
+  cfMock.reset();
+});
 
 describe("describeAllStacks", () => {
   afterEach(() => {
     sinon.restore();
-    AWSMock.restore("CloudFormation");
   });
 
   test("should test stub is working", async () => {
-    const result: Stacks = [];
-    const cfnMock = sinon.stub();
+    const result: Stack[] = [];
     const mockResolves: DescribeStacksOutput = {};
-    AWSMock.mock("CloudFormation", "describeStacks", cfnMock);
-    cfnMock.resolves(mockResolves);
+    cfMock.resolves(mockResolves);
     const mystacks = await describeAllStacks();
     expect(mystacks).toEqual(result);
   });
 
   test("should run the mocks with sinon", async () => {
     const cfnMock = sinon.stub();
-    AWSMock.mock("CloudFormation", "describeStacks", cfnMock);
     cfnMock.resolves([]);
 
     const now = new Date();
-    const first_output: CloudFormation.DescribeStacksOutput = {
+    const first_output: DescribeStacksOutput = {
       Stacks: [
         {
           StackName: "test1",
@@ -48,7 +48,7 @@ describe("describeAllStacks", () => {
       ],
       NextToken: "str1"
     };
-    const second_output: CloudFormation.DescribeStacksOutput = {
+    const second_output: DescribeStacksOutput = {
       Stacks: [
         {
           StackName: "test2",
@@ -58,7 +58,7 @@ describe("describeAllStacks", () => {
       ],
       NextToken: "str2"
     };
-    const thrid_output: CloudFormation.DescribeStacksOutput = {
+    const thrid_output: DescribeStacksOutput = {
       Stacks: [
         {
           StackName: "test3",
@@ -68,10 +68,10 @@ describe("describeAllStacks", () => {
       ]
     };
 
-    let expected: AWS.CloudFormation.Stacks = [];
-    expected = expected.concat(first_output.Stacks);
-    expected = expected.concat(second_output.Stacks);
-    expected = expected.concat(thrid_output.Stacks);
+    let expected: Stack[] = [];
+    expected = expected.concat(first_output.Stacks as Stack[]);
+    expected = expected.concat(second_output.Stacks as Stack[]);
+    expected = expected.concat(thrid_output.Stacks as Stack[]);
 
     cfnMock.onCall(0).resolves(first_output);
     cfnMock.onCall(1).resolves(second_output);

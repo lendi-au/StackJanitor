@@ -25,10 +25,4 @@ jobs:
         yarn release
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-    - name: DataDog Event Trigger
-      uses: jordan-simonovski/datadog-event-action@1.0.3
-      env:
-        DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
-        EVENT_TITLE: "StackJanitor Release Succeeded! 🎉"
-        EVENT_TEXT: "Release can be found here: https://github.com/lendi-au/StackJanitor/releases"
-        EVENT_TAGS: "['app:StackJanitor']"
+

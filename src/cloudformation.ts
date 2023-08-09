@@ -1,7 +1,7 @@
-import { CloudFormation } from "aws-sdk";
+import { CloudFormation } from "@aws-sdk/client-cloudformation";
 
 const cloudFormation = new CloudFormation();
 
 export function deleteStack(stackName: string) {
-  return cloudFormation.deleteStack({ StackName: stackName }).promise();
+  return cloudFormation.deleteStack({ StackName: stackName });
 }

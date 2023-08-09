@@ -1,8 +1,12 @@
-import { DynamoDBRecord, DynamoDBStreamEvent, StreamRecord } from "aws-lambda";
-import { AttributeValue } from "aws-lambda/trigger/dynamodb-stream";
-import { DynamoDB } from "aws-sdk";
+import {
+  AttributeValue,
+  DynamoDBRecord,
+  DynamoDBStreamEvent,
+  StreamRecord
+} from "aws-lambda";
 import { isEqual } from "lodash";
 import * as pino from "pino";
+import { unmarshall } from "../helpers";
 
 const dynamoLoggerName = "StackJanitor-DynamoDB-stream-logger";
 
@@ -59,7 +63,7 @@ interface Image {
 }
 
 function unmarshallItem(data: Image) {
-  return DynamoDB.Converter.unmarshall(data);
+  return unmarshall(data);
 }
 
 function unmarshallStream<T>(record: DynamoDBRecord): UnmarshalledData<T> {

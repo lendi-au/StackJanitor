@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "lib": ["es2017"],
+    "lib": ["es2022", "dom"],
     "moduleResolution": "node",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "sourceMap": false,
-    "target": "es6",
+    "target": "ES2022",
     "outDir": "lib",
     "strict": true,
     "allowSyntheticDefaultImports": true,

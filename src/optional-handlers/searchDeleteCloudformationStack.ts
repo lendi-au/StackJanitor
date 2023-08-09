@@ -1,17 +1,13 @@
 import config from "../config";
 
-import * as AWS from "aws-sdk";
-
-import { Stacks } from "aws-sdk/clients/cloudformation";
-
-AWS.config.update({ region: config.DEFAULT_REGION });
+import { CloudFormation, Stack } from "@aws-sdk/client-cloudformation";
 
 export const describeAllStacks = async (nextToken?: string) => {
-  const cloudFormation = new AWS.CloudFormation();
-  let returnValue: Stacks = [];
-  const allStacks = await cloudFormation
-    .describeStacks({ NextToken: nextToken })
-    .promise();
+  const cloudFormation = new CloudFormation();
+  let returnValue: Stack[] = [];
+  const allStacks = await cloudFormation.describeStacks({
+    NextToken: nextToken
+  });
   if (!allStacks.Stacks) {
     return returnValue;
   }
@@ -24,7 +20,7 @@ export const describeAllStacks = async (nextToken?: string) => {
   return returnValue;
 };
 
-export function returnStackStatus(stacks: Stacks) {
+export function returnStackStatus(stacks: Stack[]) {
   const stackStatus = [
     "CREATE_COMPLETE",
     "UPDATE_COMPLETE",
@@ -38,14 +34,14 @@ export function returnStackStatus(stacks: Stacks) {
     "IMPORT_ROLLBACK_COMPLETE"
   ];
   const desiredStacks = stacks.filter(stack => {
-    if (stackStatus.includes(stack.StackStatus)) {
+    if (stackStatus.includes(String(stack.StackStatus))) {
       return stack;
     }
   });
   return desiredStacks;
 }
 
-export function returnStackTags(stacks: Stacks) {
+export function returnStackTags(stacks: Stack[]) {
   const stackjanitorEnabledStacks = stacks.filter(stack => {
     if (stack.Tags) {
       if (
@@ -58,7 +54,7 @@ export function returnStackTags(stacks: Stacks) {
   return stackjanitorEnabledStacks;
 }
 
-export function isStackExpired(stack: Stacks) {
+export function isStackExpired(stack: Stack[]) {
   const DefaultSearchDeletePeriod =
     Number(config.DEFAULT_EXPIRATION_PERIOD) + 259200; // 259200 seconds === 3 days
   const expiredStacks = stack.filter(stack => {
@@ -70,29 +66,32 @@ export function isStackExpired(stack: Stacks) {
       if (UpdateExpirationTime < dateTime) {
         return stack;
       }
-    } else {
+    } else if (stack.CreationTime) {
       const CreateExpirationTime =
         new Date(stack.CreationTime).getTime() / 1000 +
         DefaultSearchDeletePeriod;
       if (CreateExpirationTime < dateTime) {
         return stack;
       }
+    } else {
+      // no create/update time available return stack for deletion as we don't want it!
+      return stack;
     }
   });
   return expiredStacks;
 }
 
-export function getStackName(stack: Stacks) {
+export function getStackName(stack: Stack[]) {
   const stackNames = stack.map(stack => {
     const stackName = stack.StackName;
     return stackName;
   });
-  return stackNames;
+  return stackNames as string[];
 }
 
 export function deleteStack(stackName: string) {
-  const cloudFormation = new AWS.CloudFormation();
-  return cloudFormation.deleteStack({ StackName: stackName }).promise();
+  const cloudFormation = new CloudFormation();
+  return cloudFormation.deleteStack({ StackName: stackName });
 }
 
 export const handler = async () => {
