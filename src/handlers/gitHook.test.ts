@@ -6,6 +6,12 @@ import {
 } from "./gitHook";
 import * as helpers from "../helpers";
 
+jest.mock("../helpers");
+
+beforeEach(() => {
+  jest.resetAllMocks();
+});
+
 const bitbucketEvent = {
   pullrequest: {
     type: "pullrequest",
@@ -132,7 +138,7 @@ describe("bitBucketEventHandler", () => {
     );
   });
 
-  test("should delte stack for bitbucket webhook call", async () => {
+  test("should delete stack for bitbucket webhook call", async () => {
     const deleteDynamoRow = jest.spyOn(helpers, "deleteDynamoRow");
 
     jest.spyOn(helpers, "findStacksFromTag").mockResolvedValue([

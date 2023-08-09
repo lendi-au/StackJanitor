@@ -20,7 +20,7 @@ describe("logCloudFormationStack:getTagsFromStacks", () => {
       }
     ];
 
-    const tags = await getTagsFromStacks(Stacks);
+    const tags = getTagsFromStacks(Stacks);
     expect(tags).toStrictEqual([
       {
         Key: "stackjanitor",
@@ -56,7 +56,7 @@ describe("logCloudFormationStack:getTagsFromStacks", () => {
       }
     ];
 
-    const tags = await getTagsFromStacks(Stacks);
+    const tags = getTagsFromStacks(Stacks);
     expect(tags.sort()).toEqual([
       { Key: "v1", Value: "1.0.5" },
       { Key: "stackjanitor", Value: "enabled" }
@@ -82,7 +82,7 @@ describe("logCloudFormationStack:getTagsFromStacks", () => {
       }
     ];
 
-    const tags = await getTagsFromStacks(Stacks);
+    const tags = getTagsFromStacks(Stacks);
     expect(tags.sort()).toEqual([
       { Key: "stackjanitor", Value: "enabled" },
       { Key: "v1", Value: "1.0.5" }
@@ -99,7 +99,7 @@ describe("logCloudFormationStack:getTagsFromStacks", () => {
       }
     ];
 
-    const tags = await getTagsFromStacks(Stacks);
+    const tags = getTagsFromStacks(Stacks);
     expect(tags).toEqual([]);
   });
 });
@@ -117,7 +117,7 @@ describe("logCloudFormationStack:getStackJanitorStatus", () => {
       }
     ];
 
-    const Status = await getStackJanitorStatus(Tags);
+    const Status = getStackJanitorStatus(Tags);
     expect(Status).toEqual("enabled");
   });
 
@@ -133,7 +133,7 @@ describe("logCloudFormationStack:getStackJanitorStatus", () => {
       }
     ];
 
-    const Status = await getStackJanitorStatus(Tags);
+    const Status = getStackJanitorStatus(Tags);
     expect(Status).toEqual("disabled");
   });
 
@@ -145,7 +145,7 @@ describe("logCloudFormationStack:getStackJanitorStatus", () => {
       }
     ];
 
-    const Status = await getStackJanitorStatus(Tags);
+    const Status = getStackJanitorStatus(Tags);
     expect(Status).toEqual("disabled");
   });
 });
