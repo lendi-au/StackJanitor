@@ -4,6 +4,8 @@ import {
   logCloudFormationStack
 } from "./logCloudFormationStack";
 
+jest.useFakeTimers();
+
 describe("logCloudFormationStack:getTagsFromStacks", () => {
   test("it should return tags from Stack[]", async () => {
     const Stacks = [

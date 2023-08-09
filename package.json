@@ -66,27 +66,6 @@
       "git add"
     ]
   },
-  "jest": {
-    "transform": {
-      "^.+\\.tsx?$": [
-        "ts-jest",
-        {
-          "diagnostics": false
-        }
-      ]
-    },
-    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "d.ts"
-    ],
-    "moduleDirectories": [
-      "node_modules"
-    ]
-  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
