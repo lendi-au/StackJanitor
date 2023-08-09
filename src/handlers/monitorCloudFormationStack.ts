@@ -3,7 +3,7 @@ import {
   CloudFormationEvent,
   DataItem,
   DeleteItem,
-  StackJanitorStatus
+  StackJanitorStatus,
 } from "stackjanitor";
 import { logger } from "../logger";
 import { ActionHandler, DataModel, dataModel } from "../data/DynamoDataModel";
@@ -11,12 +11,12 @@ import { ActionHandler, DataModel, dataModel } from "../data/DynamoDataModel";
 export enum RequestType {
   Create = "CreateStack",
   Update = "UpdateStack",
-  Delete = "DeleteStack"
+  Delete = "DeleteStack",
 }
 
 export enum MonitoringResultStatus {
   Success = "success",
-  Ignore = "ignore"
+  Ignore = "ignore",
 }
 
 export const getExpirationTime = (eventTime: string): number =>
@@ -30,7 +30,7 @@ export const generateItemFromEvent = (event: CloudFormationEvent): DataItem => {
     stackId: event.detail.responseElements.stackId,
     expirationTime: expirationTime,
     tags: JSON.stringify(event.detail.requestParameters.tags),
-    deleteCount: 0
+    deleteCount: 0,
   };
 };
 
@@ -45,7 +45,7 @@ export const generateRepeatedDeleteItem = (oldItem: DataItem): DataItem => {
     stackId: oldItem.stackId,
     expirationTime: newExpiration,
     tags: oldItem.tags,
-    deleteCount
+    deleteCount,
   };
 };
 
@@ -63,24 +63,24 @@ export const generateDeleteItem = (event: CloudFormationEvent): DeleteItem => {
 
   return {
     stackName,
-    stackId
+    stackId,
   };
 };
 
 export const handleDataItem = async (
   item: DataItem | DeleteItem,
-  handler: ActionHandler
+  handler: ActionHandler,
 ) => {
   try {
     await handler(item);
     return MonitoringResultStatus.Success;
-  } catch (e) {
+  } catch (e: any) {
     logger.error(
       {
         stackInfo: item,
-        stack: e.stack
+        stack: e.stack,
       },
-      e.message
+      e.message,
     );
     return MonitoringResultStatus.Ignore;
   }
@@ -88,7 +88,7 @@ export const handleDataItem = async (
 
 export const monitorCloudFormationStack = (
   event: CloudFormationEvent,
-  dataMapper: DataModel
+  dataMapper: DataModel,
 ) => {
   switch (event.detail.eventName) {
     case RequestType.Create:
