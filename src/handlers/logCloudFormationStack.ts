@@ -1,10 +1,6 @@
 import { CloudFormation, Stack, Tag } from "@aws-sdk/client-cloudformation";
 
-import {
-  CloudFormationEvent,
-  CustomTag,
-  StackJanitorStatus,
-} from "stackjanitor";
+import { CloudFormationEvent, CustomTag } from "stackjanitor";
 import { logger } from "../logger";
 import {
   generateDeleteItem,
@@ -13,7 +9,6 @@ import {
 } from "./monitorCloudFormationStack";
 import { StackStatus, TagName } from "../tag/TagStatus";
 import { dataModel } from "../data/DynamoDataModel";
-const cloudFormation = new CloudFormation();
 
 export const getTagsFromStacks = (stacks: Stack[]): Tag[] =>
   stacks
@@ -63,9 +58,14 @@ export const logCloudFormationStack = async (
   } else {
     // For all other types of Stack events tags need to be fetched
     try {
+      console.log("describing...");
       const { Stacks } = await cloudFormation.describeStacks({
         StackName: event.detail.requestParameters.stackName,
       });
+
+      console.log(JSON.stringify(Stacks));
+
+      console.log("where error yo");
 
       if (Stacks) {
         const tags = getTagsFromStacks(Stacks);
@@ -74,6 +74,8 @@ export const logCloudFormationStack = async (
         stackStatus = getStackJanitorStatus(customTags);
       }
     } catch (e: any) {
+      console.log("error yo");
+      console.log(e);
       logger.error(
         {
           event,
@@ -89,7 +91,9 @@ export const logCloudFormationStack = async (
       stackStatus !== StackStatus.Enabled
     ) {
       const item = generateDeleteItem(event);
+      console.log("error here?");
       await handleDataItem(item, dataModel.destroy);
+      console.log("error oh no here?");
     }
   }
 
@@ -99,10 +103,4 @@ export const logCloudFormationStack = async (
       stackjanitor: stackStatus,
     },
   };
-};
-
-export const index = async (
-  event: CloudFormationEvent,
-): Promise<StackJanitorStatus> => {
-  return await logCloudFormationStack(event, cloudFormation);
 };
