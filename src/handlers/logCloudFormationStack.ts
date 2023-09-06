@@ -36,7 +36,7 @@ interface TagsWithValues {
 
 export const convertTags = (tags: Tag[]): CustomTag[] => {
   const filtered = tags.filter((tag) => {
-    typeof tag.Key === "string" && typeof tag.Value === "string";
+    return typeof tag.Key === "string" && typeof tag.Value === "string";
   }) as TagsWithValues[];
   return filtered.map((tag) => ({
     key: tag.Key,
@@ -58,14 +58,9 @@ export const logCloudFormationStack = async (
   } else {
     // For all other types of Stack events tags need to be fetched
     try {
-      console.log("describing...");
       const { Stacks } = await cloudFormation.describeStacks({
         StackName: event.detail.requestParameters.stackName,
       });
-
-      console.log(JSON.stringify(Stacks));
-
-      console.log("where error yo");
 
       if (Stacks) {
         const tags = getTagsFromStacks(Stacks);
@@ -74,8 +69,6 @@ export const logCloudFormationStack = async (
         stackStatus = getStackJanitorStatus(customTags);
       }
     } catch (e: any) {
-      console.log("error yo");
-      console.log(e);
       logger.error(
         {
           event,
@@ -91,12 +84,9 @@ export const logCloudFormationStack = async (
       stackStatus !== StackStatus.Enabled
     ) {
       const item = generateDeleteItem(event);
-      console.log("error here?");
       await handleDataItem(item, dataModel.destroy);
-      console.log("error oh no here?");
     }
   }
-
   return {
     event,
     results: {
