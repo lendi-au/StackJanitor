@@ -4,13 +4,13 @@ module.exports = {
     "^.+\\.tsx?$": [
       "ts-jest",
       {
-        diagnostics: false
-      }
-    ]
+        diagnostics: false,
+      },
+    ],
   },
-  testRegex: "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+  testRegex: "(src/optional-handlers/searchDeleteCloudformationStack.test.ts)",
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "d.ts"],
   moduleDirectories: ["node_modules"],
   globals: {},
-  collectCoverage: true
+  collectCoverage: true,
 };

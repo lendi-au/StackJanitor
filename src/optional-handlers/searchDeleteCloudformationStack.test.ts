@@ -4,14 +4,14 @@ import {
   returnStackTags,
   isStackExpired,
   getStackName,
-  deleteStack
+  deleteStack,
 } from "./searchDeleteCloudformationStack";
 
 import * as sinon from "sinon";
 import {
   CloudFormation,
   DescribeStacksOutput,
-  Stack
+  Stack,
 } from "@aws-sdk/client-cloudformation";
 import { mockClient } from "aws-sdk-client-mock";
 
@@ -43,29 +43,29 @@ describe("describeAllStacks", () => {
         {
           StackName: "test1",
           CreationTime: now,
-          StackStatus: "CREATE_COMPLETE"
-        }
+          StackStatus: "CREATE_COMPLETE",
+        },
       ],
-      NextToken: "str1"
+      NextToken: "str1",
     };
     const second_output: DescribeStacksOutput = {
       Stacks: [
         {
           StackName: "test2",
           CreationTime: now,
-          StackStatus: "UPDATE_COMPLETE"
-        }
+          StackStatus: "UPDATE_COMPLETE",
+        },
       ],
-      NextToken: "str2"
+      NextToken: "str2",
     };
     const thrid_output: DescribeStacksOutput = {
       Stacks: [
         {
           StackName: "test3",
           CreationTime: now,
-          StackStatus: "ROLLBACK_COMPLETE"
-        }
-      ]
+          StackStatus: "ROLLBACK_COMPLETE",
+        },
+      ],
     };
 
     let expected: Stack[] = [];
@@ -73,8 +73,8 @@ describe("describeAllStacks", () => {
     expected = expected.concat(second_output.Stacks as Stack[]);
     expected = expected.concat(thrid_output.Stacks as Stack[]);
 
-    cfnMock.onCall(0).resolves(first_output);
-    cfnMock.onCall(1).resolves(second_output);
+    cfMock.onCall(0).resolves(first_output);
+    cfMock.onCall(1).resolves(second_output);
     cfnMock.onCall(2).resolves(thrid_output);
     const result = await describeAllStacks();
     expect(result).toEqual(expected);
@@ -91,38 +91,38 @@ describe("describeAllStacks", () => {
         {
           StackName: "test1",
           CreationTime: creationtime,
-          StackStatus: "CREATE_COMPLETE"
-        }
+          StackStatus: "CREATE_COMPLETE",
+        },
       ],
-      NextToken: "str1"
+      NextToken: "str1",
     };
     const second_output: CloudFormation.DescribeStacksOutput = {
       Stacks: [
         {
           StackName: "test2",
           CreationTime: creationtime,
-          StackStatus: "UPDATE_COMPLETE"
-        }
+          StackStatus: "UPDATE_COMPLETE",
+        },
       ],
-      NextToken: "str2"
+      NextToken: "str2",
     };
     const thrid_output: CloudFormation.DescribeStacksOutput = {
       Stacks: [
         {
           StackName: "test3",
           CreationTime: creationtime,
-          StackStatus: "ROLLBACK_COMPLETE"
-        }
-      ]
+          StackStatus: "ROLLBACK_COMPLETE",
+        },
+      ],
     };
     const first_Args: AWS.CloudFormation.DescribeStacksInput = {
-      NextToken: undefined
+      NextToken: undefined,
     };
     const second_Args: AWS.CloudFormation.DescribeStacksInput = {
-      NextToken: first_output.NextToken
+      NextToken: first_output.NextToken,
     };
     const third_Args: AWS.CloudFormation.DescribeStacksInput = {
-      NextToken: second_output.NextToken
+      NextToken: second_output.NextToken,
     };
 
     cfnMock.withArgs(first_Args).resolves(first_output);
@@ -148,27 +148,27 @@ describe("returnStackStatus", () => {
           "arn:aws:cloudformation:ap-southeast-2:019550661163:stack/test1/2b549de0-0bb3-11ec-9a21-0aa93ce2a038",
         StackName: "test1",
         CreationTime: creationtime,
-        StackStatus: "CREATE_COMPLETE"
+        StackStatus: "CREATE_COMPLETE",
       },
       {
         StackId:
           "arn:aws:cloudformation:ap-southeast-2:019550661163:stack/test3/b26fc5b0-0961-11ec-9a95-06c05975dd5c",
         StackName: "test3",
         CreationTime: creationtime,
-        StackStatus: "UPDATE_COMPLETE"
+        StackStatus: "UPDATE_COMPLETE",
       },
       {
         StackId:
           "arn:aws:cloudformation:ap-southeast-2:019550661163:stack/test2/8612c450-0960-11ec-a547-0268dfce7816",
         StackName: "test2",
         CreationTime: creationtime,
-        StackStatus: "ROLLBACK_COMPLETE"
+        StackStatus: "ROLLBACK_COMPLETE",
       },
       {
         StackName: "test5",
         CreationTime: creationtime,
-        StackStatus: "DELETE_COMPLETE"
-      }
+        StackStatus: "DELETE_COMPLETE",
+      },
     ];
     const myStacks = await returnStackStatus(stacks);
     expect(myStacks).toStrictEqual([
@@ -177,22 +177,22 @@ describe("returnStackStatus", () => {
           "arn:aws:cloudformation:ap-southeast-2:019550661163:stack/test1/2b549de0-0bb3-11ec-9a21-0aa93ce2a038",
         StackName: "test1",
         CreationTime: creationtime,
-        StackStatus: "CREATE_COMPLETE"
+        StackStatus: "CREATE_COMPLETE",
       },
       {
         StackId:
           "arn:aws:cloudformation:ap-southeast-2:019550661163:stack/test3/b26fc5b0-0961-11ec-9a95-06c05975dd5c",
         StackName: "test3",
         CreationTime: creationtime,
-        StackStatus: "UPDATE_COMPLETE"
+        StackStatus: "UPDATE_COMPLETE",
       },
       {
         StackId:
           "arn:aws:cloudformation:ap-southeast-2:019550661163:stack/test2/8612c450-0960-11ec-a547-0268dfce7816",
         StackName: "test2",
         CreationTime: creationtime,
-        StackStatus: "ROLLBACK_COMPLETE"
-      }
+        StackStatus: "ROLLBACK_COMPLETE",
+      },
     ]);
   });
 });
@@ -210,9 +210,9 @@ describe("returnStackTags", () => {
         Tags: [
           {
             Key: "stackjanitor",
-            Value: "enabled"
-          }
-        ]
+            Value: "enabled",
+          },
+        ],
       },
       {
         StackId:
@@ -223,17 +223,17 @@ describe("returnStackTags", () => {
         Tags: [
           {
             Key: "stackjanitor",
-            Value: "disabled"
-          }
-        ]
+            Value: "disabled",
+          },
+        ],
       },
       {
         StackId:
           "arn:aws:cloudformation:ap-southeast-2:019550661163:stack/test2/8612c450-0960-11ec-a547-0268dfce7816",
         StackName: "test2",
         CreationTime: creationtime,
-        StackStatus: "ROLLBACK_COMPLETE"
-      }
+        StackStatus: "ROLLBACK_COMPLETE",
+      },
     ];
     const myStacks = await returnStackTags(stacks);
     expect(myStacks).toStrictEqual([
@@ -246,10 +246,10 @@ describe("returnStackTags", () => {
         Tags: [
           {
             Key: "stackjanitor",
-            Value: "enabled"
-          }
-        ]
-      }
+            Value: "enabled",
+          },
+        ],
+      },
     ]);
   });
 });
@@ -272,9 +272,9 @@ describe("isStackExpired", () => {
         Tags: [
           {
             Key: "stackjanitor",
-            Value: "enabled"
-          }
-        ]
+            Value: "enabled",
+          },
+        ],
       },
       {
         StackId:
@@ -285,9 +285,9 @@ describe("isStackExpired", () => {
         Tags: [
           {
             Key: "stackjanitor",
-            Value: "enabled"
-          }
-        ]
+            Value: "enabled",
+          },
+        ],
       },
       {
         StackId:
@@ -298,10 +298,10 @@ describe("isStackExpired", () => {
         Tags: [
           {
             Key: "stackjanitor",
-            Value: "enabled"
-          }
-        ]
-      }
+            Value: "enabled",
+          },
+        ],
+      },
     ];
     const myStacks = isStackExpired(stacks);
     expect(myStacks).toStrictEqual([
@@ -314,10 +314,10 @@ describe("isStackExpired", () => {
         Tags: [
           {
             Key: "stackjanitor",
-            Value: "enabled"
-          }
-        ]
-      }
+            Value: "enabled",
+          },
+        ],
+      },
     ]);
   });
 });
@@ -334,9 +334,9 @@ describe("getStackName", () => {
         Tags: [
           {
             Key: "stackjanitor",
-            Value: "enabled"
-          }
-        ]
+            Value: "enabled",
+          },
+        ],
       },
       {
         StackId:
@@ -347,10 +347,10 @@ describe("getStackName", () => {
         Tags: [
           {
             Key: "stackjanitor",
-            Value: "enabled"
-          }
-        ]
-      }
+            Value: "enabled",
+          },
+        ],
+      },
     ];
     const myStacks = await getStackName(stacks);
     expect(myStacks).toStrictEqual(["test1", "test3"]);
