@@ -1,13 +1,20 @@
-import { CloudFormation, Stack } from "@aws-sdk/client-cloudformation";
+import {
+  CloudFormationClient,
+  DescribeStacksCommand,
+  DescribeStacksCommandInput,
+  Stack,
+} from "@aws-sdk/client-cloudformation";
 
 export const describeAllStacks = async (
   nextToken?: string,
 ): Promise<Stack[]> => {
-  const cloudFormation = new CloudFormation();
+  const cloudFormation = new CloudFormationClient();
   let returnValue: Stack[] = [];
-  const allStacks = await cloudFormation.describeStacks({
+  const describeStacksInput: DescribeStacksCommandInput = {
     NextToken: nextToken,
-  });
+  };
+  const describeStacksCmd = new DescribeStacksCommand(describeStacksInput);
+  const allStacks = await cloudFormation.send(describeStacksCmd);
   if (!allStacks.Stacks) {
     return returnValue;
   }

@@ -9,7 +9,7 @@ import { isStackExpired } from "./utils/isStackExpired";
 
 export const handler = async () => {
   const allStacks = await describeAllStacks();
-  if (allStacks) {
+  if (allStacks.length > 0) {
     const desiredStacks = returnStackStatus(allStacks);
     const stackjanitorEnabledStacks = returnStackTags(desiredStacks);
     const expiredStacks = isStackExpired(stackjanitorEnabledStacks);

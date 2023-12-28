@@ -8,7 +8,6 @@ module.exports = {
       },
     ],
   },
-  testRegex: "(src/optional-handlers/searchDeleteCloudformationStack.test.ts)",
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "d.ts"],
   moduleDirectories: ["node_modules"],
   globals: {},
