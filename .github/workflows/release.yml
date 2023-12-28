@@ -11,12 +11,12 @@ jobs:
   Release:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 0 # Fetch all commits, assuming release-it needs this for the commit history
-    - uses: actions/setup-node@v2
+    - uses: actions/setup-node@v3
       with:
-        node-version: '12'
+        node-version: '18'
     - run: yarn
     - name: Release 🎉
       run:  |
