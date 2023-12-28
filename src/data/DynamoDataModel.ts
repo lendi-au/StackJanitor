@@ -18,16 +18,16 @@ export const dynamoDataModel: dynogels.Model = dynogels.define(
       stackId: joi.string(),
       expirationTime: joi.number(),
       tags: joi.string(),
-      deleteCount: joi.number()
-    }
-  }
+      deleteCount: joi.number(),
+    },
+  },
 );
 
 export enum Actions {
   Create = "create",
   Update = "update",
   Destroy = "destroy",
-  Get = "get"
+  Get = "get",
 }
 
 export interface ActionHandler {
@@ -40,7 +40,7 @@ const promisifyDataMapper = (dataMapper: Model): DataModel => ({
   create: promisify(dataMapper.create),
   update: promisify(dataMapper.update),
   destroy: promisify(dataMapper.destroy),
-  get: promisify(dataMapper.get)
+  get: promisify(dataMapper.get),
 });
 
 export const dataModel = promisifyDataMapper(dynamoDataModel);

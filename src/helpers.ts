@@ -2,7 +2,7 @@ import {
   DataItem,
   DynamoDataModel,
   DynamoSearchResult,
-  GitTag
+  GitTag,
 } from "stackjanitor";
 import { dataModel, dynamoDataModel } from "./data/DynamoDataModel";
 import { handleDataItem } from "./handlers/monitorCloudFormationStack";
@@ -11,7 +11,7 @@ import {
   marshallOptions,
   NativeAttributeValue,
   unmarshall as sdkUnmarshall,
-  unmarshallOptions
+  unmarshallOptions,
 } from "@aws-sdk/util-dynamodb";
 import { AttributeValue as LambdaAttributeValue } from "aws-lambda";
 import { AttributeValue as SdkAttributeValue } from "@aws-sdk/client-dynamodb";
@@ -19,7 +19,7 @@ import { TextDecoder, TextEncoder } from "util";
 
 export const findStacksFromTag = (
   gitTag: GitTag,
-  keyName: string
+  keyName: string,
 ): Promise<DataItem[]> =>
   new Promise((resolve, reject) =>
     dynamoDataModel
@@ -31,30 +31,30 @@ export const findStacksFromTag = (
       .exec((err, data: DynamoSearchResult) =>
         err
           ? reject(err)
-          : resolve(data.Items.map((item: DynamoDataModel) => item.attrs))
-      )
+          : resolve(data.Items.map((item: DynamoDataModel) => item.attrs)),
+      ),
   );
 
 export const deleteDynamoRow = async (dataItem: DataItem) =>
   handleDataItem(
     {
       stackName: dataItem.stackName,
-      stackId: dataItem.stackId
+      stackId: dataItem.stackId,
     },
-    dataModel.destroy
+    dataModel.destroy,
   );
 
 /// marshall that produces output according to the types used by aws-lambda
 export function marshall<T extends { [K in keyof T]: NativeAttributeValue }>(
   data: T,
-  options?: marshallOptions
+  options?: marshallOptions,
 ): { [key: string]: LambdaAttributeValue } {
   const sdkResult = sdkMarshall(data, options);
 
   const result = Object.fromEntries(
     Object.entries(sdkResult).map(([key, value]) => {
       return [key, sdkToLambdaAttr(value)];
-    })
+    }),
   );
 
   return result;
@@ -66,7 +66,7 @@ function sdkToLambdaAttr(a: SdkAttributeValue): LambdaAttributeValue {
   }
 
   if (a.BS) {
-    return { BS: a.BS.map(item => new TextDecoder().decode(item)) };
+    return { BS: a.BS.map((item) => new TextDecoder().decode(item)) };
   }
 
   if (a.L) {
@@ -76,8 +76,11 @@ function sdkToLambdaAttr(a: SdkAttributeValue): LambdaAttributeValue {
   if (a.M) {
     return {
       M: Object.fromEntries(
-        Object.entries(a.M).map(([key, value]) => [key, sdkToLambdaAttr(value)])
-      )
+        Object.entries(a.M).map(([key, value]) => [
+          key,
+          sdkToLambdaAttr(value),
+        ]),
+      ),
     };
   }
 
@@ -87,12 +90,12 @@ function sdkToLambdaAttr(a: SdkAttributeValue): LambdaAttributeValue {
 /// unmarshall that takes input according to the types used by aws-lambda
 export function unmarshall(
   data: { [key: string]: LambdaAttributeValue },
-  options?: unmarshallOptions
+  options?: unmarshallOptions,
 ): { [key: string]: NativeAttributeValue } {
   const input = Object.fromEntries(
     Object.entries(data).map(([key, value]) => {
       return [key, lambdaToSdkAttr(value)];
-    })
+    }),
   );
 
   return sdkUnmarshall(input, options);
@@ -104,7 +107,7 @@ function lambdaToSdkAttr(a: LambdaAttributeValue): SdkAttributeValue {
   }
 
   if (typeof a.BS !== "undefined") {
-    return { BS: a.BS.map(item => new TextEncoder().encode(item)) };
+    return { BS: a.BS.map((item) => new TextEncoder().encode(item)) };
   }
 
   if (typeof a.BOOL !== "undefined") {
@@ -118,8 +121,11 @@ function lambdaToSdkAttr(a: LambdaAttributeValue): SdkAttributeValue {
   if (typeof a.M !== "undefined") {
     return {
       M: Object.fromEntries(
-        Object.entries(a.M).map(([key, value]) => [key, lambdaToSdkAttr(value)])
-      )
+        Object.entries(a.M).map(([key, value]) => [
+          key,
+          lambdaToSdkAttr(value),
+        ]),
+      ),
     };
   }
 

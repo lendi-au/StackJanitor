@@ -3,7 +3,7 @@ import {
   generateItemFromEvent,
   getExpirationTime,
   monitorCloudFormationStack,
-  MonitoringResultStatus
+  MonitoringResultStatus,
 } from "./monitorCloudFormationStack";
 
 describe("monitorCloudFormationStack:generateDeleteItem", () => {
@@ -11,21 +11,21 @@ describe("monitorCloudFormationStack:generateDeleteItem", () => {
     const event = {
       detail: {
         userIdentity: {
-          userName: "jordan.simonovski"
+          userName: "jordan.simonovski",
         },
         eventTime: "2019-07-21T22:41:21Z",
         eventName: "DeleteStack",
         requestParameters: {
           stackName:
-            "arn:aws:cloudformation:ap-southeast-2:12345:stack/log-archive-management/16921510-a9e8-11e9-a24e-02d286d7265a"
+            "arn:aws:cloudformation:ap-southeast-2:12345:stack/log-archive-management/16921510-a9e8-11e9-a24e-02d286d7265a",
         },
-        responseElements: null
-      }
+        responseElements: null,
+      },
     };
     expect(generateDeleteItem(event)).toStrictEqual({
       stackName: "log-archive-management",
       stackId:
-        "arn:aws:cloudformation:ap-southeast-2:12345:stack/log-archive-management/16921510-a9e8-11e9-a24e-02d286d7265a"
+        "arn:aws:cloudformation:ap-southeast-2:12345:stack/log-archive-management/16921510-a9e8-11e9-a24e-02d286d7265a",
     });
   });
 
@@ -33,23 +33,23 @@ describe("monitorCloudFormationStack:generateDeleteItem", () => {
     const event = {
       detail: {
         userIdentity: {
-          userName: "test_user"
+          userName: "test_user",
         },
         eventTime: "2019-07-21T22:41:21Z",
         eventName: "UpdateStack",
         requestParameters: {
-          stackName: "product-api-latest-development"
+          stackName: "product-api-latest-development",
         },
         responseElements: {
           stackId:
-            "arn:aws:cloudformation:ap-southeast-2:12345:stack/product-api-latest-development/8c0e2370-b9a5-11e9-abf5-02afb887c468"
-        }
-      }
+            "arn:aws:cloudformation:ap-southeast-2:12345:stack/product-api-latest-development/8c0e2370-b9a5-11e9-abf5-02afb887c468",
+        },
+      },
     };
     expect(generateDeleteItem(event)).toStrictEqual({
       stackName: "product-api-latest-development",
       stackId:
-        "arn:aws:cloudformation:ap-southeast-2:12345:stack/product-api-latest-development/8c0e2370-b9a5-11e9-abf5-02afb887c468"
+        "arn:aws:cloudformation:ap-southeast-2:12345:stack/product-api-latest-development/8c0e2370-b9a5-11e9-abf5-02afb887c468",
     });
   });
 });
@@ -71,9 +71,9 @@ describe("monitorCloudFormationStack:generateItemFromEvent", () => {
         userIdentity: {
           sessionContext: {
             sessionIssuer: {
-              userName: "development-poweruser"
-            }
-          }
+              userName: "development-poweruser",
+            },
+          },
         },
         eventTime: "2019-08-09T01:56:24Z",
         eventName: "CreateStack",
@@ -82,20 +82,20 @@ describe("monitorCloudFormationStack:generateItemFromEvent", () => {
           tags: [
             {
               value: "enabled",
-              key: "stackjanitor"
+              key: "stackjanitor",
             },
             {
               value: "1",
-              key: "v1"
-            }
+              key: "v1",
+            },
           ],
-          stackName: "CloudJanitorTest"
+          stackName: "CloudJanitorTest",
         },
         responseElements: {
           stackId:
-            "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTest/e46581a0-ba48-11e9-a48c-0a4631dffc70"
-        }
-      }
+            "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTest/e46581a0-ba48-11e9-a48c-0a4631dffc70",
+        },
+      },
     };
     expect(generateItemFromEvent(event)).toEqual({
       deleteCount: 0,
@@ -103,8 +103,7 @@ describe("monitorCloudFormationStack:generateItemFromEvent", () => {
       stackId:
         "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTest/e46581a0-ba48-11e9-a48c-0a4631dffc70",
       expirationTime: 1565920584,
-      tags:
-        '[{"value":"enabled","key":"stackjanitor"},{"value":"1","key":"v1"}]'
+      tags: '[{"value":"enabled","key":"stackjanitor"},{"value":"1","key":"v1"}]',
     });
   });
 });
@@ -120,9 +119,9 @@ describe("monitorCloudFormationStack", () => {
       userIdentity: {
         sessionContext: {
           sessionIssuer: {
-            userName: "development-poweruser"
-          }
-        }
+            userName: "development-poweruser",
+          },
+        },
       },
       eventTime: "2019-08-09T01:56:24Z",
       eventName: "CreateStack",
@@ -131,27 +130,27 @@ describe("monitorCloudFormationStack", () => {
         tags: [
           {
             value: "enabled",
-            key: "stackjanitor"
+            key: "stackjanitor",
           },
           {
             value: "1",
-            key: "v1"
-          }
+            key: "v1",
+          },
         ],
-        stackName: "CloudJanitorTest"
+        stackName: "CloudJanitorTest",
       },
       responseElements: {
         stackId:
-          "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTest/e46581a0-ba48-11e9-a48c-0a4631dffc70"
-      }
-    }
+          "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTest/e46581a0-ba48-11e9-a48c-0a4631dffc70",
+      },
+    },
   };
 
   const mockDataMapper = {
     create: (arg: any) => Promise.resolve(arg),
     update: (arg: any) => Promise.resolve(arg),
     destroy: (arg: any) => Promise.resolve(arg),
-    get: (arg: any) => Promise.resolve(arg)
+    get: (arg: any) => Promise.resolve(arg),
   };
 
   test("monitorCloudFormationStack should be successful for: CreateStack", async () => {

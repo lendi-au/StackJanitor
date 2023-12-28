@@ -16,37 +16,34 @@ describe("deleteCloudFormationStack", () => {
           dynamodb: {
             Keys: {
               stackId: {
-                S:
-                  "arn:aws:cloudformation:ap-southeast-2:account-id:stack/stack-name/id"
+                S: "arn:aws:cloudformation:ap-southeast-2:account-id:stack/stack-name/id",
               },
               stackName: {
-                S: "stackname"
-              }
+                S: "stackname",
+              },
             },
             OldImage: {
               expirationTime: {
-                N: "1596090125"
+                N: "1596090125",
               },
               stackId: {
-                S:
-                  "arn:aws:cloudformation:ap-southeast-2:account-id:stack/stack-name/id"
+                S: "arn:aws:cloudformation:ap-southeast-2:account-id:stack/stack-name/id",
               },
               stackName: {
-                S: "stackname"
+                S: "stackname",
               },
               tags: {
-                S:
-                  '[{"value":"your-app-name","key":"APP_NAME"},{"value":"4018","key":"BUILD_NUMBER"},{"value":"enabled","key":"stackjanitor"}]'
+                S: '[{"value":"your-app-name","key":"APP_NAME"},{"value":"4018","key":"BUILD_NUMBER"},{"value":"enabled","key":"stackjanitor"}]',
               },
               deleteCount: {
-                N: "0"
-              }
+                N: "0",
+              },
             },
-            StreamViewType: "NEW_AND_OLD_IMAGES"
-          }
-        }
+            StreamViewType: "NEW_AND_OLD_IMAGES",
+          },
+        },
       ],
-      v: 1
+      v: 1,
     };
   });
 
@@ -78,12 +75,11 @@ describe("deleteCloudFormationStack", () => {
           stackId:
             "arn:aws:cloudformation:ap-southeast-2:account-id:stack/stack-name/id",
           stackName: "stackname",
-          tags:
-            '[{"value":"your-app-name","key":"APP_NAME"},{"value":"4018","key":"BUILD_NUMBER"},{"value":"enabled","key":"stackjanitor"}]',
-          deleteCount: 0
-        }
+          tags: '[{"value":"your-app-name","key":"APP_NAME"},{"value":"4018","key":"BUILD_NUMBER"},{"value":"enabled","key":"stackjanitor"}]',
+          deleteCount: 0,
+        },
       },
-      "Stack with id stackname does not exist"
+      "Stack with id stackname does not exist",
     );
   });
 });
