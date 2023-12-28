@@ -1,5 +1,4 @@
-service:
-  name: StackJanitor${self:custom.NAME_SUFFIX}
+service: StackJanitor${self:custom.NAME_SUFFIX}
 
 plugins:
   - serverless-plugin-typescript
@@ -24,62 +23,64 @@ provider:
   deploymentBucket:
     name: ${env:SLS_DEPLOY_BUCKET, 'stackjanitor-serverless-deployment-bucket'}
   deploymentPrefix: ${env:SLS_DEPLOY_PREFIX, 'StackJanitor'}
-  iamRoleStatements:
-    - Effect: "Allow"
-      Action:
-        - "dynamodb:DescribeTable"
-        - "dynamodb:Query"
-        - "dynamodb:Scan"
-        - "dynamodb:GetItem"
-        - "dynamodb:PutItem"
-        - "dynamodb:UpdateItem"
-        - "dynamodb:DeleteItem"
-      Resource: "arn:aws:dynamodb:*:*:table/${self:custom.DYNAMO_DB_TABLE}${self:custom.NAME_SUFFIX}"
-    - Effect: "Allow"
-      Action:
-        - "dynamodb:List*"
-        - "dynamodb:Delete*"
-        - "dynamodb:Describe*"
-      Resource: "*"
-    - Effect: "Allow"
-      Action:
-        - "cloudformation:DescribeStack*"
-        - "cloudformation:DeleteStack*"
-      Resource: "*"
-    - Effect: "Allow"
-      Action:
-        - "elasticache:Delete*"
-        - "elasticache:Describe*"
-        - "ec2:*"
-        - "s3:*"
-        - "ecs:*"
-        - "sqs:*"
-        - "elasticloadbalancing:*"
-        - "elasticloadbalancing:*"
-        - "elasticloadbalancingv2:*"
-        - "logs:*"
-        - "events:*"
-        - "route53:*"
-        - "cloudwatch:*"
-        - "application-autoscaling:*"
-        - "autoscaling:*"
-        - "apigateway:*"
-        - "lambda:Get*"
-        - "lambda:Delete*"
-        - "lambda:Remove*"
-        - "glue:Delete*"
-        - "glue:Stop*"
-        - "iam:DetachRolePolicy"
-        - "iam:DeleteRolePolicy"
-        - "iam:DeleteRole"
-        - "iam:DeletePolicy"
-        - "iam:DeleteGroupPolicy"
-        - "iam:DeletePolicyVersion"
-      Resource: "*"
-    - Effect: "Allow"
-      Action:
-        - "lambda:Invoke*"
-      Resource: "${env:EXTERNAL_LAMBDA}"
+  iam:
+    role:
+      statements:
+      - Effect: "Allow"
+        Action:
+          - "dynamodb:DescribeTable"
+          - "dynamodb:Query"
+          - "dynamodb:Scan"
+          - "dynamodb:GetItem"
+          - "dynamodb:PutItem"
+          - "dynamodb:UpdateItem"
+          - "dynamodb:DeleteItem"
+        Resource: "arn:aws:dynamodb:*:*:table/${self:custom.DYNAMO_DB_TABLE}${self:custom.NAME_SUFFIX}"
+      - Effect: "Allow"
+        Action:
+          - "dynamodb:List*"
+          - "dynamodb:Delete*"
+          - "dynamodb:Describe*"
+        Resource: "*"
+      - Effect: "Allow"
+        Action:
+          - "cloudformation:DescribeStack*"
+          - "cloudformation:DeleteStack*"
+        Resource: "*"
+      - Effect: "Allow"
+        Action:
+          - "elasticache:Delete*"
+          - "elasticache:Describe*"
+          - "ec2:*"
+          - "s3:*"
+          - "ecs:*"
+          - "sqs:*"
+          - "elasticloadbalancing:*"
+          - "elasticloadbalancing:*"
+          - "elasticloadbalancingv2:*"
+          - "logs:*"
+          - "events:*"
+          - "route53:*"
+          - "cloudwatch:*"
+          - "application-autoscaling:*"
+          - "autoscaling:*"
+          - "apigateway:*"
+          - "lambda:Get*"
+          - "lambda:Delete*"
+          - "lambda:Remove*"
+          - "glue:Delete*"
+          - "glue:Stop*"
+          - "iam:DetachRolePolicy"
+          - "iam:DeleteRolePolicy"
+          - "iam:DeleteRole"
+          - "iam:DeletePolicy"
+          - "iam:DeleteGroupPolicy"
+          - "iam:DeletePolicyVersion"
+        Resource: "*"
+      - Effect: "Allow"
+        Action:
+          - "lambda:Invoke*"
+        Resource: "${env:EXTERNAL_LAMBDA}"
 
 resources:
   Resources:
@@ -197,7 +198,8 @@ stepFunctions:
       events:
         - cloudwatchEvent:
             event:
-              source: "aws.cloudformation"
+              source: 
+                - "aws.cloudformation"
               detail:
                 eventSource:
                   - "cloudformation.amazonaws.com"
