@@ -1,8 +1,22 @@
 import {
   getTagsFromStacks,
   getStackJanitorStatus,
-  logCloudFormationStack
+  logCloudFormationStack,
 } from "./logCloudFormationStack";
+
+import * as mcfs from "./monitorCloudFormationStack";
+import * as sinon from "sinon";
+import { mockClient } from "aws-sdk-client-mock";
+import {
+  CloudFormationClient,
+  DescribeStacksCommand,
+} from "@aws-sdk/client-cloudformation";
+
+jest.useFakeTimers();
+jest.mock("./monitorCloudFormationStack");
+
+const textStub = sinon.stub(mcfs, "handleDataItem");
+textStub.resolves();
 
 describe("logCloudFormationStack:getTagsFromStacks", () => {
   test("it should return tags from Stack[]", async () => {
@@ -14,18 +28,18 @@ describe("logCloudFormationStack:getTagsFromStacks", () => {
         Tags: [
           {
             Key: `stackjanitor`,
-            Value: "enabled"
-          }
-        ]
-      }
+            Value: "enabled",
+          },
+        ],
+      },
     ];
 
-    const tags = await getTagsFromStacks(Stacks);
+    const tags = getTagsFromStacks(Stacks);
     expect(tags).toStrictEqual([
       {
         Key: "stackjanitor",
-        Value: "enabled"
-      }
+        Value: "enabled",
+      },
     ]);
   });
 
@@ -38,9 +52,9 @@ describe("logCloudFormationStack:getTagsFromStacks", () => {
         Tags: [
           {
             Key: `stackjanitor`,
-            Value: "enabled"
-          }
-        ]
+            Value: "enabled",
+          },
+        ],
       },
 
       {
@@ -50,16 +64,16 @@ describe("logCloudFormationStack:getTagsFromStacks", () => {
         Tags: [
           {
             Key: `v1`,
-            Value: "1.0.5"
-          }
-        ]
-      }
+            Value: "1.0.5",
+          },
+        ],
+      },
     ];
 
-    const tags = await getTagsFromStacks(Stacks);
+    const tags = getTagsFromStacks(Stacks);
     expect(tags.sort()).toEqual([
       { Key: "v1", Value: "1.0.5" },
-      { Key: "stackjanitor", Value: "enabled" }
+      { Key: "stackjanitor", Value: "enabled" },
     ]);
   });
 
@@ -72,20 +86,20 @@ describe("logCloudFormationStack:getTagsFromStacks", () => {
         Tags: [
           {
             Key: `stackjanitor`,
-            Value: "enabled"
+            Value: "enabled",
           },
           {
             Key: `v1`,
-            Value: "1.0.5"
-          }
-        ]
-      }
+            Value: "1.0.5",
+          },
+        ],
+      },
     ];
 
-    const tags = await getTagsFromStacks(Stacks);
+    const tags = getTagsFromStacks(Stacks);
     expect(tags.sort()).toEqual([
       { Key: "stackjanitor", Value: "enabled" },
-      { Key: "v1", Value: "1.0.5" }
+      { Key: "v1", Value: "1.0.5" },
     ]);
   });
 
@@ -95,11 +109,11 @@ describe("logCloudFormationStack:getTagsFromStacks", () => {
         StackName: "StackJanitor-dev",
         CreationTime: new Date(),
         StackStatus: "CREATE_COMPLETE",
-        Tags: []
-      }
+        Tags: [],
+      },
     ];
 
-    const tags = await getTagsFromStacks(Stacks);
+    const tags = getTagsFromStacks(Stacks);
     expect(tags).toEqual([]);
   });
 });
@@ -109,15 +123,15 @@ describe("logCloudFormationStack:getStackJanitorStatus", () => {
     const Tags = [
       {
         key: `stackjanitor`,
-        value: "enabled"
+        value: "enabled",
       },
       {
         key: `test`,
-        value: "disabled"
-      }
+        value: "disabled",
+      },
     ];
 
-    const Status = await getStackJanitorStatus(Tags);
+    const Status = getStackJanitorStatus(Tags);
     expect(Status).toEqual("enabled");
   });
 
@@ -125,15 +139,15 @@ describe("logCloudFormationStack:getStackJanitorStatus", () => {
     const Tags = [
       {
         Key: `stackjanitor`,
-        Value: "disabled"
+        Value: "disabled",
       },
       {
         Key: `test`,
-        Value: "disabled"
-      }
+        Value: "disabled",
+      },
     ];
 
-    const Status = await getStackJanitorStatus(Tags);
+    const Status = getStackJanitorStatus(Tags);
     expect(Status).toEqual("disabled");
   });
 
@@ -141,11 +155,11 @@ describe("logCloudFormationStack:getStackJanitorStatus", () => {
     const Tags = [
       {
         Key: `v1`,
-        Value: "1.0.5"
-      }
+        Value: "1.0.5",
+      },
     ];
 
-    const Status = await getStackJanitorStatus(Tags);
+    const Status = getStackJanitorStatus(Tags);
     expect(Status).toEqual("disabled");
   });
 });
@@ -161,56 +175,53 @@ describe("logCloudFormationStack", () => {
           type: "AssumedRole",
           sessionContext: {
             sessionIssuer: {
-              userName: "development-deployer"
-            }
-          }
+              userName: "development-deployer",
+            },
+          },
         },
         eventName: "UpdateStack",
         requestParameters: {
           parameters: null,
-          stackName: "stackjanitor"
+          stackName: "stackjanitor",
         },
         responseElements: {
           stackId:
-            "arn:aws:cloudformation:ap-southeast-2:12345:stack/test/36ad7930-b8c4-11e9-aadd-0ae3f52010f8"
-        }
-      }
+            "arn:aws:cloudformation:ap-southeast-2:12345:stack/test/36ad7930-b8c4-11e9-aadd-0ae3f52010f8",
+        },
+      },
     };
 
-    const cloudFormation = {
-      describeStacks: () => ({
-        promise: () =>
-          Promise.resolve({
-            Stacks: [
-              {
-                StackName: "StackJanitor-dev",
-                CreationTime: new Date(),
-                StackStatus: "CREATE_COMPLETE",
-                Tags: [
-                  {
-                    Key: `stackjanitor`,
-                    Value: "enabled"
-                  },
-                  {
-                    Key: `v1`,
-                    Value: "1.0.5"
-                  }
-                ]
-              }
-            ]
-          })
-      })
-    };
+    const cfMock = mockClient(CloudFormationClient);
+    cfMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: "StackJanitor-dev",
+          CreationTime: new Date(),
+          StackStatus: "CREATE_COMPLETE",
+          Tags: [
+            {
+              Key: `stackjanitor`,
+              Value: "enabled",
+            },
+            {
+              Key: `v1`,
+              Value: "1.0.5",
+            },
+          ],
+        },
+      ],
+    });
+
+    const cloudFormation = new CloudFormationClient();
 
     const logStackOutput = await logCloudFormationStack(
       sample_event,
-      // @ts-ignore
-      cloudFormation
+      cloudFormation,
     );
 
     expect(logStackOutput).toHaveProperty("results");
     expect(logStackOutput.results).toStrictEqual({
-      stackjanitor: "enabled"
+      stackjanitor: "enabled",
     });
     expect(logStackOutput).toHaveProperty("event");
   });

@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`config it shoud match with the default config 1`] = `
-Object {
-  "default": Object {
+{
+  "default": {
     "DEFAULT_DYNAMODB_TABLE": "stackJanitorTable",
     "DEFAULT_EXPIRATION_PERIOD": 604800,
     "DEFAULT_REGION": "ap-southeast-2",

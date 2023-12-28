@@ -4,29 +4,29 @@ import {
   DataItem,
   GithubWebhookEvent,
   GitTag,
-  State
+  State,
 } from "stackjanitor";
 import { logger } from "../logger";
 import { deleteDynamoRow, findStacksFromTag } from "../helpers";
-import AWS from "aws-sdk";
+import { Lambda } from "@aws-sdk/client-lambda";
 
 export const SEARCH_KEY = "tags";
 
 export enum Response {
   Ignore = "Ignored as PR is not in Merged or Declined state",
-  Success = "Request processed"
+  Success = "Request processed",
 }
 
 export const bitbucketEventParser = (
-  eventData: BitbucketWebhookEvent
+  eventData: BitbucketWebhookEvent,
 ): GitTag => ({
   repository: eventData.pullrequest.source.repository.name,
-  branch: eventData.pullrequest.source.branch.name
+  branch: eventData.pullrequest.source.branch.name,
 });
 
 export const gitHubEventParser = (eventData: GithubWebhookEvent): GitTag => ({
   repository: eventData.repository.name,
-  branch: eventData.pull_request.head.ref
+  branch: eventData.pull_request.head.ref,
 });
 
 export const isBitbucketEvent = (event: any): event is BitbucketWebhookEvent =>
@@ -36,20 +36,20 @@ export const isGithubEvent = (event: any): event is GithubWebhookEvent =>
   event.hasOwnProperty("pull_request") && event.hasOwnProperty("repository");
 
 export const bitBucketEventHandler = async (
-  eventData: BitbucketWebhookEvent
+  eventData: BitbucketWebhookEvent,
 ) => {
   const state = eventData.pullrequest.state;
   const inDesiredState = isInDesiredState(state);
   if (!inDesiredState)
     return {
       statusCode: 200,
-      body: Response.Ignore
+      body: Response.Ignore,
     };
   const gitTag = bitbucketEventParser(eventData);
   logger.info(
     { gitTag },
     `Processing BitBucket webhook for branch ${gitTag.branch} \
-              in repository ${gitTag.repository}`
+              in repository ${gitTag.repository}`,
   );
   return findAndDeleteStacksFromTag(gitTag);
 };
@@ -59,13 +59,13 @@ export const gitHubEventHandler = async (eventData: GithubWebhookEvent) => {
   if (!mergedState)
     return {
       statusCode: 200,
-      body: Response.Ignore
+      body: Response.Ignore,
     };
   const gitTag = gitHubEventParser(eventData);
   logger.info(
     { gitTag },
     `Processing GitHub webhook for branch ${gitTag.branch} \
-              in repository ${gitTag.repository}`
+              in repository ${gitTag.repository}`,
   );
   return findAndDeleteStacksFromTag(gitTag);
 };
@@ -79,19 +79,19 @@ export const deleteStacks = async (stacks: DataItem[]) => {
   for (let stack of stacks) {
     try {
       await deleteDynamoRow(stack);
-    } catch (e) {
+    } catch (e: any) {
       logger.error(
         {
           stackInfo: stack,
-          stack: e.stack
+          stack: e.stack,
         },
-        e.message
+        e.message,
       );
     }
   }
   return {
     statusCode: 200,
-    body: Response.Success
+    body: Response.Success,
   };
 };
 
@@ -102,7 +102,7 @@ export const index = async (event: APIGatewayEvent) => {
   if (!event.body) {
     return {
       statusCode: 200,
-      body: Response.Ignore
+      body: Response.Ignore,
     };
   }
 
@@ -110,17 +110,17 @@ export const index = async (event: APIGatewayEvent) => {
   if (process.env.EXTERNAL_LAMBDA) {
     const externalLambda = process.env.EXTERNAL_LAMBDA;
     logger.info({
-      externalLambda
+      externalLambda,
     });
-    const lambda = new AWS.Lambda();
+    const lambda = new Lambda();
     const params = {
       FunctionName: externalLambda,
       InvocationType: "Event",
-      Payload: event.body
+      Payload: event.body,
     };
     try {
-      await lambda.invoke(params).promise();
-    } catch (e) {
+      await lambda.invoke(params);
+    } catch (e: any) {
       // log only and continue the invocation
       logger.error(e);
     }
@@ -135,6 +135,6 @@ export const index = async (event: APIGatewayEvent) => {
 
   return {
     statusCode: 200,
-    body: Response.Ignore
+    body: Response.Ignore,
   };
 };

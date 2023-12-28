@@ -2,9 +2,14 @@ import {
   bitBucketEventHandler,
   bitbucketEventParser,
   isBitbucketEvent,
-  isInDesiredState
+  isInDesiredState,
 } from "./gitHook";
 import * as helpers from "../helpers";
+jest.mock("../helpers");
+
+beforeEach(() => {
+  jest.resetAllMocks();
+});
 
 const bitbucketEvent = {
   pullrequest: {
@@ -13,20 +18,20 @@ const bitbucketEvent = {
       repository: {
         type: "repository",
         name: "test-repo",
-        full_name: "lendi-dev/test-repo"
+        full_name: "lendi-dev/test-repo",
       },
       branch: {
-        name: "feature/FUNNEL-1525-1"
-      }
+        name: "feature/FUNNEL-1525-1",
+      },
     },
     state: "DECLINED",
-    reason: "TEST"
+    reason: "TEST",
   },
   repository: {
     full_name: "lendi-dev/test-repo",
     type: "repository",
-    name: "test-repo"
-  }
+    name: "test-repo",
+  },
 };
 
 describe("isInDesiredState", () => {
@@ -51,30 +56,30 @@ describe("bitbucketEventParser", () => {
         destination: {
           repository: {
             name: "test-webhook",
-            full_name: "khaledquadir/test-webhook"
+            full_name: "khaledquadir/test-webhook",
           },
           branch: {
-            name: "master"
-          }
+            name: "master",
+          },
         },
         source: {
           repository: {
             name: "test-webhook",
-            full_name: "khaledquadir/test-webhook"
+            full_name: "khaledquadir/test-webhook",
           },
           branch: {
-            name: "test-hook-12"
-          }
+            name: "test-hook-12",
+          },
         },
-        state: "MERGED"
+        state: "MERGED",
       },
       repository: {
-        name: "test-webhook"
-      }
+        name: "test-webhook",
+      },
     };
     expect(bitbucketEventParser(bitBucketEventData)).toEqual({
       repository: "test-webhook",
-      branch: "test-hook-12"
+      branch: "test-hook-12",
     });
   });
 });
@@ -83,7 +88,7 @@ describe("isBitbucketEvent", () => {
   test("it should return true bitbucket event", () => {
     const bitBucketEventData = {
       pullrequest: {},
-      repository: {}
+      repository: {},
     };
     expect(isBitbucketEvent(bitBucketEventData)).toEqual(true);
   });
@@ -96,26 +101,26 @@ describe("bitBucketEventHandler", () => {
         destination: {
           repository: {
             name: "test-webhook",
-            full_name: "khaledquadir/test-webhook"
+            full_name: "khaledquadir/test-webhook",
           },
           branch: {
-            name: "master"
-          }
+            name: "master",
+          },
         },
         source: {
           repository: {
             name: "test-webhook",
-            full_name: "khaledquadir/test-webhook"
+            full_name: "khaledquadir/test-webhook",
           },
           branch: {
-            name: "test-hook-12"
-          }
+            name: "test-hook-12",
+          },
         },
-        state: "MERGED"
+        state: "MERGED",
       },
       repository: {
-        name: "test-webhook"
-      }
+        name: "test-webhook",
+      },
     };
 
     const spy = jest.spyOn(helpers, "findStacksFromTag");
@@ -123,24 +128,24 @@ describe("bitBucketEventHandler", () => {
       {
         stackName: "CloudJanitorTestV1",
         stackId:
-          "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTestV1/f79269a0"
-      }
+          "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTestV1/f79269a0",
+      },
     ]);
 
     expect(bitBucketEventHandler(bitBucketEventData)).toEqual(
-      Promise.resolve({})
+      Promise.resolve({}),
     );
   });
 
-  test("should delte stack for bitbucket webhook call", async () => {
+  test("should delete stack for bitbucket webhook call", async () => {
     const deleteDynamoRow = jest.spyOn(helpers, "deleteDynamoRow");
 
     jest.spyOn(helpers, "findStacksFromTag").mockResolvedValue([
       {
         stackName: "stackname",
         stackId:
-          "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTestV1/f79269a0"
-      }
+          "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTestV1/f79269a0",
+      },
     ]);
 
     await bitBucketEventHandler(bitbucketEvent);
@@ -148,7 +153,7 @@ describe("bitBucketEventHandler", () => {
     expect(deleteDynamoRow).toHaveBeenNthCalledWith(1, {
       stackId:
         "arn:aws:cloudformation:ap-southeast-2:12345:stack/CloudJanitorTestV1/f79269a0",
-      stackName: "stackname"
+      stackName: "stackname",
     });
   });
 });

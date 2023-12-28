@@ -4,14 +4,14 @@ import { StackStatus } from "../tag/TagStatus";
 import {
   DynamoDBEventType,
   ParsedRecord,
-  parseEventRecords
+  parseEventRecords,
 } from "./dynamoParser";
 import { CustomTag, DataItem } from "stackjanitor";
 import { deleteStack } from "../cloudformation";
 import config from "../config";
 import {
   generateRepeatedDeleteItem,
-  handleDataItem
+  handleDataItem,
 } from "./monitorCloudFormationStack";
 import { dataModel } from "../data/DynamoDataModel";
 
@@ -28,7 +28,7 @@ export class ValidationError extends Error {
 }
 
 function isStackJanitorEnabled(tags: CustomTag[]) {
-  const status = tags.find(tag => tag.key === "stackjanitor")?.value;
+  const status = tags.find((tag) => tag.key === "stackjanitor")?.value;
   return status === StackStatus.Enabled;
 }
 
@@ -39,7 +39,7 @@ export const deleteCloudFormationStack = async (item: DataItem) => {
 
   if (!isEnabled) {
     throw new StackJanitorNotEnabledError(
-      `StackJanitor is not enabled for ${stackName}`
+      `StackJanitor is not enabled for ${stackName}`,
     );
   }
 
@@ -49,7 +49,7 @@ export const deleteCloudFormationStack = async (item: DataItem) => {
 
   logger.info(
     { stackInfo: item },
-    `CFN Stack: ${stackName} deleted successfully`
+    `CFN Stack: ${stackName} deleted successfully`,
   );
 };
 
@@ -58,7 +58,7 @@ async function processRecords(records: ParsedRecord<DataItem>[]) {
     const { eventID, oldData, eventName } = record;
     const eventDetails = {
       eventID,
-      eventName
+      eventName,
     };
 
     logger.info(eventDetails, `Started processing Dynamo stream.`);
@@ -71,14 +71,14 @@ async function processRecords(records: ParsedRecord<DataItem>[]) {
     if (!oldData) {
       logger.info(
         eventDetails,
-        `Data is null for ${eventName}. Cannot proceed.`
+        `Data is null for ${eventName}. Cannot proceed.`,
       );
       return;
     }
 
     try {
       await deleteCloudFormationStack(oldData);
-    } catch (err) {
+    } catch (err: any) {
       if (
         err instanceof StackJanitorNotEnabledError ||
         (err instanceof ValidationError &&
@@ -87,9 +87,9 @@ async function processRecords(records: ParsedRecord<DataItem>[]) {
         logger.error(
           {
             stackInfo: oldData,
-            ...eventDetails
+            ...eventDetails,
           },
-          `${err.message}`
+          `${err.message}`,
         );
         return;
       }
@@ -97,9 +97,9 @@ async function processRecords(records: ParsedRecord<DataItem>[]) {
       logger.error(
         {
           stackInfo: oldData,
-          ...eventDetails
+          ...eventDetails,
         },
-        `${err.message}`
+        `${err.message}`,
       );
       // throw err;
 
@@ -109,15 +109,15 @@ async function processRecords(records: ParsedRecord<DataItem>[]) {
       // based on the deleteCount
       if (
         record.oldData?.deleteCount &&
-        record.oldData.deleteCount > config.MAX_CLEANUP_RETRY
+        record.oldData.deleteCount > Number(config.MAX_CLEANUP_RETRY)
       ) {
         // Log message to cloudwatch
         logger.error(
           {
             stackInfo: oldData,
-            ...eventDetails
+            ...eventDetails,
           },
-          `Failed to delete stack after ${config.MAX_CLEANUP_RETRY} additional attempts: ${oldData.stackName}`
+          `Failed to delete stack after ${config.MAX_CLEANUP_RETRY} additional attempts: ${oldData.stackName}`,
         );
       } else {
         // Recreate record

@@ -66,7 +66,7 @@ declare module "stackjanitor" {
 
   export const enum State {
     Merged = "MERGED",
-    Declined = "DECLINED"
+    Declined = "DECLINED",
   }
 
   export interface Repository {

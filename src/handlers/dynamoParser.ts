@@ -1,26 +1,30 @@
-import { DynamoDBRecord, DynamoDBStreamEvent, StreamRecord } from "aws-lambda";
-import { AttributeValue } from "aws-lambda/trigger/dynamodb-stream";
-import { DynamoDB } from "aws-sdk";
+import {
+  AttributeValue,
+  DynamoDBRecord,
+  DynamoDBStreamEvent,
+  StreamRecord,
+} from "aws-lambda";
 import { isEqual } from "lodash";
 import * as pino from "pino";
+import { unmarshall } from "../helpers";
 
 const dynamoLoggerName = "StackJanitor-DynamoDB-stream-logger";
 
 const createModuleLogger = (moduleName: string, level?: string) => {
   return pino({
     name: moduleName,
-    base: null
+    base: null,
   }).child({
     module: moduleName,
     level,
-    base: null
+    base: null,
   });
 };
 
 export enum DynamoDBEventType {
   Insert = "INSERT",
   Modify = "MODIFY",
-  Remove = "REMOVE"
+  Remove = "REMOVE",
 }
 
 export interface ParsedRecord<T> {
@@ -59,7 +63,7 @@ interface Image {
 }
 
 function unmarshallItem(data: Image) {
-  return DynamoDB.Converter.unmarshall(data);
+  return unmarshall(data);
 }
 
 function unmarshallStream<T>(record: DynamoDBRecord): UnmarshalledData<T> {
@@ -74,7 +78,7 @@ function unmarshallStream<T>(record: DynamoDBRecord): UnmarshalledData<T> {
 }
 
 export function parseEventRecords<T>(
-  event: DynamoDBStreamEvent
+  event: DynamoDBStreamEvent,
 ): ParsedRecord<T>[] {
   if (event.Records.length === 0) {
     throw new Error("No records found.");
@@ -87,7 +91,7 @@ export function parseEventRecords<T>(
 
     if (isModifiedRecordWithoutAnyChange(record)) {
       logger.error(
-        `DynamoDB stream record was not modified. Dropping event ID: ${record.eventID}`
+        `DynamoDB stream record was not modified. Dropping event ID: ${record.eventID}`,
       );
       return;
     }

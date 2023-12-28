@@ -18,7 +18,7 @@ const config = {
     process.env.DEFAULT_EXPIRATION_PERIOD || SEVEN_DAYS,
   MAX_CLEANUP_RETRY: process.env.MAX_CLEANUP_RETRY || 5,
   DELETE_INTERVAL,
-  DRY_RUN: isDryRun()
+  DRY_RUN: isDryRun(),
 };
 
 export default config;

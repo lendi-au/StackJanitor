@@ -1,11 +1,9 @@
 service:
   name: StackJanitor${self:custom.NAME_SUFFIX}
 
-# Add the serverless-webpack plugin
 plugins:
-  - serverless-webpack
+  - serverless-plugin-typescript
   - serverless-step-functions
-  - serverless-pseudo-parameters
 
 custom:
   DYNAMO_DB_TABLE: stackJanitorTable
@@ -13,11 +11,10 @@ custom:
   DEFAULT_REGION: "ap-southeast-2"
   MAX_CLEANUP_RETRY: 2 # maximum number of retries before abandoning deletion
   NAME_SUFFIX: ${env:NAME_SUFFIX, ''}
-  SCHEDULE_ENABLE: "false"
 
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs18.x
   memorySize: 128
   stage: ${opt:stage, 'development'}
   region: ${self:custom.DEFAULT_REGION}
@@ -157,9 +154,7 @@ functions:
     events:
       - schedule: 
           rate: cron(0 10 * * ? *)
-          enabled: ${self:custom.SCHEDULE_ENABLE}
-
-
+          enabled: ${env:SCHEDULE_ENABLE, 'false'}
 
 stepFunctions:
   stateMachines:
@@ -172,7 +167,7 @@ stepFunctions:
           logCloudFormationStack:
             Type: Task
             Next: checkStackJanitorTag
-            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-logCloudFormationStack
+            Resource: arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:service}-${opt:stage}-logCloudFormationStack
             Catch:
               - ErrorEquals:
                   - States.ALL
@@ -193,7 +188,7 @@ stepFunctions:
           MonitorStack:
             Type: Task
             Next: EndStackMonitoring
-            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-monitorCloudFormationStack
+            Resource: arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:service}-${opt:stage}-monitorCloudFormationStack
             Catch:
               - ErrorEquals:
                   - States.ALL
@@ -202,8 +197,7 @@ stepFunctions:
       events:
         - cloudwatchEvent:
             event:
-              source:
-                - "aws.cloudformation"
+              source: "aws.cloudformation"
               detail:
                 eventSource:
                   - "cloudformation.amazonaws.com"
