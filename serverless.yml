@@ -11,7 +11,6 @@ custom:
   DEFAULT_REGION: "ap-southeast-2"
   MAX_CLEANUP_RETRY: 2 # maximum number of retries before abandoning deletion
   NAME_SUFFIX: ${env:NAME_SUFFIX, ''}
-  SCHEDULE_ENABLE: "false"
 
 provider:
   name: aws
@@ -155,7 +154,7 @@ functions:
     events:
       - schedule: 
           rate: cron(0 10 * * ? *)
-          enabled: ${self:custom.SCHEDULE_ENABLE}
+          enabled: ${env:SCHEDULE_ENABLE, 'false'}
 
 stepFunctions:
   stateMachines:
@@ -198,8 +197,7 @@ stepFunctions:
       events:
         - cloudwatchEvent:
             event:
-              source:
-                - "aws.cloudformation"
+              source: "aws.cloudformation"
               detail:
                 eventSource:
                   - "cloudformation.amazonaws.com"
