@@ -6,6 +6,11 @@ import {
 
 import * as mcfs from "./monitorCloudFormationStack";
 import * as sinon from "sinon";
+import { mockClient } from "aws-sdk-client-mock";
+import {
+  CloudFormationClient,
+  DescribeStacksCommand,
+} from "@aws-sdk/client-cloudformation";
 
 jest.useFakeTimers();
 jest.mock("./monitorCloudFormationStack");
@@ -186,32 +191,31 @@ describe("logCloudFormationStack", () => {
       },
     };
 
-    const cloudFormation = {
-      describeStacks: async () =>
-        Promise.resolve({
-          Stacks: [
+    const cfMock = mockClient(CloudFormationClient);
+    cfMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: "StackJanitor-dev",
+          CreationTime: new Date(),
+          StackStatus: "CREATE_COMPLETE",
+          Tags: [
             {
-              StackName: "StackJanitor-dev",
-              CreationTime: "",
-              StackStatus: "CREATE_COMPLETE",
-              Tags: [
-                {
-                  Key: `stackjanitor`,
-                  Value: "enabled",
-                },
-                {
-                  Key: `v1`,
-                  Value: "1.0.5",
-                },
-              ],
+              Key: `stackjanitor`,
+              Value: "enabled",
+            },
+            {
+              Key: `v1`,
+              Value: "1.0.5",
             },
           ],
-        }),
-    };
+        },
+      ],
+    });
+
+    const cloudFormation = new CloudFormationClient();
 
     const logStackOutput = await logCloudFormationStack(
       sample_event,
-      // @ts-ignore
       cloudFormation,
     );
 

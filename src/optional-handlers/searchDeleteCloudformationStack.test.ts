@@ -48,5 +48,31 @@ describe("basic handler calls", () => {
     stacksStub.resolves(returnedValue);
     await handler();
     expect(deleteStub.calledOnce).toBeTruthy();
+    sinon.reset();
+    sinon.restore();
+  });
+
+  test("handler with a stack returned", async () => {
+    const stacksStub = sinon.stub(describeAllStacks, "describeAllStacks");
+    const deleteStub = sinon.stub(cf, "deleteStack");
+    const now = new Date(); // now!
+    const returnedValue: Stack[] = [
+      {
+        StackName: "test1",
+        CreationTime: now,
+        StackStatus: "CREATE_COMPLETE",
+        Tags: [
+          {
+            Key: "stackjanitor",
+            Value: "enabled",
+          },
+        ],
+      },
+    ];
+    stacksStub.resolves(returnedValue);
+    await handler();
+    expect(deleteStub.notCalled).toBeTruthy();
+    sinon.reset();
+    sinon.restore();
   });
 });
