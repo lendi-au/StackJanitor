@@ -168,7 +168,7 @@ stepFunctions:
           logCloudFormationStack:
             Type: Task
             Next: checkStackJanitorTag
-            Resource: arn:aws:lambda:${aws:region}:${aws:accountid}:function:${self:service}-${opt:stage}-logCloudFormationStack
+            Resource: arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:service}-${opt:stage}-logCloudFormationStack
             Catch:
               - ErrorEquals:
                   - States.ALL
@@ -189,7 +189,7 @@ stepFunctions:
           MonitorStack:
             Type: Task
             Next: EndStackMonitoring
-            Resource: arn:aws:lambda:${aws:region}:${aws:accountid}:function:${self:service}-${opt:stage}-monitorCloudFormationStack
+            Resource: arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:service}-${opt:stage}-monitorCloudFormationStack
             Catch:
               - ErrorEquals:
                   - States.ALL
