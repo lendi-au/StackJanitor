@@ -6,7 +6,8 @@ import {
   StackJanitorStatus,
 } from "stackjanitor";
 import { logger } from "../logger";
-import { ActionHandler, DataModel, dataModel } from "../data/DynamoDataModel";
+import { Actions, JanitorRecord } from "../data/DynamoDataModel";
+import { Entity } from "dynamodb-toolbox";
 
 export enum RequestType {
   Create = "CreateStack",
@@ -69,10 +70,28 @@ export const generateDeleteItem = (event: CloudFormationEvent): DeleteItem => {
 
 export const handleDataItem = async (
   item: DataItem | DeleteItem,
-  handler: ActionHandler,
+  handler: Entity,
+  action: Actions,
 ) => {
   try {
-    await handler(item);
+    console.log(item);
+    console.log(action);
+    switch (action) {
+      case Actions.Create:
+        await handler.put(item);
+        break;
+      case Actions.Destroy:
+        await handler.delete(item);
+        break;
+      case Actions.Get:
+        await handler.get(item);
+        break;
+      case Actions.Update:
+        await handler.update(item);
+        break;
+      default:
+        throw new Error(`Unmatched action: ${action}`);
+    }
     return MonitoringResultStatus.Success;
   } catch (e: any) {
     logger.error(
@@ -88,20 +107,20 @@ export const handleDataItem = async (
 
 export const monitorCloudFormationStack = (
   event: CloudFormationEvent,
-  dataMapper: DataModel,
+  dataMapper: Entity,
 ) => {
   switch (event.detail.eventName) {
     case RequestType.Create:
       const inputItem = generateItemFromEvent(event);
-      return handleDataItem(inputItem, dataMapper.create);
+      return handleDataItem(inputItem, dataMapper, Actions.Create);
 
     case RequestType.Update:
       const updateItem = generateItemFromEvent(event);
-      return handleDataItem(updateItem, dataMapper.update);
+      return handleDataItem(updateItem, dataMapper, Actions.Update);
 
     case RequestType.Delete:
       const deleteItem = generateDeleteItem(event);
-      return handleDataItem(deleteItem, dataMapper.destroy);
+      return handleDataItem(deleteItem, dataMapper, Actions.Destroy);
 
     default:
       return MonitoringResultStatus.Ignore;
@@ -110,5 +129,36 @@ export const monitorCloudFormationStack = (
 
 export const index = async (stackJanitorStatus: StackJanitorStatus) => {
   const { event } = stackJanitorStatus;
-  return monitorCloudFormationStack(event, dataModel);
+  return monitorCloudFormationStack(event, JanitorRecord);
 };
+
+(async () => {
+  await index({
+    event: {
+      id: "",
+      detail: {
+        userIdentity: {
+          type: "",
+          sessionContext: {
+            sessionIssuer: {
+              userName: "",
+            },
+          },
+        },
+        eventName: RequestType.Create,
+        eventTime: Date(),
+        requestParameters: {
+          tags: [],
+          parameters: [],
+          stackName: "teddy-test-2",
+        },
+        responseElements: {
+          stackId: "testing",
+        },
+      },
+    },
+    results: {
+      stackjanitor: "",
+    },
+  });
+})();

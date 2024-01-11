@@ -14,7 +14,7 @@ import {
   RequestType,
 } from "./monitorCloudFormationStack";
 import { StackStatus, TagName } from "../tag/TagStatus";
-import { dataModel } from "../data/DynamoDataModel";
+import { Actions, JanitorRecord } from "../data/DynamoDataModel";
 
 export const getTagsFromStacks = (stacks: Stack[]): Tag[] =>
   stacks
@@ -94,7 +94,7 @@ export const logCloudFormationStack = async (
       stackStatus !== StackStatus.Enabled
     ) {
       const item = generateDeleteItem(event);
-      await handleDataItem(item, dataModel.destroy);
+      await handleDataItem(item, JanitorRecord, Actions.Destroy);
     }
   }
   return {

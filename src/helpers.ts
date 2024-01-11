@@ -4,7 +4,11 @@ import {
   DynamoSearchResult,
   GitTag,
 } from "stackjanitor";
-import { dataModel, dynamoDataModel } from "./data/DynamoDataModel";
+import {
+  Actions,
+  JanitorRecord,
+  dynamoDataModel,
+} from "./data/DynamoDataModel";
 import { handleDataItem } from "./handlers/monitorCloudFormationStack";
 import {
   marshall as sdkMarshall,
@@ -17,23 +21,47 @@ import { AttributeValue as LambdaAttributeValue } from "aws-lambda";
 import { AttributeValue as SdkAttributeValue } from "@aws-sdk/client-dynamodb";
 import { TextDecoder, TextEncoder } from "util";
 
-export const findStacksFromTag = (
+export const findStacksFromTag = async (
   gitTag: GitTag,
   keyName: string,
-): Promise<DataItem[]> =>
-  new Promise((resolve, reject) =>
-    dynamoDataModel
-      .scan()
-      .where(keyName)
-      .contains(gitTag.repository)
-      .where(keyName)
-      .contains(gitTag.branch)
-      .exec((err, data: DynamoSearchResult) =>
-        err
-          ? reject(err)
-          : resolve(data.Items.map((item: DynamoDataModel) => item.attrs)),
-      ),
-  );
+): Promise<DataItem[]> => {
+  const returnVal: DataItem[] = [];
+  const result = (await dynamoDataModel.scan({
+    filters: [
+      {
+        attr: keyName,
+        contains: gitTag.repository,
+      },
+      {
+        attr: keyName,
+        contains: gitTag.branch,
+      },
+    ],
+  })) as DynamoSearchResult;
+
+  result.Items?.map((item: DynamoDataModel) => returnVal.push(item.attrs));
+
+  return returnVal;
+};
+// new Promise((resolve, reject) =>
+//   dynamoDataModel
+//     .scan({
+//       filters: [
+//         {
+//           attr: keyName,
+//           contains: gitTag.repository,
+//         },
+//         {
+//           attr: keyName,
+//           contains: gitTag.branch,
+//         },
+//       ]})
+//     .exec((err: any, data: DynamoSearchResult) =>
+//       err
+//         ? reject(err)
+//         : resolve(data.Items.map((item: DynamoDataModel) => item.attrs)),
+//     ),
+// );
 
 export const deleteDynamoRow = async (dataItem: DataItem) =>
   handleDataItem(
@@ -41,7 +69,8 @@ export const deleteDynamoRow = async (dataItem: DataItem) =>
       stackName: dataItem.stackName,
       stackId: dataItem.stackId,
     },
-    dataModel.destroy,
+    JanitorRecord,
+    Actions.Destroy,
   );
 
 /// marshall that produces output according to the types used by aws-lambda

@@ -1,27 +1,30 @@
-import * as dynogels from "dynogels";
 import config from "../config";
-import * as joi from "joi";
-import { Item } from "dynogels";
-import { Model } from "dynogels";
-import { promisify } from "util";
+import { Entity, Table } from "dynamodb-toolbox";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
-dynogels.AWS.config.update({ region: config.DEFAULT_REGION });
-
-export const dynamoDataModel: dynogels.Model = dynogels.define(
-  "DynamoDataMapper",
-  {
-    tableName: config.DEFAULT_DYNAMODB_TABLE,
-    hashKey: "stackName",
-    rangeKey: "stackId",
-    schema: {
-      stackName: joi.string(),
-      stackId: joi.string(),
-      expirationTime: joi.number(),
-      tags: joi.string(),
-      deleteCount: joi.number(),
-    },
-  },
+export const DocumentClient = DynamoDBDocumentClient.from(
+  new DynamoDBClient({ region: config.DEFAULT_REGION }),
 );
+
+export const dynamoDataModel = new Table({
+  name: config.DEFAULT_DYNAMODB_TABLE,
+  partitionKey: "stackName",
+  sortKey: "stackId",
+  DocumentClient,
+});
+
+export const JanitorRecord: Entity = new Entity({
+  name: "StackToDelete",
+  attributes: {
+    stackName: { type: "string", partitionKey: true }, // flag as partitionKey
+    stackId: { type: "string", sortKey: true }, // flag as sortKey and mark hidden
+    expirationTime: { type: "number" }, // set the attribute type
+    tags: { type: "string" },
+    deleteCount: { type: "number" },
+  },
+  table: dynamoDataModel,
+});
 
 export enum Actions {
   Create = "create",
@@ -29,18 +32,3 @@ export enum Actions {
   Destroy = "destroy",
   Get = "get",
 }
-
-export interface ActionHandler {
-  (arg: any): Promise<Item>;
-}
-
-export type DataModel = { [K in Actions]: ActionHandler };
-
-const promisifyDataMapper = (dataMapper: Model): DataModel => ({
-  create: promisify(dataMapper.create),
-  update: promisify(dataMapper.update),
-  destroy: promisify(dataMapper.destroy),
-  get: promisify(dataMapper.get),
-});
-
-export const dataModel = promisifyDataMapper(dynamoDataModel);
