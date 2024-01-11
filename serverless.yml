@@ -116,6 +116,8 @@ resources:
 functions:
   logCloudFormationStack:
     handler: src/handlers/logCloudFormationStack.index
+    environment:
+      NODE_OPTIONS: "--experimental-specifier-resolution=node"
 
   monitorCloudFormationStack:
     handler: src/handlers/monitorCloudFormationStack.index
@@ -124,11 +126,13 @@ functions:
       DEFAULT_EXPIRATION_PERIOD: ${self:custom.DEFAULT_EXPIRATION_PERIOD}
       DEFAULT_REGION: ${self:custom.DEFAULT_REGION}
       MAX_CLEANUP_RETRY: ${self:custom.MAX_CLEANUP_RETRY}
+      NODE_OPTIONS: "--experimental-specifier-resolution=node"
 
   gitHook:
     handler: src/handlers/gitHook.index
     environment:
       EXTERNAL_LAMBDA: ${env:EXTERNAL_LAMBDA}
+      NODE_OPTIONS: "--experimental-specifier-resolution=node"
     events:
       - http:
           path: /deleteStack
@@ -141,6 +145,7 @@ functions:
       DEFAULT_EXPIRATION_PERIOD: ${self:custom.DEFAULT_EXPIRATION_PERIOD}
       DEFAULT_REGION: ${self:custom.DEFAULT_REGION}
       MAX_CLEANUP_RETRY: ${self:custom.MAX_CLEANUP_RETRY}
+      NODE_OPTIONS: "--experimental-specifier-resolution=node"
     events:
       - stream:
           type: dynamodb
@@ -152,6 +157,7 @@ functions:
     environment:
       DEFAULT_EXPIRATION_PERIOD: ${self:custom.DEFAULT_EXPIRATION_PERIOD}
       DEFAULT_REGION: ${self:custom.DEFAULT_REGION}
+      NODE_OPTIONS: "--experimental-specifier-resolution=node"
     events:
       - schedule: 
           rate: cron(0 10 * * ? *)

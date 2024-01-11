@@ -4,8 +4,8 @@ import {
   DynamoDBStreamEvent,
   StreamRecord,
 } from "aws-lambda";
-import { isEqual } from "lodash";
-import * as pino from "pino";
+import pkg from "lodash";
+import pino from "pino";
 import { unmarshall } from "../helpers";
 
 const dynamoLoggerName = "StackJanitor-DynamoDB-stream-logger";
@@ -50,7 +50,7 @@ function isThereChange(streamRecord: StreamRecord) {
   const { updatedAt: niUpdated, ...newImage } = streamRecord.NewImage;
   const { updatedAt: oiUpdated, ...oldImage } = streamRecord.OldImage;
 
-  return !isEqual(oldImage, newImage);
+  return !pkg.isEqual(oldImage, newImage);
 }
 
 interface UnmarshalledData<T> {
