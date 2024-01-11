@@ -132,33 +132,33 @@ export const index = async (stackJanitorStatus: StackJanitorStatus) => {
   return monitorCloudFormationStack(event, JanitorRecord);
 };
 
-(async () => {
-  await index({
-    event: {
-      id: "",
-      detail: {
-        userIdentity: {
-          type: "",
-          sessionContext: {
-            sessionIssuer: {
-              userName: "",
-            },
-          },
-        },
-        eventName: RequestType.Create,
-        eventTime: Date(),
-        requestParameters: {
-          tags: [],
-          parameters: [],
-          stackName: "teddy-test-2",
-        },
-        responseElements: {
-          stackId: "testing",
-        },
-      },
-    },
-    results: {
-      stackjanitor: "",
-    },
-  });
-})();
+// (async () => {
+//   await index({
+//     event: {
+//       id: "",
+//       detail: {
+//         userIdentity: {
+//           type: "",
+//           sessionContext: {
+//             sessionIssuer: {
+//               userName: "",
+//             },
+//           },
+//         },
+//         eventName: RequestType.Create,
+//         eventTime: Date(),
+//         requestParameters: {
+//           tags: [],
+//           parameters: [],
+//           stackName: "teddy-test-2",
+//         },
+//         responseElements: {
+//           stackId: "testing",
+//         },
+//       },
+//     },
+//     results: {
+//       stackjanitor: "",
+//     },
+//   });
+// })();
