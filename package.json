@@ -1,6 +1,6 @@
 {
   "name": "stackjanitor",
-  "version": "1.28.0",
+  "version": "1.29.0",
   "description": "StackJanitor cleans up CloudFormation stacks based on TTL and tags.",
   "main": "src/handler.ts",
   "private": true,
