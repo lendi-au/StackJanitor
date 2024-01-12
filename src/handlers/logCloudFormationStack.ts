@@ -50,10 +50,8 @@ export const convertTags = (tags: Tag[]): CustomTag[] => {
   }));
 };
 
-export const logCloudFormationStack = async (
-  event: CloudFormationEvent,
-  cloudFormation: CloudFormationClient,
-) => {
+export const index = async (event: CloudFormationEvent) => {
+  const cloudFormation = new CloudFormationClient();
   let stackStatus: StackStatus = StackStatus.Disabled;
   const eventName = event.detail.eventName;
 
