@@ -13,7 +13,7 @@ import {
   generateRepeatedDeleteItem,
   handleDataItem,
 } from "./monitorCloudFormationStack";
-import { dataModel } from "../data/DynamoDataModel";
+import { Actions, JanitorRecord } from "../data/DynamoDataModel";
 
 class StackJanitorNotEnabledError extends Error {
   constructor(message: string) {
@@ -122,7 +122,7 @@ async function processRecords(records: ParsedRecord<DataItem>[]) {
       } else {
         // Recreate record
         const deleteItem = generateRepeatedDeleteItem(oldData);
-        await handleDataItem(deleteItem, dataModel.create);
+        await handleDataItem(deleteItem, JanitorRecord, Actions.Create);
         return;
       }
     }

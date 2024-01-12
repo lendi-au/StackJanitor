@@ -8,7 +8,7 @@ import {
 } from "stackjanitor";
 import { logger } from "../logger";
 import { deleteDynamoRow, findStacksFromTag } from "../helpers";
-import { Lambda } from "@aws-sdk/client-lambda";
+import { InvokeCommand, LambdaClient } from "@aws-sdk/client-lambda";
 
 export const SEARCH_KEY = "tags";
 
@@ -112,14 +112,14 @@ export const index = async (event: APIGatewayEvent) => {
     logger.info({
       externalLambda,
     });
-    const lambda = new Lambda();
-    const params = {
+    const lambda = new LambdaClient();
+    const params = new InvokeCommand({
       FunctionName: externalLambda,
       InvocationType: "Event",
       Payload: event.body,
-    };
+    });
     try {
-      await lambda.invoke(params);
+      await lambda.send(params);
     } catch (e: any) {
       // log only and continue the invocation
       logger.error(e);
