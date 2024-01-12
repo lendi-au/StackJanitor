@@ -1,3 +1,4 @@
+import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import {
   generateDeleteItem,
   generateItemFromEvent,
@@ -5,6 +6,8 @@ import {
   monitorCloudFormationStack,
   MonitoringResultStatus,
 } from "./monitorCloudFormationStack";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { Entity, Table } from "dynamodb-toolbox";
 
 describe("monitorCloudFormationStack:generateDeleteItem", () => {
   test("it should return correct format for deleteStack event", () => {
@@ -111,6 +114,7 @@ describe("monitorCloudFormationStack:generateItemFromEvent", () => {
 describe("monitorCloudFormationStack", () => {
   beforeEach(() => {
     jest.resetModules();
+    jest.clearAllMocks();
   });
 
   const event = {
@@ -138,6 +142,7 @@ describe("monitorCloudFormationStack", () => {
           },
         ],
         stackName: "CloudJanitorTest",
+        parameters: [],
       },
       responseElements: {
         stackId:
@@ -146,34 +151,76 @@ describe("monitorCloudFormationStack", () => {
     },
   };
 
-  const mockDataMapper = {
-    create: (arg: any) => Promise.resolve(arg),
-    update: (arg: any) => Promise.resolve(arg),
-    destroy: (arg: any) => Promise.resolve(arg),
-    get: (arg: any) => Promise.resolve(arg),
+  const marshallOptions = {
+    // Whether to automatically convert empty strings, blobs, and sets to `null`.
+    convertEmptyValues: false, // false, by default.
+    // Whether to remove undefined values while marshalling.
+    removeUndefinedValues: false, // false, by default.
+    // Whether to convert typeof object to map attribute.
+    convertClassInstanceToMap: false, // false, by default.
   };
+
+  const unmarshallOptions = {
+    // Whether to return numbers as a string instead of converting them to native JavaScript numbers.
+    wrapNumbers: false, // false, by default.
+  };
+
+  const translateConfig = { marshallOptions, unmarshallOptions };
+
+  const DocumentClient = DynamoDBDocumentClient.from(
+    new DynamoDBClient({
+      endpoint: "http://localhost:4567",
+      region: "us-east-1",
+      credentials: {
+        accessKeyId: "test",
+        secretAccessKey: "test",
+      },
+    }),
+    translateConfig,
+  );
+
+  const TestTable = new Table({
+    name: "test-table",
+    partitionKey: "stackName",
+    sortKey: "stackId",
+    DocumentClient,
+  });
+
+  const TestEntity = new Entity({
+    name: "TestEntity",
+    autoExecute: false,
+    attributes: {
+      stackName: { type: "string", partitionKey: true }, // flag as partitionKey
+      stackId: { type: "string", sortKey: true }, // flag as sortKey and mark hidden
+      expirationTime: { type: "number" }, // set the attribute type
+      tags: { type: "string" },
+      deleteCount: { type: "number" },
+    },
+    table: TestTable,
+  });
 
   test("monitorCloudFormationStack should be successful for: CreateStack", async () => {
     event.detail.eventName = "CreateStack";
-    const status = await monitorCloudFormationStack(event, mockDataMapper);
+    const status = await monitorCloudFormationStack(event, TestEntity);
     expect(status).toEqual(MonitoringResultStatus.Success);
   });
 
   test("monitorCloudFormationStack should be successful for: UpdateStack", async () => {
     event.detail.eventName = "UpdateStack";
-    const status = await monitorCloudFormationStack(event, mockDataMapper);
+    const status = await monitorCloudFormationStack(event, TestEntity);
     expect(status).toEqual(MonitoringResultStatus.Success);
   });
 
   test("monitorCloudFormationStack should be successful for: DeleteStack", async () => {
     event.detail.eventName = "DeleteStack";
-    const status = await monitorCloudFormationStack(event, mockDataMapper);
+    event.detail.requestParameters.stackName = "teddy/my-stack";
+    const status = await monitorCloudFormationStack(event, TestEntity);
     expect(status).toEqual(MonitoringResultStatus.Success);
   });
 
   test("monitorCloudFormationStack should be ignored for other eventName", async () => {
     event.detail.eventName = "BumpStack";
-    const status = await monitorCloudFormationStack(event, mockDataMapper);
+    const status = await monitorCloudFormationStack(event, TestEntity);
     expect(status).toEqual(MonitoringResultStatus.Ignore);
   });
 });

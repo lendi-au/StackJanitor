@@ -55,6 +55,7 @@ export const generateDeleteItem = (event: CloudFormationEvent): DeleteItem => {
   let stackId: string;
 
   if (event.detail.eventName === RequestType.Delete) {
+    console.log("matched eventName"); // might need to debug and validate if this if block makes sense.
     stackName = event.detail.requestParameters.stackName.split("/")[1];
     stackId = event.detail.requestParameters.stackName;
   } else {
@@ -74,8 +75,6 @@ export const handleDataItem = async (
   action: Actions,
 ) => {
   try {
-    console.log(item);
-    console.log(action);
     switch (action) {
       case Actions.Create:
         await handler.put(item);
