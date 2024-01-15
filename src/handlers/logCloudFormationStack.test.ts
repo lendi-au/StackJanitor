@@ -1,7 +1,7 @@
 import {
   getTagsFromStacks,
   getStackJanitorStatus,
-  logCloudFormationStack,
+  index,
 } from "./logCloudFormationStack";
 
 import * as mcfs from "./monitorCloudFormationStack";
@@ -212,12 +212,7 @@ describe("logCloudFormationStack", () => {
       ],
     });
 
-    const cloudFormation = new CloudFormationClient();
-
-    const logStackOutput = await logCloudFormationStack(
-      sample_event,
-      cloudFormation,
-    );
+    const logStackOutput = await index(sample_event);
 
     expect(logStackOutput).toHaveProperty("results");
     expect(logStackOutput.results).toStrictEqual({

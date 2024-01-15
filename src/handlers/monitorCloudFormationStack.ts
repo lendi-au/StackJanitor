@@ -56,6 +56,7 @@ export const generateDeleteItem = (event: CloudFormationEvent): DeleteItem => {
 
   if (event.detail.eventName === RequestType.Delete) {
     console.log("matched eventName"); // might need to debug and validate if this if block makes sense.
+    // matches "arn:aws:cloudformation:ap-southeast-2:01234567890:stack/dna-ml-poc-teddy/fe4b14b0-b0fa-11ee-901a-02e779f78083"
     stackName = event.detail.requestParameters.stackName.split("/")[1];
     stackId = event.detail.requestParameters.stackName;
   } else {
