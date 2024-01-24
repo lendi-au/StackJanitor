@@ -63,7 +63,10 @@ export const index = async (event: CloudFormationEvent) => {
     // For all other types of Stack events tags need to be fetched
     try {
       // early exit when we are attempting an UpdateStack call (edge case) before create and we get this error
-      if (event.detail.errorCode === "ValidationException") {
+      if (
+        event.detail.errorCode &&
+        event.detail.errorCode === "ValidationException"
+      ) {
         logger.info({
           event,
         });
