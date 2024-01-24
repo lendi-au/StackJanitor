@@ -52,6 +52,7 @@ declare module "stackjanitor" {
       responseElements: {
         stackId: string;
       };
+      errorCode?: string;
     };
   }
 
