@@ -1,9 +1,4 @@
-import {
-  DataItem,
-  DynamoDataModel,
-  DynamoSearchResult,
-  GitTag,
-} from "stackjanitor";
+import { DataItem, DynamoSearchResult, GitTag } from "stackjanitor";
 import {
   Actions,
   JanitorRecord,
@@ -39,29 +34,10 @@ export const findStacksFromTag = async (
     ],
   })) as DynamoSearchResult;
 
-  result.Items?.map((item: DynamoDataModel) => returnVal.push(item.attrs));
+  result.Items?.map((item: DataItem) => returnVal.push(item));
 
   return returnVal;
 };
-// new Promise((resolve, reject) =>
-//   dynamoDataModel
-//     .scan({
-//       filters: [
-//         {
-//           attr: keyName,
-//           contains: gitTag.repository,
-//         },
-//         {
-//           attr: keyName,
-//           contains: gitTag.branch,
-//         },
-//       ]})
-//     .exec((err: any, data: DynamoSearchResult) =>
-//       err
-//         ? reject(err)
-//         : resolve(data.Items.map((item: DynamoDataModel) => item.attrs)),
-//     ),
-// );
 
 export const deleteDynamoRow = async (dataItem: DataItem) =>
   handleDataItem(

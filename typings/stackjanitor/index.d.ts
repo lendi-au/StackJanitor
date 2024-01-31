@@ -88,11 +88,7 @@ declare module "stackjanitor" {
   }
 
   export interface DynamoSearchResult {
-    Items: DynamoDataModel[];
-  }
-
-  export interface DynamoDataModel {
-    attrs: DataItem;
+    Items: DataItem[];
   }
 
   export interface GithubWebhookEvent {

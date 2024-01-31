@@ -48,8 +48,7 @@ export const bitBucketEventHandler = async (
   const gitTag = bitbucketEventParser(eventData);
   logger.info(
     { gitTag },
-    `Processing BitBucket webhook for branch ${gitTag.branch} \
-              in repository ${gitTag.repository}`,
+    `Processing BitBucket webhook for branch ${gitTag.branch} in repository ${gitTag.repository}`,
   );
   return findAndDeleteStacksFromTag(gitTag);
 };
