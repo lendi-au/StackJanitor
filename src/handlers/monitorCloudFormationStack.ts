@@ -8,6 +8,7 @@ import {
 import { logger } from "../logger";
 import { Actions, JanitorRecord } from "../data/DynamoDataModel";
 import { Entity } from "dynamodb-toolbox";
+import { getStackArn } from "../cloudformation";
 
 export enum RequestType {
   Create = "CreateStack",
@@ -28,7 +29,7 @@ export const generateItemFromEvent = (event: CloudFormationEvent): DataItem => {
   const expirationTime = getExpirationTime(event.detail.eventTime);
   return {
     stackName: event.detail.requestParameters.stackName,
-    stackId: event.detail.responseElements.stackId,
+    stackId: event.detail.responseElements?.stackId,
     expirationTime: expirationTime,
     tags: JSON.stringify(event.detail.requestParameters.tags),
     deleteCount: 0,
@@ -50,18 +51,27 @@ export const generateRepeatedDeleteItem = (oldItem: DataItem): DataItem => {
   };
 };
 
-export const generateDeleteItem = (event: CloudFormationEvent): DeleteItem => {
+export const generateDeleteItem = async (
+  event: CloudFormationEvent,
+): Promise<DeleteItem> => {
   let stackName: string;
-  let stackId: string;
+  let stackId: string | undefined;
 
   if (event.detail.eventName === RequestType.Delete) {
-    console.log("matched eventName"); // might need to debug and validate if this if block makes sense.
+    logger.info(`matched eventName ${RequestType.Delete}`);
     // matches "arn:aws:cloudformation:ap-southeast-2:01234567890:stack/dna-ml-poc-teddy/fe4b14b0-b0fa-11ee-901a-02e779f78083"
-    stackName = event.detail.requestParameters.stackName.split("/")[1];
-    stackId = event.detail.requestParameters.stackName;
+    if (event.detail.requestParameters.stackName.startsWith("arn")) {
+      stackName = event.detail.requestParameters.stackName.split("/")[1];
+      stackId = event.detail.requestParameters.stackName;
+      // tricky else block where the DeleteStack is called but no ARN is in the stackId
+    } else {
+      stackName = event.detail.requestParameters.stackName;
+      stackId = await getStackArn(stackName);
+    }
+    // when not delete event, should have the stackId in the event body
   } else {
     stackName = event.detail.requestParameters.stackName;
-    stackId = event.detail.responseElements.stackId;
+    stackId = event.detail.responseElements?.stackId;
   }
 
   return {
@@ -81,6 +91,10 @@ export const handleDataItem = async (
         await handler.put(item);
         break;
       case Actions.Destroy:
+        if (!item.stackId) {
+          logger.info(item, "No stackId to destroy, exiting early");
+          break;
+        }
         await handler.delete(item);
         break;
       case Actions.Get:
@@ -105,7 +119,7 @@ export const handleDataItem = async (
   }
 };
 
-export const monitorCloudFormationStack = (
+export const monitorCloudFormationStack = async (
   event: CloudFormationEvent,
   dataMapper: Entity,
 ) => {
@@ -119,7 +133,7 @@ export const monitorCloudFormationStack = (
       return handleDataItem(updateItem, dataMapper, Actions.Update);
 
     case RequestType.Delete:
-      const deleteItem = generateDeleteItem(event);
+      const deleteItem = await generateDeleteItem(event);
       return handleDataItem(deleteItem, dataMapper, Actions.Destroy);
 
     default:
@@ -129,36 +143,5 @@ export const monitorCloudFormationStack = (
 
 export const index = async (stackJanitorStatus: StackJanitorStatus) => {
   const { event } = stackJanitorStatus;
-  return monitorCloudFormationStack(event, JanitorRecord);
+  return await monitorCloudFormationStack(event, JanitorRecord);
 };
-
-// (async () => {
-//   await index({
-//     event: {
-//       id: "",
-//       detail: {
-//         userIdentity: {
-//           type: "",
-//           sessionContext: {
-//             sessionIssuer: {
-//               userName: "",
-//             },
-//           },
-//         },
-//         eventName: RequestType.Create,
-//         eventTime: Date(),
-//         requestParameters: {
-//           tags: [],
-//           parameters: [],
-//           stackName: "teddy-test-2",
-//         },
-//         responseElements: {
-//           stackId: "testing",
-//         },
-//       },
-//     },
-//     results: {
-//       stackjanitor: "",
-//     },
-//   });
-// })();

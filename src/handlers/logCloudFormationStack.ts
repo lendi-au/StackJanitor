@@ -106,7 +106,7 @@ export const index = async (event: CloudFormationEvent) => {
       eventName === RequestType.Update &&
       stackStatus !== StackStatus.Enabled
     ) {
-      const item = generateDeleteItem(event);
+      const item = await generateDeleteItem(event);
       await handleDataItem(item, JanitorRecord, Actions.Destroy);
     }
   }
