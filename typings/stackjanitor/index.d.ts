@@ -15,14 +15,14 @@ declare module "stackjanitor" {
 
   export interface DataItem {
     expirationTime: number;
-    stackId: string;
+    stackId?: string;
     stackName: string;
     tags: string;
     deleteCount?: number;
   }
 
   export interface DeleteItem {
-    stackId: string;
+    stackId?: string;
     stackName: string;
   }
 
@@ -46,10 +46,10 @@ declare module "stackjanitor" {
       eventTime: string;
       requestParameters: {
         tags: CustomTag[];
-        parameters: parameterKey[];
+        parameters?: parameterKey[];
         stackName: string;
       };
-      responseElements: {
+      responseElements: null | {
         stackId: string;
       };
       errorCode?: string;

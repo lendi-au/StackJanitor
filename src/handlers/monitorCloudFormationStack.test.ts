@@ -10,7 +10,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { Entity, Table } from "dynamodb-toolbox";
 
 describe("monitorCloudFormationStack:generateDeleteItem", () => {
-  test("it should return correct format for deleteStack event", () => {
+  test("it should return correct format for deleteStack event", async () => {
     const event = {
       detail: {
         userIdentity: {
@@ -25,14 +25,14 @@ describe("monitorCloudFormationStack:generateDeleteItem", () => {
         responseElements: null,
       },
     };
-    expect(generateDeleteItem(event)).toStrictEqual({
+    expect(await generateDeleteItem(event)).toStrictEqual({
       stackName: "log-archive-management",
       stackId:
         "arn:aws:cloudformation:ap-southeast-2:12345:stack/log-archive-management/16921510-a9e8-11e9-a24e-02d286d7265a",
     });
   });
 
-  test("it should return correct format for deleteStack event", () => {
+  test("it should return correct format for deleteStack event", async () => {
     const event = {
       detail: {
         userIdentity: {
@@ -49,7 +49,7 @@ describe("monitorCloudFormationStack:generateDeleteItem", () => {
         },
       },
     };
-    expect(generateDeleteItem(event)).toStrictEqual({
+    expect(await generateDeleteItem(event)).toStrictEqual({
       stackName: "product-api-latest-development",
       stackId:
         "arn:aws:cloudformation:ap-southeast-2:12345:stack/product-api-latest-development/8c0e2370-b9a5-11e9-abf5-02afb887c468",
@@ -213,7 +213,7 @@ describe("monitorCloudFormationStack", () => {
 
   test("monitorCloudFormationStack should be successful for: DeleteStack", async () => {
     event.detail.eventName = "DeleteStack";
-    event.detail.requestParameters.stackName = "teddy/my-stack";
+    event.detail.requestParameters.stackName = "arn:other:teddy/my-stack";
     const status = await monitorCloudFormationStack(event, TestEntity);
     expect(status).toEqual(MonitoringResultStatus.Success);
   });

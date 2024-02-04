@@ -119,6 +119,11 @@ scan and delete old stacks when the stacks are not cleaned up properly.
 This optional function is not enabled by default. You can update
 `serverless.yml` to enable this function.
 
+## Possible improvements
+
+- Maybe we don't care to track `DeleteStack` events and perform table cleanup
+  items around this as it leads to a bit of logic that goes around in circles.
+
 ## Upcoming features
 
 - [ ] Slack Notifications when stack has been deleted
