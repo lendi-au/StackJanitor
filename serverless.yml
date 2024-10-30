@@ -79,6 +79,7 @@ provider:
           - "iam:DeletePolicy"
           - "iam:DeleteGroupPolicy"
           - "iam:DeletePolicyVersion"
+          - "cloudfront:*"
         Resource: "*"
       - Effect: "Allow"
         Action:
